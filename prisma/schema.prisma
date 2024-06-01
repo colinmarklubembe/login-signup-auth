@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// datasource db {
+//   provider = "mongodb"
+//   url      = env("DATABASE_URL")
+// }
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// model User {
+//   id                          String @id @default(auto()) @map("_id") @db.ObjectId
+//   name                        String
+//   email                       String @unique
+//   password                    String
+//   isVerified                  Boolean @default(false)
+//   verificationCode            Int?
+//   verificationAttempts        Int @default(0)
+//   verificationCodeExpiry      DateTime?
+//   forgotPasswordToken         String?
+//   forgotPasswordTokenExpiry   DateTime?
+//   verifyEmailToken            String?
+//   verifyEmailTokenExpiry      DateTime?
+// }
+
+// model Admin {
+//   id                          String @id @default(auto()) @map("_id") @db.ObjectId
+//   name                        String
+//   email                       String @unique
+//   password                    String
+//   isVerified                  Boolean @default(false)
+//   verificationCode            Int?
+//   verificationAttempts        Int @default(0)
+//   verificationCodeExpiry      DateTime?
+//   forgotPasswordToken         String?
+//   forgotPasswordTokenExpiry   DateTime?
+//   verifyEmailToken            String?
+//   verifyEmailTokenExpiry      DateTime?
+// }
+
+// model Workspace  {
+//   id                          String @id @default(auto()) @map("_id") @db.ObjectId
+//   name                        String
+//   description                 String?
+//   createdAt                   DateTime @default(now())
+//   updatedAt                   DateTime @updatedAt
+// }
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                          String        @id @default(auto()) @map("_id") @db.ObjectId
+  name                        String
+  email                       String        @unique
+  password                    String
+  isVerified                  Boolean       @default(false)
+  verificationToken           String?          
+  forgotPasswordToken         String?
+  
+  // Define the relation to Workspace
+  // workspace                    Workspace?    @relation(fields: [workspaceId], references: [id])
+  // workspaceId                  String       @db.ObjectId
+}
+
+model Admin {
+  id                          String        @id @default(auto()) @map("_id") @db.ObjectId
+  name                        String
+  email                       String        @unique
+  password                    String
+  isVerified                  Boolean       @default(false)
+  verificationToken           String?
+  forgotPasswordToken         String?
+  
+  // Define the relation to Workspace
+  // workspace                    Workspace?    @relation(fields: [workspaceId], references: [id])
+  // workspaceId                  String       @db.ObjectId
+}
+
+model Workspace  {
+  id                          String        @id @default(auto()) @map("_id") @db.ObjectId
+  name                        String
+  description                 String?
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+  
+  // Define the relations to User and Admin
+  // users                       User[]
+  // admins                      Admin[]
+}
