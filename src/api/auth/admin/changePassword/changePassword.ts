@@ -3,9 +3,9 @@ import { PrismaClient } from "@prisma/client";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import zxcvbn from "zxcvbn";
+import prisma from "../../../../prisma/client";
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // password strength validation function
 const validatePasswordStrength = (password: string) => {
@@ -14,22 +14,22 @@ const validatePasswordStrength = (password: string) => {
   return password.length >= minLength && result.score >= 3;
 };
 
-// update password for user
-router.put("/user/change-password/:id", async (req, res) => {
+// update password for admin
+router.put("/admin/change-password/:id", async (req, res) => {
   const { id } = req.params;
   const { oldPassword, newPassword } = req.body;
 
   try {
-    const user = await prisma.user.findUnique({
+    const admin = await prisma.admin.findUnique({
       where: { id },
     });
 
-    if (!user) {
-      return res.status(400).json({ error: "User does not exist" });
+    if (!admin) {
+      return res.status(400).json({ error: "Admin does not exist" });
     }
 
     // compare old password
-    const isMatch = await bcryptjs.compare(oldPassword, user.password);
+    const isMatch = await bcryptjs.compare(oldPassword, admin.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid old password" });
     }
@@ -46,7 +46,7 @@ router.put("/user/change-password/:id", async (req, res) => {
     const hashedPassword = await bcryptjs.hash(newPassword, salt);
 
     // update password
-    const updatedPassword = await prisma.user.update({
+    const updatedPassword = await prisma.admin.update({
       where: { id },
       data: {
         password: hashedPassword,
@@ -58,19 +58,20 @@ router.put("/user/change-password/:id", async (req, res) => {
   }
 });
 
-// reset password for user
-router.put("/user/reset-password/:id", async (req, res) => {
+// reset password for admin
+router.put("/admin/reset-password/:id", async (req, res) => {
   const { id } = req.params;
   const { newPassword } = req.body;
+
   const forgotPasswordToken = req.query.token as string;
 
   try {
-    const user = await prisma.user.findUnique({
+    const admin = await prisma.admin.findUnique({
       where: { id },
     });
 
-    if (!user) {
-      return res.status(400).json({ error: "User does not exist" });
+    if (!admin) {
+      return res.status(400).json({ error: "Admin does not exist" });
     }
 
     if (!forgotPasswordToken) {
@@ -89,7 +90,7 @@ router.put("/user/reset-password/:id", async (req, res) => {
       };
 
       // check if both tokens match
-      if (user?.forgotPasswordToken !== forgotPasswordToken) {
+      if (admin?.forgotPasswordToken !== forgotPasswordToken) {
         return res.status(400).json({ error: "Tokens do not match" });
       }
 
@@ -116,7 +117,7 @@ router.put("/user/reset-password/:id", async (req, res) => {
     const hashedPassword = await bcryptjs.hash(newPassword, salt);
 
     // update password
-    const updatedPassword = await prisma.user.update({
+    const updatedPassword = await prisma.admin.update({
       where: { id },
       data: {
         password: hashedPassword,

@@ -1,13 +1,14 @@
 import express from "express";
 import mongoose from "mongoose";
-import userSignUpRouter from "./api/User/signup/userSignUp";
-import adminSignUpRouter from "./api/admin/signup/adminSignUp";
-import adminLoginRouter from "./api/admin/login/adminLogin";
-import userLoginRouter from "./api/User/login/userLogin";
-import adminForgotPassWordRouter from "./api/admin/changePassword/forgotPassword";
-import adminChangePasswordRouter from "./api/admin/changePassword/changePassword";
-import userForgotPasswordRouter from "./api/User/changePassword/forgotPassword";
-import userChangePasswordRouter from "./api/User/changePassword/changePassword";
+import userSignUpRouter from "./api/auth/User/signup/userSignUp";
+import adminSignUpRouter from "./api/auth/admin/signup/adminSignUp";
+import adminLoginRouter from "./api/auth/admin/login/adminLogin";
+import userLoginRouter from "./api/auth/User/login/userLogin";
+import adminForgotPassWordRouter from "./api/auth/admin/changePassword/forgotPassword";
+import adminChangePasswordRouter from "./api/auth/admin/changePassword/changePassword";
+import userForgotPasswordRouter from "./api/auth/User/changePassword/forgotPassword";
+import userChangePasswordRouter from "./api/auth/User/changePassword/changePassword";
+import workspaceRouter from "./api/routes/workspaceRoutes";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -20,19 +21,20 @@ mongoose
 app.use(express.json());
 
 app.use(
-  "/api_user",
+  "/auth/api_user",
   userSignUpRouter,
   userLoginRouter,
   userForgotPasswordRouter,
   userChangePasswordRouter
 );
 app.use(
-  "/api_admin",
+  "/auth/api_admin",
   adminSignUpRouter,
   adminLoginRouter,
   adminForgotPassWordRouter,
   adminChangePasswordRouter
 );
+app.use("/api_workspace", workspaceRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

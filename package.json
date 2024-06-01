@@ -32,6 +32,8 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/nodemailer": "^6.4.15",
     "@types/zxcvbn": "^4.4.4",
+    "gulp": "^5.0.0",
+    "gulp-concat": "^2.6.1",
     "nodemon": "^3.1.2",
     "prisma": "^5.14.0"
   }

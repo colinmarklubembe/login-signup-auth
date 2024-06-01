@@ -3,9 +3,9 @@ import { PrismaClient } from "@prisma/client";
 import bcryptjs from "bcryptjs";
 import rateLimit from "express-rate-limit";
 import session from "express-session";
+import prisma from "../../../../prisma/client";
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // rate limiter middleware
 const limiter = rateLimit({
