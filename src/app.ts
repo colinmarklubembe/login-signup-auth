@@ -10,7 +10,12 @@ import userForgotPasswordRouter from "./api/auth/User/changePassword/forgotPassw
 import userChangePasswordRouter from "./api/auth/User/changePassword/changePassword";
 import workspaceRouter from "./api/routes/workspaceRoutes";
 
+const cors = require("cors");
 const app = express();
+
+//use cors
+app.use(cors());
+
 const port = process.env.PORT || 4000;
 
 mongoose

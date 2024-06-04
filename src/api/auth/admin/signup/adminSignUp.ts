@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken";
 import zxcvbn from "zxcvbn";
 import { Resend } from "resend";
 import prisma from "../../../../prisma/client";
-
 const router = Router();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
