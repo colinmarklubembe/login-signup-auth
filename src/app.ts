@@ -9,6 +9,7 @@ import adminChangePasswordRouter from "./api/auth/admin/changePassword/changePas
 import userForgotPasswordRouter from "./api/auth/User/changePassword/forgotPassword";
 import userChangePasswordRouter from "./api/auth/User/changePassword/changePassword";
 import workspaceRouter from "./api/routes/workspaceRoutes";
+import loginRouter from "./api/auth/login-logout";
 
 const cors = require("cors");
 const app = express();
@@ -39,6 +40,7 @@ app.use(
   adminForgotPassWordRouter,
   adminChangePasswordRouter
 );
+app.use("/auth/api_login", loginRouter);
 app.use("/api_workspace", workspaceRouter);
 
 app.listen(port, () => {

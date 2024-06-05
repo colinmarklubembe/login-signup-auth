@@ -5,8 +5,9 @@ import jwt from "jsonwebtoken";
 import zxcvbn from "zxcvbn";
 import { Resend } from "resend";
 import prisma from "../../../../prisma/client";
-const router = Router();
+require("dotenv").config();
 
+const router = Router();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // password strength validation function
@@ -38,7 +39,6 @@ router.post("/admin/signup", async (req, res) => {
   }
 
   const hashedPassword = await bcryptjs.hash(password, 10);
-
   // check if admin already exists
   try {
     const admin = await prisma.admin.findUnique({
@@ -48,7 +48,6 @@ router.post("/admin/signup", async (req, res) => {
     if (admin) {
       return res.status(400).json({ error: "Admin already exists" });
     }
-
     const newAdmin = await prisma.admin.create({
       data: {
         name,
@@ -63,6 +62,7 @@ router.post("/admin/signup", async (req, res) => {
       email: newAdmin.email,
       username: newAdmin.name,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     // create token

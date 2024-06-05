@@ -6,6 +6,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "typeRoots": ["./src/api/types", "./node_modules/@types"],
     "outDir": "./dist",
     "rootDir": "./src"
   },

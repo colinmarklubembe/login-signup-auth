@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import zxcvbn from "zxcvbn";
 import { Resend } from "resend";
 import prisma from "../../../../prisma/client";
+require("dotenv").config();
 
 const router = Router();
 
@@ -64,6 +65,7 @@ router.post("/user/signup", async (req, res) => {
       email: newUser.email,
       username: newUser.name,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     // create token

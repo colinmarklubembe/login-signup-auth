@@ -39,7 +39,7 @@ interface AdminSession extends Session {
 }
 
 //admin login
-router.get("/admin/login", limiter, async (req, res) => {
+router.post("/admin/login", limiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -52,32 +52,36 @@ router.get("/admin/login", limiter, async (req, res) => {
 
     if (!admin) {
       return res.status(400).json({ error: "Admin does not exist" });
+    }
+    // check if user is verified
+    if (!admin.verified) {
+      return res.status(400).json({ error: "Admin is not verified" });
+    }
+
+    // compare password
+    const isMatch = await bcryptjs.compare(password, admin.password);
+
+    if (!isMatch) {
+      // increment login attempts
+
+      return res.status(400).json({ error: "Invalid credentials" });
     } else {
-      // compare password
-      const isMatch = await bcryptjs.compare(password, admin.password);
+      // start a session
+      (req.session as AdminSession).admin = {
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
+      };
 
-      if (!isMatch) {
-        // increment login attempts
+      // store admin in cookie
+      res.cookie("admin", admin.id, {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: true,
+      });
 
-        return res.status(400).json({ error: "Invalid credentials" });
-      } else {
-        // start a session
-        (req.session as AdminSession).admin = {
-          id: admin.id,
-          name: admin.name,
-          email: admin.email,
-        };
-
-        // store admin in cookie
-        res.cookie("admin", admin.id, {
-          maxAge: 24 * 60 * 60 * 1000,
-          httpOnly: true,
-          secure: true,
-        });
-
-        console.log(req.session);
-        res.json({ message: "Login successful", success: true });
-      }
+      console.log(req.session);
+      res.json({ message: "Login successful", success: true });
     }
   } catch (error: any) {
     return res.status(400).json({ error: error.message });

@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { Resend } from "resend";
 import jwt from "jsonwebtoken";
 import prisma from "../../../../prisma/client";
+require("dotenv").config();
 
 const router = Router();
 const resend = new Resend(process.env.RESEND_API_KEY);
