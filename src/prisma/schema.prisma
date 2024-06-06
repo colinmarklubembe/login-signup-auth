@@ -7,19 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model Admin {
-//   id                      String          @id @default(auto()) @map("_id") @db.ObjectId
-//   name                    String
-//   email                   String          @unique
-//   password                String
-//   verificationToken       String?
-//   isVerified              Boolean?        @default(false)
-//   isAdmin                 Boolean         @default(true)
-//   // role                    Role
-//   organizations           Organization[]  @relation("AdminOrganizations")
-//   createdAt               DateTime?        
-//   updatedAt               DateTime?       
-// }
+model Admin {
+  id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String
+  email                   String          @unique
+  password                String
+  verificationToken       String?
+  isVerified              Boolean?        @default(false)
+  isAdmin                 Boolean         @default(true)
+  // role                    Role
+  // organizations           Organization[]  @relation("AdminOrganizations")
+  createdAt               DateTime?        
+  updatedAt               DateTime?       
+}
 
 model User {
   id                      String          @id @default(auto()) @map("_id") @db.ObjectId
@@ -30,47 +30,47 @@ model User {
   verificationToken       String?
   isAdmin                 Boolean         @default(false)
   // roles                    UserRole[]
-  userType                UserType        @default(USER)
+  // userType                UserType        @default(USER)
   createdAt               DateTime?        
   updatedAt               DateTime?       
 }
 
-model Organization {
-  id                      String          @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String      
-  // adminId                 String          @db.ObjectId
-  // admin                   Admin           @relation("AdminOrganizations", fields: [adminId], references: [id])
-  createdAt               DateTime? 
-  updatedAt               DateTime? 
-}
+// model Organization {
+//   id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+//   name                    String      
+//   // adminId                 String          @db.ObjectId
+//   // admin                   Admin           @relation("AdminOrganizations", fields: [adminId], references: [id])
+//   createdAt               DateTime? 
+//   updatedAt               DateTime? 
+// }
 
-model Role {
-  id                      String          @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String          @unique
-  createdAt               DateTime? 
-  updatedAt               DateTime? 
-}
+// model Role {
+//   id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+//   name                    String          @unique
+//   createdAt               DateTime? 
+//   updatedAt               DateTime? 
+// }
 
-model UserRole {
-  id                     String          @id @default(auto()) @map("_id") @db.ObjectId
-  userId                 String?         @db.ObjectId
-  roleId                 String          @db.ObjectId
-}
+// model UserRole {
+//   id                     String          @id @default(auto()) @map("_id") @db.ObjectId
+//   userId                 String?         @db.ObjectId
+//   roleId                 String          @db.ObjectId
+// }
 
-model Permission {
-  id                     String          @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String          @unique
-  description             String?
+// model Permission {
+//   id                     String          @id @default(auto()) @map("_id") @db.ObjectId
+//   name                    String          @unique
+//   description             String?
 
 
-}
+// }
 
-model RolePermission {
-  id                     String          @id @default(auto()) @map("_id") @db.ObjectId
-  permissionId           String          @db.ObjectId
-}
+// model RolePermission {
+//   id                     String          @id @default(auto()) @map("_id") @db.ObjectId
+//   permissionId           String          @db.ObjectId
+// }
 
-enum UserType {
-  ADMIN
-  USER
-}
+// enum UserType {
+//   ADMIN
+//   USER
+// }
