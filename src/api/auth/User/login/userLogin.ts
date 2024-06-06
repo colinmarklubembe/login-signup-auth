@@ -63,7 +63,7 @@ router.post("/user/login", limiter, async (req, res) => {
       // compare password
       const isMatch = await bcryptjs.compare(password, user.password);
 
-      console.log(req.session);
+      // console.log(req.session);
       if (!isMatch) {
         // increment login attempts
 

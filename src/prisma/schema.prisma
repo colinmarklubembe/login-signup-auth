@@ -7,103 +7,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
-  id                                  String          @id @default(auto()) @map("_id") @db.ObjectId
-  name                                String
-  email                               String          @unique
-  password                            String
-  verificationToken                   String?
-  isVerified                          Boolean?        @default(false)
-  isAdmin                             Boolean         @default(true)
-  workspaces                          Workspace[]
-  createdAt                           DateTime?        
-  updatedAt                           DateTime?       
-}
+// model Admin {
+//   id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+//   name                    String
+//   email                   String          @unique
+//   password                String
+//   verificationToken       String?
+//   isVerified              Boolean?        @default(false)
+//   isAdmin                 Boolean         @default(true)
+//   // role                    Role
+//   organizations           Organization[]  @relation("AdminOrganizations")
+//   createdAt               DateTime?        
+//   updatedAt               DateTime?       
+// }
 
 model User {
-  id                                  String          @id @default(auto()) @map("_id") @db.ObjectId
-  email                               String          @unique
-  password                            String
-  name                                String
-  isVerified                          Boolean?         @default(false)
-  verificationToken                   String?
-  isAdmin                             Boolean         @default(false)   
-  // roleId                              String?         @db.ObjectId
-  // role                                Role?           @relation("UserRoles", fields: [roleId], references: [id])
-  // workspaceId                         String ?         @db.ObjectId
-  // workspace                           Workspace?       @relation(fields: [workspaceId], references: [id])
-  // departmentId                        String?         @db.ObjectId
-  // department                          Department?     @relation(fields: [departmentId], references: [id])
-  // headOfDepartments                   Department?     @relation("HeadOfDepartments")
-  // messagesSent                        Message[]       @relation("MessagesSent")
-  // messagesReceived Message[]                          @relation("MessagesReceived")
-  // notifications                       Notification[]
-  createdAt                           DateTime?        
-  updatedAt                           DateTime?       
+  id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+  email                   String          @unique
+  password                String
+  name                    String
+  isVerified              Boolean?        @default(false)
+  verificationToken       String?
+  isAdmin                 Boolean         @default(false)
+  // roles                    UserRole[]
+  userType                UserType        @default(USER)
+  createdAt               DateTime?        
+  updatedAt               DateTime?       
 }
 
-model Workspace {
-  id                                  String          @id @default(auto()) @map("_id") @db.ObjectId
-  name                                String
-  description                         String
-  adminId                             String          @db.ObjectId
-  admin                               Admin           @relation(fields: [adminId], references: [id])
-  departments                         Department[]
-  // users                               User[]
-  roles                               Role[]
-  createdAt                           DateTime        @default(now())
-  updatedAt                           DateTime        @updatedAt
-}
-
-model Department {
-  id                                  String          @id @default(auto()) @map("_id") @db.ObjectId
-  name                                String
-  workspaceId                         String          @db.ObjectId
-  workspace                           Workspace       @relation(fields: [workspaceId], references: [id])
-  // users                               User[]
-  headId                              String?         @unique @db.ObjectId
-  // head                                User?           @relation("HeadOfDepartments", fields: [headId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  createdAt                           DateTime        @default(now())
-  updatedAt                           DateTime        @updatedAt
+model Organization {
+  id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String      
+  // adminId                 String          @db.ObjectId
+  // admin                   Admin           @relation("AdminOrganizations", fields: [adminId], references: [id])
+  createdAt               DateTime? 
+  updatedAt               DateTime? 
 }
 
 model Role {
-  id                                  String          @id @default(auto()) @map("_id") @db.ObjectId
-  name                                String
-  description                         String?
-  workspaceId                         String          @db.ObjectId
-  workspace                           Workspace       @relation(fields: [workspaceId], references: [id])
-  // users                               User[]          @relation("UserRoles")
-  createdAt                           DateTime        @default(now())
-  updatedAt                           DateTime        @updatedAt
+  id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String          @unique
+  createdAt               DateTime? 
+  updatedAt               DateTime? 
 }
 
-model Message {
-  id                                  String          @id @default(auto()) @map("_id") @db.ObjectId
-  senderId                            String          @db.ObjectId
-  // sender                              User            @relation("MessagesSent", fields: [senderId], references: [id])
-  receiverId                          String          @db.ObjectId
-  // receiver                            User            @relation("MessagesReceived", fields: [receiverId], references: [id])
-  content                             String      
-  createdAt                           DateTime        @default(now())
-  updatedAt                           DateTime        @updatedAt
+model UserRole {
+  id                     String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId                 String?         @db.ObjectId
+  roleId                 String          @db.ObjectId
 }
 
-model Notification {
-  id                                  String          @id @default(auto()) @map("_id") @db.ObjectId
-  userId                              String          @db.ObjectId
-  // user                                User            @relation(fields: [userId], references: [id])
-  content                             String
-  read                                Boolean         @default(false)
-  createdAt                           DateTime        @default(now())
-  updatedAt                           DateTime        @updatedAt
+model Permission {
+  id                     String          @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String          @unique
+  description             String?
+
+
 }
 
-enum RoleName {
+model RolePermission {
+  id                     String          @id @default(auto()) @map("_id") @db.ObjectId
+  permissionId           String          @db.ObjectId
+}
+
+enum UserType {
   ADMIN
-  SALES
-  CUSTOMER_SUPPORT
-  MARKETING
-  HEAD
-  OTHER
+  USER
 }

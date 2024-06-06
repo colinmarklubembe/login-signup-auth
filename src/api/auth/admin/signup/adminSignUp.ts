@@ -53,6 +53,7 @@ router.post("/admin/signup", async (req, res) => {
         name,
         email,
         password: hashedPassword,
+        createdAt: new Date().toISOString(),
       },
     });
 
@@ -61,8 +62,7 @@ router.post("/admin/signup", async (req, res) => {
       id: newAdmin.id,
       email: newAdmin.email,
       username: newAdmin.name,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: newAdmin.createdAt,
     };
 
     // create token
@@ -158,6 +158,7 @@ router.get("/admin/verify-email", async (req, res) => {
       data: {
         isVerified: true,
         verificationToken: null,
+        updatedAt: new Date().toISOString(),
       },
     });
 

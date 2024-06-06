@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import zxcvbn from "zxcvbn";
@@ -56,6 +55,7 @@ router.post("/user/signup", async (req, res) => {
         name,
         email,
         password: hashedPassword,
+        createdAt: new Date().toISOString(),
       },
     });
 
@@ -64,8 +64,7 @@ router.post("/user/signup", async (req, res) => {
       id: newUser.id,
       email: newUser.email,
       username: newUser.name,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: newUser.createdAt,
     };
 
     // create token
@@ -166,6 +165,7 @@ router.get("/user/verify-email", async (req, res) => {
       data: {
         isVerified: true,
         verificationToken: null,
+        updatedAt: new Date().toISOString(),
       },
     });
 

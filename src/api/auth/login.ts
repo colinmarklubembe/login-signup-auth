@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { Router } from "express";
 import bcryptjs from "bcryptjs";
 import rateLimit from "express-rate-limit";
@@ -74,6 +75,22 @@ router.post("/login", limiter, async (req, res) => {
       if (!isMatch) {
         return res.status(400).json({ error: "Invalid credentials" });
       } else {
+        // create a token to verify user
+        // token data
+        const tokenData = {
+          id: checkUser.id,
+          email: checkUser.email,
+          name: checkUser.name,
+          isAdmin: checkUser.isAdmin,
+          isVerified: checkUser.isVerified,
+          createdAt: new Date().toISOString(),
+        };
+        // create token
+        const loginToken = jwt.sign(tokenData, process.env.JWT_SECRET!, {
+          expiresIn: "1h",
+        });
+        console.log(loginToken);
+
         // start a session
         (req.session as LoginSession).user = {
           id: checkUser.id,
@@ -89,7 +106,12 @@ router.post("/login", limiter, async (req, res) => {
         });
 
         console.log(req.session);
-        res.json({ message: "Logged in successfully as user", success: true });
+        // send token
+        res.json({
+          message: "Logged in successfully as user",
+          success: true,
+          token: loginToken,
+        });
       }
     }
   } else {
@@ -102,6 +124,21 @@ router.post("/login", limiter, async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid credentials" });
     } else {
+      // create a token to verify user
+      // token data
+      const tokenData = {
+        id: checkAdmin.id,
+        email: checkAdmin.email,
+        name: checkAdmin.name,
+        isAdmin: checkAdmin.isAdmin,
+        isVerified: checkAdmin.isVerified,
+        createdAt: new Date().toISOString(),
+      };
+      // create token
+      const loginToken = jwt.sign(tokenData, process.env.JWT_SECRET!, {
+        expiresIn: "1h",
+      });
+      console.log(loginToken);
       // start a session
       (req.session as LoginSession).admin = {
         id: checkAdmin.id,
@@ -117,7 +154,12 @@ router.post("/login", limiter, async (req, res) => {
       });
 
       console.log(req.session);
-      res.json({ message: "Logged in successfully as admin", success: true });
+      // send token
+      res.json({
+        message: "Logged in successfully as admin",
+        success: true,
+        token: loginToken,
+      });
     }
   }
 });
