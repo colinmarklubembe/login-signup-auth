@@ -8,13 +8,15 @@ import adminForgotPassWordRouter from "./api/auth/admin/changePassword/forgotPas
 import adminChangePasswordRouter from "./api/auth/admin/changePassword/changePassword";
 import userForgotPasswordRouter from "./api/auth/User/changePassword/forgotPassword";
 import userChangePasswordRouter from "./api/auth/User/changePassword/changePassword";
-import workspaceRouter from "./api/routes/workspaceRoutes";
+import organizationRouter from "./api/routes/organizationRoutes";
 import loginRouter from "./api/auth/login";
 
 const cors = require("cors");
 const app = express();
 
 app.use(cors());
+
+app.use(cors({ origin: "http://localhost:3000" }));
 
 const port = process.env.PORT || 4000;
 
@@ -40,7 +42,7 @@ app.use(
   adminChangePasswordRouter
 );
 app.use("/auth/api_login", loginRouter);
-app.use("/api_workspace", workspaceRouter);
+app.use("/api_organization", organizationRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

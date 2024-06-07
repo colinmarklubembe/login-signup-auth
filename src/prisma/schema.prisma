@@ -16,7 +16,7 @@ model Admin {
   isVerified              Boolean?        @default(false)
   isAdmin                 Boolean         @default(true)
   // role                    Role
-  // organizations           Organization[]  @relation("AdminOrganizations")
+  organizations           Organization[]  @relation("AdminOrganizations")
   createdAt               DateTime?        
   updatedAt               DateTime?       
 }
@@ -35,14 +35,24 @@ model User {
   updatedAt               DateTime?       
 }
 
-// model Organization {
-//   id                      String          @id @default(auto()) @map("_id") @db.ObjectId
-//   name                    String      
-//   // adminId                 String          @db.ObjectId
-//   // admin                   Admin           @relation("AdminOrganizations", fields: [adminId], references: [id])
-//   createdAt               DateTime? 
-//   updatedAt               DateTime? 
-// }
+model Organization {
+  id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String      
+  adminId                 String          @db.ObjectId
+  admin                   Admin           @relation("AdminOrganizations", fields: [adminId], references: [id])
+  departments             Department[]    @relation("OrganizationDepartments")
+  createdAt               DateTime? 
+  updatedAt               DateTime? 
+}
+
+model Department {
+  id                      String          @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String
+  organizationId          String          @db.ObjectId
+  organization            Organization    @relation("OrganizationDepartments", fields: [organizationId], references: [id])
+  createdAt               DateTime? 
+  updatedAt               DateTime? 
+}
 
 // model Role {
 //   id                      String          @id @default(auto()) @map("_id") @db.ObjectId
@@ -71,6 +81,7 @@ model User {
 // }
 
 // enum UserType {
+//   OWNER
 //   ADMIN
 //   USER
 // }
