@@ -11,6 +11,11 @@ import userChangePasswordRouter from "./api/auth/User/changePassword/changePassw
 import organizationRouter from "./api/routes/organizationRoutes";
 import loginRouter from "./api/auth/login";
 
+// new routes for signup
+import ownerSignupRouter from "./api/auth/owner/signup";
+import userSignupRouter from "./api/auth/User/signup";
+import adminSignupRouter from "./api/auth/admin/signup";
+
 const cors = require("cors");
 const app = express();
 
@@ -41,6 +46,12 @@ app.use(
   adminForgotPassWordRouter,
   adminChangePasswordRouter
 );
+
+// new routes for signup
+app.use("/auth2/api_owner", ownerSignupRouter);
+app.use("/auth2/api_user", userSignupRouter);
+app.use("/auth2/api_admin", adminSignupRouter);
+
 app.use("/auth/api_login", loginRouter);
 app.use("/api_organization", organizationRouter);
 
