@@ -9,21 +9,13 @@ const createOrganization = async (req: Request, res: Response) => {
     const { name, email } = req.body;
 
     // check if email exists in the database
-    const admin = await prisma.admin.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         email,
       },
     });
 
-    // Access the admin id from the session
-    // const adminSession = (req.session as LoginSession).admin;
-
-    // Check if admin is logged in
-    // if (!adminSession || !adminSession.id) {
-    //   return res.status(403).send("Admin is not logged in");
-    // }
-
-    const adminId = admin.id;
+    const userId = user.id;
 
     if (!name) {
       return res.status(400).send("Name is required for creating a workspace");
@@ -31,7 +23,7 @@ const createOrganization = async (req: Request, res: Response) => {
 
     const newOrganization = await organizationService.createOrganization(
       name,
-      adminId
+      userId
     );
 
     res.status(201).json(newOrganization);
@@ -54,9 +46,7 @@ const updateOrganization = async (req: Request, res: Response) => {
     });
 
     if (!organization) {
-      return res
-       .status(404)
-       .json({ error: "Organization does not exist" });
+      return res.status(404).json({ error: "Organization does not exist" });
     }
 
     if (!name) {
@@ -73,7 +63,7 @@ const updateOrganization = async (req: Request, res: Response) => {
     console.error("Error updating organization", error);
     res.status(500).send("Error updating organization");
   }
-}
+};
 
 export default {
   createOrganization,
