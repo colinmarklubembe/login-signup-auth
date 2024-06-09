@@ -1,13 +1,5 @@
 import express from "express";
 import mongoose from "mongoose";
-import userSignUpRouter from "./api/auth/User/signup/userSignUp";
-import adminSignUpRouter from "./api/auth/admin/signup/adminSignUp";
-import adminLoginRouter from "./api/auth/admin/login/adminLogin";
-import userLoginRouter from "./api/auth/User/login/userLogin";
-import adminForgotPassWordRouter from "./api/auth/admin/changePassword/forgotPassword";
-import adminChangePasswordRouter from "./api/auth/admin/changePassword/changePassword";
-import userForgotPasswordRouter from "./api/auth/User/changePassword/forgotPassword";
-import userChangePasswordRouter from "./api/auth/User/changePassword/changePassword";
 import forgotPasswordRouter from "./api/auth/forgotPassword";
 import changePasswordRouter from "./api/auth/changePassword";
 import organizationRouter from "./api/routes/organizationRoutes";
@@ -34,25 +26,10 @@ mongoose
 
 app.use(express.json());
 
-app.use(
-  "/auth/api_user",
-  userSignUpRouter,
-  userLoginRouter,
-  userForgotPasswordRouter,
-  userChangePasswordRouter
-);
-app.use(
-  "/auth/api_admin",
-  adminSignUpRouter,
-  adminLoginRouter,
-  adminForgotPassWordRouter,
-  adminChangePasswordRouter
-);
-
 // new routes for signup
-app.use("/auth2/api_owner", ownerSignupRouter);
-app.use("/auth2/api_user", userSignupRouter);
-app.use("/auth2/api_admin", adminSignupRouter);
+app.use("/auth/api_owner", ownerSignupRouter);
+app.use("/auth/api_user", userSignupRouter);
+app.use("/auth/api_admin", adminSignupRouter);
 
 // new routes for password change
 app.use("/auth/api", forgotPasswordRouter);
