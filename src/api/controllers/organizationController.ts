@@ -15,14 +15,14 @@ const createOrganization = async (req: Request, res: Response) => {
       },
     });
 
-    // check if user roles are admin or owner
-    if (
-      !user ||
-      !Array.isArray(user.roles) ||
-      !user.roles.some((role: any) => ["ADMIN", "OWNER"].includes(role))
-    ) {
+    if (!user) {
+      return res.status(404).json({ error: "User does not exist" });
+    }
+
+    // check if the user type is an owner or admin
+    if (user.userType !== "OWNER" && user.userType !== "ADMIN") {
       return res.status(403).json({
-        error: "You are not authorized to create a workspace",
+        error: "You do not have permission to create an organization",
       });
     }
 
