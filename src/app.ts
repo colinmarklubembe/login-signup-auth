@@ -8,6 +8,8 @@ import adminForgotPassWordRouter from "./api/auth/admin/changePassword/forgotPas
 import adminChangePasswordRouter from "./api/auth/admin/changePassword/changePassword";
 import userForgotPasswordRouter from "./api/auth/User/changePassword/forgotPassword";
 import userChangePasswordRouter from "./api/auth/User/changePassword/changePassword";
+import forgotPasswordRouter from "./api/auth/forgotPassword";
+import changePasswordRouter from "./api/auth/changePassword";
 import organizationRouter from "./api/routes/organizationRoutes";
 import loginRouter from "./api/auth/login";
 
@@ -51,6 +53,10 @@ app.use(
 app.use("/auth2/api_owner", ownerSignupRouter);
 app.use("/auth2/api_user", userSignupRouter);
 app.use("/auth2/api_admin", adminSignupRouter);
+
+// new routes for password change
+app.use("/auth/api", forgotPasswordRouter);
+app.use("/auth/api", changePasswordRouter);
 
 app.use("/auth/api_login", loginRouter);
 app.use("/api_organization", organizationRouter);

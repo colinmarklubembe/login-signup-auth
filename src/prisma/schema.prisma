@@ -26,7 +26,8 @@ model User {
   password                String    
   name                    String    
   isVerified              Boolean?            @default(false)
-  verificationToken       String?   
+  verificationToken       String?
+  forgotPasswordToken     String?  
   roles                   UserRole[]          @relation("UserRoles")
   userType                UserType            @default(USER)
   createdAt               DateTime?        

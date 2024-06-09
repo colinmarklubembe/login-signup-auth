@@ -8,28 +8,7 @@ require("dotenv").config();
 const router = Router();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// get a single user from the database
-router.get("/user/:id", async (req, res) => {
-  const { id } = req.params;
-
-  console.log("User ID: ", id);
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id },
-    });
-
-    if (!user) {
-      return res.status(400).json({ error: "User does not exist" });
-    }
-
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch user" });
-  }
-});
-
-router.post("/user/forgot-password", async (req, res) => {
+router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
   try {
