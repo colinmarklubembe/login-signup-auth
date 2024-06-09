@@ -9,6 +9,7 @@ import loginRouter from "./api/auth/login";
 import ownerSignupRouter from "./api/auth/owner/signup";
 import userSignupRouter from "./api/auth/User/signup";
 import adminSignupRouter from "./api/auth/admin/signup";
+import verifyUserRouter from "./api/auth/verifyUser";
 
 const cors = require("cors");
 const app = express();
@@ -30,6 +31,7 @@ app.use(express.json());
 app.use("/auth/api_owner", ownerSignupRouter);
 app.use("/auth/api_user", userSignupRouter);
 app.use("/auth/api_admin", adminSignupRouter);
+app.use("/auth/api_verify", verifyUserRouter);
 
 // new routes for password change
 app.use("/auth/api", forgotPasswordRouter);
