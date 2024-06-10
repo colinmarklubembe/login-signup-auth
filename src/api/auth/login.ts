@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import { Router } from "express";
-import bcryptjs from "bcryptjs";
 import rateLimit from "express-rate-limit";
 import prisma from "../../prisma/client";
+import { comparePassword } from "./utils/comparePassword";
 
 const router = Router();
 
@@ -39,11 +39,10 @@ router.post("/login", limiter, async (req, res) => {
       return res.status(400).json({ error: "User is not verified" });
     }
 
+    const hashedPassword = user.password;
+
     // Compare passwords
-    const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
-    }
+    comparePassword(password, hashedPassword, res);
 
     // Fetch roles
     const roles = user.roles.map(
@@ -58,7 +57,7 @@ router.post("/login", limiter, async (req, res) => {
       userType: user.userType,
       isVerified: user.isVerified,
       roles,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(), // token
     };
 
     // Create token

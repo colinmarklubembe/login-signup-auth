@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { verifyUser, reverifyUser } from "./utils/createUserAndAssignRole";
+import checkVerification from "./utils/checkVerification";
 
 const router = Router();
 
@@ -7,7 +7,7 @@ const router = Router();
 router.get("/verify", async (req: Request, res: Response) => {
   const token = req.query.token as string;
 
-  await verifyUser(token, res);
+  await checkVerification.verifyUser(token, res);
 });
 
 //reverify user
@@ -17,7 +17,7 @@ router.post("/reverify", async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  await reverifyUser(email, res);
+  await checkVerification.reverifyUser(email, res);
 });
 
 export default router;

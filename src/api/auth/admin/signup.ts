@@ -1,10 +1,6 @@
 import express, { Request, Response } from "express";
 import { UserType } from "@prisma/client";
-import {
-  createUserAndAssignRole,
-  verifyUser,
-  reverifyUser,
-} from "../utils/createUserAndAssignRole";
+import { createUserAndAssignRole } from "../utils/createUserAndAssignRole";
 import zxcvbn from "zxcvbn";
 
 const router = express.Router();
