@@ -45,9 +45,7 @@ router.post("/login", limiter, async (req, res) => {
     comparePassword(password, hashedPassword, res);
 
     // Fetch roles
-    const roles = user.roles.map(
-      (userRole: { role: { name: any } }) => userRole.role.name
-    );
+    const roles = user.roles.map((userRole: any) => userRole.role.name);
 
     // Create token data
     const tokenData = {
