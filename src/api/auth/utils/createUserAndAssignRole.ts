@@ -64,7 +64,7 @@ const createUserAndAssignRole = async (
       id: user.id,
       email: user.email,
       username: user.name,
-      createdAt: user.createdAt,
+      createdAt: new Date().toISOString(),
       userType: user.userType,
     };
 
