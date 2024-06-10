@@ -126,10 +126,6 @@ const sendInviteEmail = async (generateEmailToken: string, res: Response) => {
         </div>
       `,
     });
-
-    res.status(200).json({
-      message: `Invitation email sent successfully to email ${decoded.email}`,
-    });
   } catch (error) {
     console.error("Error sending invitation email:", error);
     return res.status(500).json({ error: "Failed to send invitation email" });

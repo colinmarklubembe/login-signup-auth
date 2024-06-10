@@ -42,7 +42,11 @@ router.post("/login", limiter, async (req, res) => {
     const hashedPassword = user.password;
 
     // Compare passwords
-    comparePassword(password, hashedPassword, res);
+    const isMatch = comparePassword(password, hashedPassword);
+
+    if (!isMatch) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
 
     // Fetch roles
     const roles = user.roles.map((userRole: any) => userRole.role.name);

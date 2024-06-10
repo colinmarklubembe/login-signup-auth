@@ -167,6 +167,13 @@ const createInvitedUser = async (
     );
     // Send invitation email
     sendEmails.sendInviteEmail(generateEmailToken, res);
+
+    // return the created user in the json response
+    res.status(200).json({
+      message: "Invitation email sent successfully!",
+      success: true,
+      user,
+    });
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ error: "Internal server error" });
