@@ -1,3 +1,4 @@
+import { generateToken } from "./generateToken";
 import { Resend } from "resend";
 import { Response } from "express";
 import jwt from "jsonwebtoken";
@@ -43,4 +44,54 @@ const sendVerificationEmail = async (
   }
 };
 
-export default { sendVerificationEmail };
+const sendForgotPasswordEmail = async (
+  generateEmailToken: any,
+  res: Response
+) => {
+  const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
+    id: string;
+    email: string;
+    name: string;
+    token: string;
+  };
+  try {
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: decoded.email,
+      subject: "Reset Your Password",
+      html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h1 style="color: #333;">Password Reset Request</h1>
+        <p>Hello ${decoded.name},</p>
+        <p>We received a request to reset your password for your NOVA CRM account associated with this email address. If you made this request, please click the button below to reset your password:</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="http://localhost:4000/auth/api/reset-password/${decoded.id}?token=${decoded.token}" 
+             style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
+             Reset Your Password
+          </a>
+        </div>
+        <p>If you did not request a password reset, please ignore this email. Your password will remain unchanged and no further action is required.</p>
+        <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
+        <p style="word-wrap: break-word;">
+          <a href="http://localhost:4000/auth/api/reset-password/${decoded.id}?token=${decoded.token}" style="color: #007BFF;">
+            http://localhost:4000/auth/api/reset-password/${decoded.id}?token=${decoded.token}
+          </a>
+        </p>
+        <p>Thank you,<br>The NOVA CRM Team</p>
+      </div>
+    `,
+    });
+    res.status(200).json({ message: "Email sent successfully" });
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return res.status(400).json(error);
+  }
+};
+
+const sendInviteEmail = async () => {};
+
+export default {
+  sendVerificationEmail,
+  sendForgotPasswordEmail,
+  sendInviteEmail,
+};

@@ -4,15 +4,10 @@ import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import zxcvbn from "zxcvbn";
 import prisma from "../../prisma/client";
+import { validatePasswordStrength } from "./utils/checkPasswordStrength";
+import { hashPassword } from "./utils/hashPassword";
 
 const router = Router();
-
-// password strength validation function
-const validatePasswordStrength = (password: string) => {
-  const minLength = 8;
-  const result = zxcvbn(password);
-  return password.length >= minLength && result.score >= 3;
-};
 
 // update password
 router.put("/change-password/:id", async (req, res) => {
@@ -34,16 +29,13 @@ router.put("/change-password/:id", async (req, res) => {
       return res.status(400).json({ error: "Invalid old password" });
     }
 
+    const password = newPassword;
+
     // validate password strength
-    if (!validatePasswordStrength(newPassword)) {
-      return res.status(400).json({
-        error: "Password is too weak. It should be at least 8 characters long!",
-      });
-    }
+    validatePasswordStrength(password, res);
 
     // hash new password
-    const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(newPassword, salt);
+    const hashedPassword = await hashPassword(password);
 
     // update password
     const updatedPassword = await prisma.user.update({
@@ -106,16 +98,13 @@ router.put("/reset-password/:id", async (req, res) => {
       return res.status(400).json({ error: "Invalid token" });
     }
 
+    const password = newPassword;
+
     // validate password strength
-    if (!validatePasswordStrength(newPassword)) {
-      return res.status(400).json({
-        error: "Password is too weak. It should be at least 8 characters long!",
-      });
-    }
+    validatePasswordStrength(password, res);
 
     // hash new password
-    const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(newPassword, salt);
+    const hashedPassword = await hashPassword(password);
 
     // update password
     const updatedPassword = await prisma.user.update({
