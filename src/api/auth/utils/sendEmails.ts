@@ -2,6 +2,7 @@ import { generateToken } from "./generateToken";
 import { Resend } from "resend";
 import { Response } from "express";
 import jwt from "jsonwebtoken";
+require("dotenv").config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -126,7 +127,9 @@ const sendInviteEmail = async (generateEmailToken: string, res: Response) => {
       `,
     });
 
-    res.status(200).json({ message: "Invitation email sent successfully" });
+    res.status(200).json({
+      message: `Invitation email sent successfully to email ${decoded.email}`,
+    });
   } catch (error) {
     console.error("Error sending invitation email:", error);
     return res.status(500).json({ error: "Failed to send invitation email" });

@@ -10,6 +10,7 @@ import ownerSignupRouter from "./api/auth/owner/signup";
 import userSignupRouter from "./api/auth/User/signup";
 import adminSignupRouter from "./api/auth/admin/signup";
 import verifyUserRouter from "./api/auth/verifyUser";
+import inviteUserRouter from "./api/auth/owner/inviteUsers";
 
 const cors = require("cors");
 const app = express();
@@ -39,6 +40,7 @@ app.use("/auth/api", changePasswordRouter);
 
 app.use("/auth/api_login", loginRouter);
 app.use("/api_organization", organizationRouter);
+app.use("/auth/api_invite", inviteUserRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

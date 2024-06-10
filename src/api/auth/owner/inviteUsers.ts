@@ -34,3 +34,5 @@ router.post("/invite-user", async (req, res) => {
   // create user
   await createInvitedUser(name, email, password, userType, roles, res);
 });
+
+export default router;
