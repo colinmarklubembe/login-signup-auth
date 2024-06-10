@@ -1,8 +1,6 @@
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
-import zxcvbn from "zxcvbn";
 import prisma from "../../prisma/client";
 import { validatePasswordStrength } from "./utils/checkPasswordStrength";
 import { hashPassword } from "./utils/hashPassword";

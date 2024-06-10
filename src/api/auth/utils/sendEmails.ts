@@ -88,7 +88,50 @@ const sendForgotPasswordEmail = async (
   }
 };
 
-const sendInviteEmail = async () => {};
+const sendInviteEmail = async (generateEmailToken: string, res: Response) => {
+  const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
+    email: string;
+    name: string;
+    password: string;
+  };
+
+  try {
+    // Send the invitation email
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: decoded.email,
+      subject: "You're Invited to Join NOVA CRM",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          <h1 style="color: #333;">Invitation to Join NOVA CRM</h1>
+          <p>Hello ${decoded.name},</p>
+          <p>You have been invited to join NOVA CRM. We're excited to have you on board.</p>
+          <p>Your default password for the first login is: <strong>${decoded.password}</strong></p>
+          <p>You will login using the current email to which this invite was sent.</p>
+          <p>Please click the button below to accept the invitation and get started:</p>
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="http://localhost:4000/auth/api_login/login" 
+               style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
+               Accept Invitation and Login
+            </a>
+          </div>
+          <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
+          <p style="word-wrap: break-word;">
+            <a href="http://localhost:4000/auth/api_login/login" style="color: #007BFF;">
+              http://localhost:4000/auth/api_login/login
+            </a>
+          </p>
+          <p>Thank you,<br>The NOVA CRM Team</p>
+        </div>
+      `,
+    });
+
+    res.status(200).json({ message: "Invitation email sent successfully" });
+  } catch (error) {
+    console.error("Error sending invitation email:", error);
+    return res.status(500).json({ error: "Failed to send invitation email" });
+  }
+};
 
 export default {
   sendVerificationEmail,
