@@ -221,13 +221,13 @@ const reverifyUser = async (email: string, res: Response) => {
       <p>Thank you for signing up, ${user.name}. We're excited to have you on board.</p>
       <p>To get started, please verify your email address by clicking the button below:</p>
       <div style="text-align: center;">
-        <a href="http://localhost:4000/auth2/api_verify/verify?token=${token}" 
+        <a href="http://localhost:4000/auth/api_verify/verify?token=${token}" 
            style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: blue; text-decoration: none; border-radius: 5px;">
            Verify Your Account
         </a>
       </div>
       <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
-      <p>http://localhost:4000/auth2/api_verify/verify?token=${token}</p>
+      <p>http://localhost:4000/auth/api_verify/verify?token=${token}</p>
       <p>Best regards,<br>The Team</p>
     `,
       });
