@@ -60,18 +60,23 @@ router.post("/login", limiter, async (req, res) => {
       name: user.name,
       userType: user.userType,
       isVerified: user.isVerified,
+      organizationId: user.organizationId,
       roles,
       createdAt: new Date().toISOString(), // temporarily store the token creation date
     };
+    console.log("Token Data: ", tokenData);
 
     // Create token
-    const loginToken = jwt.sign(tokenData, process.env.JWT_SECRET!);
+    const loginToken = jwt.sign(tokenData, process.env.JWT_SECRET!, {
+      expiresIn: "1h", // Set token expiration time
+    });
 
-    // Determine the user type message
-    const userTypeMessage = user.userType.toLowerCase();
+    // Set the token in the Authorization header
+    res.setHeader("Authorization", `Bearer ${loginToken}`);
+    console.log("Authorization Header Set: ", res.getHeader("Authorization"));
 
     res.json({
-      message: `Logged in successfully as ${userTypeMessage}`,
+      message: `Logged in successfully as ${user.userType.toLowerCase()}`,
       success: true,
       token: loginToken,
     });

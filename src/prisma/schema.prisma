@@ -17,15 +17,31 @@ model User {
   forgotPasswordToken     String? 
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
   userType                UserType                   @default(USER)
+  // userOrganizations       UserOrganization[]         @relation("UserOrganizations")
   createdAt               DateTime?        
   updatedAt               DateTime?       
 }
 
+// model UserOrganization {
+//   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
+//   userId                  String                     @db.ObjectId
+//   organizationId          String                     @db.ObjectId
+//   roleId                  String                     @db.ObjectId
+
+//   user                    User                       @relation("UserOrganizations", fields: [userId], references: [id])
+//   organization            Organization               @relation("UserOrganizations", fields: [organizationId], references: [id])
+
+//   @@unique([userId, organizationId, roleId])
+
+// }
+
 model Organization {
   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String          
+  name                    String  
+  // userId                  String                     @db.ObjectId        
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
   departments             Department[]               @relation("OrganizationDepartments")
+  // userOrganizations       UserOrganization[]         @relation("UserOrganizations")
   createdAt               DateTime? 
   updatedAt               DateTime? 
 }

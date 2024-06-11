@@ -36,19 +36,30 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const newOrganization = await organizationService.createOrganization(
-      name,
-      userId
+      name
+      // userId
     );
 
-    // assign the organizationId to the user
-    await prisma.user.update({
+    // fetch the role id of the owner
+    const ownerRole = await prisma.role.findFirst({
       where: {
-        id: userId,
-      },
-      data: {
-        organizationId: newOrganization.orgId,
+        name: "OWNER",
       },
     });
+
+    if (!ownerRole) {
+      return res.status(500).json({ error: "Owner role not found" });
+    }
+
+    // create UserOrganization record
+    const updatedUser = await prisma.userOrganizationRole.create({
+      data: {
+        user: { connect: { id: user.id } },
+        organization: { connect: { id: newOrganization.id } },
+        role: { connect: { id: ownerRole.id } },
+      },
+    });
+    console.log(updatedUser);
 
     res.status(201).json(newOrganization);
   } catch (error) {
