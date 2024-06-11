@@ -1,16 +1,23 @@
 import { Router } from "express";
 import { PrismaClient, UserType } from "@prisma/client";
-import generateRandomPassword from "../utils/generateRandonPassword";
-import { hashPassword } from "../utils/hashPassword";
 import { createInvitedUser } from "../utils/createUserAndAssignRole";
+import generateRandomPassword from "../utils/generateRandonPassword";
 
 const router = Router();
 const prisma = new PrismaClient();
+
 // invite users
 router.post("/invite-user", async (req, res) => {
-  const { name, email, userType, roles } = req.body;
+  const { name, email, organizationId, userType, userOrganizationRoles } =
+    req.body;
 
-  if (!name || !email || !userType || !roles) {
+  if (
+    !name ||
+    !email ||
+    !organizationId ||
+    !userType ||
+    !userOrganizationRoles
+  ) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -32,7 +39,15 @@ router.post("/invite-user", async (req, res) => {
   const password = generateRandomPassword();
 
   // create user
-  await createInvitedUser(name, email, password, userType, roles, res);
+  await createInvitedUser(
+    name,
+    email,
+    password,
+    userType,
+    organizationId,
+    userOrganizationRoles,
+    res
+  );
 });
 
 export default router;

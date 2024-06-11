@@ -1,9 +1,6 @@
 import prisma from "../../prisma/client";
 
-const createOrganization = async (
-  name: string,
-  userId: string
-) => {
+const createOrganization = async (name: string, userId: string) => {
   return prisma.organization.create({
     data: {
       name,
@@ -24,8 +21,7 @@ const updateOrganization = async (id: string, name: string) => {
       updatedAt: new Date().toISOString(),
     },
   });
-  
-}
+};
 
 export default {
   createOrganization,

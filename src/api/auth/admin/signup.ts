@@ -14,14 +14,7 @@ router.post("/signup", async (req: Request, res: Response) => {
   //validate password strength
   validatePasswordStrength(password, res);
 
-  await createUserAndAssignRole(
-    name,
-    email,
-    password,
-    UserType.ADMIN,
-    ["ADMIN"],
-    res
-  );
+  await createUserAndAssignRole(name, email, password, UserType.ADMIN, res);
 });
 
 export default router;

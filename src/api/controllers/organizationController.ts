@@ -1,12 +1,15 @@
-// import workspaceService from "../services/organizationService";
 import { Request, Response } from "express";
 import prisma from "../../prisma/client";
 import organizationService from "../services/organizationService";
-// import { LoginSession } from "../types/types";
 
-const createOrganization = async (req: Request, res: Response) => {
+interface AuthenticatedRequest extends Request {
+  user?: { email: string };
+}
+
+const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { name, email } = req.body;
+    const { name } = req.body;
+    const { email } = req.user!;
 
     // check if email exists in the database
     const user = await prisma.user.findUnique({
@@ -19,8 +22,8 @@ const createOrganization = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "User does not exist" });
     }
 
-    // check if the user type is an owner or admin
-    if (user.userType !== "OWNER" && user.userType !== "ADMIN") {
+    // check if the user type is an owner
+    if (user.userType !== "OWNER") {
       return res.status(403).json({
         error: "You do not have permission to create an organization",
       });
@@ -37,6 +40,16 @@ const createOrganization = async (req: Request, res: Response) => {
       userId
     );
 
+    // assign the organizationId to the user
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        organizationId: newOrganization.orgId,
+      },
+    });
+
     res.status(201).json(newOrganization);
   } catch (error) {
     console.error("Error creating organization", error);
@@ -46,13 +59,13 @@ const createOrganization = async (req: Request, res: Response) => {
 
 const updateOrganization = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { orgId } = req.params;
     const { name } = req.body;
 
     // check if the organization exists in the database
     const organization = await prisma.organization.findUnique({
       where: {
-        id,
+        orgId,
       },
     });
 
@@ -65,7 +78,7 @@ const updateOrganization = async (req: Request, res: Response) => {
     }
 
     const updatedOrganization = await organizationService.updateOrganization(
-      id,
+      orgId,
       name
     );
     console.log(updatedOrganization);

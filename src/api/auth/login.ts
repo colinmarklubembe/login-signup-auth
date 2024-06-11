@@ -22,7 +22,7 @@ router.post("/login", limiter, async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
-        roles: {
+        userOrganizationRoles: {
           include: {
             role: true,
           },
@@ -49,7 +49,9 @@ router.post("/login", limiter, async (req, res) => {
     }
 
     // Fetch roles
-    const roles = user.roles.map((userRole: any) => userRole.role.name);
+    const roles = user.userOrganizationRoles.map(
+      (userOrganizationRole: any) => userOrganizationRole.role.name
+    );
 
     // Create token data
     const tokenData = {
@@ -59,13 +61,11 @@ router.post("/login", limiter, async (req, res) => {
       userType: user.userType,
       isVerified: user.isVerified,
       roles,
-      createdAt: new Date().toISOString(), // token
+      createdAt: new Date().toISOString(), // temporarily store the token creation date
     };
 
     // Create token
-    const loginToken = jwt.sign(tokenData, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
-    });
+    const loginToken = jwt.sign(tokenData, process.env.JWT_SECRET!);
 
     // Determine the user type message
     const userTypeMessage = user.userType.toLowerCase();

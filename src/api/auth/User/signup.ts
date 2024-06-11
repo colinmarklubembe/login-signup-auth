@@ -21,14 +21,7 @@ router.post("/signup", async (req: Request, res: Response) => {
   if (userRoles.length === 0) {
     return res.status(400).json({ error: "Invalid roles provided" });
   }
-  await createUserAndAssignRole(
-    name,
-    email,
-    password,
-    UserType.USER,
-    userRoles,
-    res
-  );
+  await createUserAndAssignRole(name, email, password, UserType.USER, res);
 });
 
 export default router;

@@ -12,7 +12,6 @@ const createUserAndAssignRole = async (
   email: string,
   password: string,
   userType: UserType,
-  roles: string[],
   res: Response
 ) => {
   try {
@@ -24,16 +23,6 @@ const createUserAndAssignRole = async (
 
     const hashedPassword = await hashPassword(password);
 
-    // Find roles
-    const roleEntities = await prisma.role.findMany({
-      where: { name: { in: roles } },
-    });
-
-    // Validate roles
-    if (roleEntities.length !== roles.length) {
-      return res.status(400).json({ error: "One or more roles are invalid" });
-    }
-
     // Create the user along with user roles in a single transaction
     const user = await prisma.user.create({
       data: {
@@ -42,20 +31,6 @@ const createUserAndAssignRole = async (
         password: hashedPassword,
         userType,
         createdAt: new Date().toISOString(),
-        roles: {
-          create: roleEntities.map((role) => ({
-            role: {
-              connect: { id: role.id },
-            },
-          })),
-        },
-      },
-      include: {
-        roles: {
-          include: {
-            role: true,
-          },
-        },
       },
     });
 
@@ -64,7 +39,7 @@ const createUserAndAssignRole = async (
       id: user.id,
       email: user.email,
       username: user.name,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(), // temporarily store the timestamp of the token creation
       userType: user.userType,
     };
 
@@ -106,7 +81,8 @@ const createInvitedUser = async (
   email: string,
   password: string,
   userType: UserType,
-  roles: string[],
+  organizationId: string,
+  userOrganizationRoles: string[],
   res: Response
 ) => {
   try {
@@ -121,11 +97,11 @@ const createInvitedUser = async (
 
     // Find roles
     const roleEntities = await prisma.role.findMany({
-      where: { name: { in: roles } },
+      where: { name: { in: userOrganizationRoles } },
     });
 
     // Validate roles
-    if (roleEntities.length !== roles.length) {
+    if (roleEntities.length !== userOrganizationRoles.length) {
       return res.status(400).json({ error: "One or more roles are invalid" });
     }
 
@@ -138,8 +114,11 @@ const createInvitedUser = async (
         userType,
         isVerified: true,
         createdAt: new Date().toISOString(),
-        roles: {
+        userOrganizationRoles: {
           create: roleEntities.map((role) => ({
+            organization: {
+              connect: { id: organizationId },
+            },
             role: {
               connect: { id: role.id },
             },
@@ -147,7 +126,7 @@ const createInvitedUser = async (
         },
       },
       include: {
-        roles: {
+        userOrganizationRoles: {
           include: {
             role: true,
           },
