@@ -8,8 +8,14 @@ const prisma = new PrismaClient();
 
 // invite users
 router.post("/invite-user", async (req, res) => {
-  const { name, email, organizationId, userType, userOrganizationRoles } =
-    req.body;
+  const {
+    name,
+    email,
+    organizationId,
+    userType,
+    userOrganizationRoles,
+    // departmentId
+  } = req.body;
 
   if (
     !name ||

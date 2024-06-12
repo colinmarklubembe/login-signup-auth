@@ -17,18 +17,16 @@ model User {
   forgotPasswordToken     String? 
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
   userType                UserType                   @default(USER)
-  // userOrganizations       UserOrganization[]         @relation("UserOrganizations")
+  userDepartments         UserDepartment[]           @relation("UserDepartments")
   createdAt               DateTime?        
   updatedAt               DateTime?       
 }
 
 model Organization {
   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String  
-  // userId                  String                     @db.ObjectId        
+  name                    String         
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
   departments             Department[]               @relation("OrganizationDepartments")
-  // userOrganizations       UserOrganization[]         @relation("UserOrganizations")
   createdAt               DateTime? 
   updatedAt               DateTime? 
 }
@@ -38,6 +36,7 @@ model Department {
   name                    String    
   organizationId          String                     @db.ObjectId
   organization            Organization               @relation("OrganizationDepartments", fields: [organizationId], references: [id])
+  userDepartments         UserDepartment[]           @relation("UserDepartments")
   createdAt               DateTime? 
   updatedAt               DateTime? 
 }
@@ -80,6 +79,17 @@ model UserOrganizationRole {
   role                    Role                       @relation("UserOrganizationRoles", fields: [roleId], references: [id])
 
   @@unique([userId, organizationId, roleId])
+}
+
+model UserDepartment {
+  id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
+  userId                  String                     @db.ObjectId
+  departmentId            String                     @db.ObjectId
+
+  user                    User                       @relation("UserDepartments", fields: [userId], references: [id])
+  department              Department                 @relation("UserDepartments", fields: [departmentId], references: [id])
+
+  @@unique([userId, departmentId])
 }
 
 enum UserType {
