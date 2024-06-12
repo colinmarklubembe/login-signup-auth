@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../../prisma/client";
 import organizationService from "../services/organizationService";
+import { generateToken } from "../../utils/generateToken";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string };
@@ -16,6 +17,13 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       where: {
         email,
       },
+      include: {
+        userOrganizationRoles: {
+          include: {
+            role: true, // Ensure roles are included
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -29,16 +37,11 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       });
     }
 
-    const userId = user.id;
-
     if (!name) {
       return res.status(400).send("Name is required for creating a workspace");
     }
 
-    const newOrganization = await organizationService.createOrganization(
-      name
-      // userId
-    );
+    const newOrganization = await organizationService.createOrganization(name);
 
     // fetch the role id of the owner
     const ownerRole = await prisma.role.findFirst({
@@ -51,7 +54,7 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(500).json({ error: "Owner role not found" });
     }
 
-    // create UserOrganization record
+    // create UserOrganizationRole record
     await prisma.userOrganizationRole.create({
       data: {
         user: { connect: { id: user.id } },
@@ -60,7 +63,47 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       },
     });
 
-    res.status(201).json(newOrganization);
+    // get all user organization roles
+    const userOrganizationRoles = await prisma.userOrganizationRole.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        role: true,
+      },
+    });
+
+    // Ensure userOrganizationRoles is always an array
+    const roles = userOrganizationRoles.map(
+      (userOrganizationRole: any) =>
+        userOrganizationRole.role?.name || "Unknown"
+    );
+
+    // create a new token of the user with the updated organizationId
+    const tokenData = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      userType: user.userType,
+      isVerified: user.isVerified,
+      newOrganizationId: newOrganization.id,
+      organizations: userOrganizationRoles,
+      roles,
+      createdAt: new Date().toISOString(), // Store the token creation date
+    };
+
+    // create a new token
+    const newToken = generateToken(tokenData);
+
+    // Set the token in the Authorization header
+    res.setHeader("Authorization", `Bearer ${newToken}`);
+
+    res.status(201).json({
+      message: "Organization created successfully",
+      success: true,
+      token: newToken,
+      organization: newOrganization,
+    });
   } catch (error) {
     console.error("Error creating organization", error);
     res.status(500).send("Error creating organization");

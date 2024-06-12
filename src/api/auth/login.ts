@@ -3,6 +3,7 @@ import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import prisma from "../../prisma/client";
 import { comparePassword } from "../../utils/comparePassword";
+import { generateToken } from "../../utils/generateToken";
 
 const router = Router();
 
@@ -48,6 +49,16 @@ router.post("/login", limiter, async (req, res) => {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
+    // get all user organization roles
+    const userOrganizationRoles = await prisma.userOrganizationRole.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        role: true,
+      },
+    });
+
     // Fetch roles
     const roles = user.userOrganizationRoles.map(
       (userOrganizationRole: any) => userOrganizationRole.role.name
@@ -65,6 +76,7 @@ router.post("/login", limiter, async (req, res) => {
       name: user.name,
       userType: user.userType,
       isVerified: user.isVerified,
+      organizations: userOrganizationRoles,
       organizationId: organizationId,
       roles,
       createdAt: new Date().toISOString(), // temporarily store the token creation date
@@ -72,9 +84,7 @@ router.post("/login", limiter, async (req, res) => {
     console.log("Token Data: ", tokenData);
 
     // Create token
-    const loginToken = jwt.sign(tokenData, process.env.JWT_SECRET!, {
-      expiresIn: "1h", // Set token expiration time
-    });
+    const loginToken = generateToken(tokenData);
 
     // Set the token in the Authorization header
     res.setHeader("Authorization", `Bearer ${loginToken}`);

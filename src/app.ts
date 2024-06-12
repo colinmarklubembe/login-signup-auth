@@ -5,13 +5,12 @@ import changePasswordRouter from "./api/auth/changePassword";
 import organizationRouter from "./api/routes/organizationRoutes";
 import departmentRouter from "./api/routes/departmentRoutes";
 import loginRouter from "./api/auth/login";
-
-// new routes for signup
 import ownerSignupRouter from "./api/auth/owner/signup";
 import userSignupRouter from "./api/auth/User/signup";
 import adminSignupRouter from "./api/auth/admin/signup";
 import verifyUserRouter from "./api/auth/verifyUser";
 import inviteUserRouter from "./api/auth/owner/inviteUsers";
+import refreshTokenRouter from "./api/auth/refreshToken";
 
 const cors = require("cors");
 const app = express();
@@ -43,6 +42,7 @@ app.use("/auth/api_login", loginRouter);
 app.use("/api_organization", organizationRouter);
 app.use("/auth/api_invite", inviteUserRouter);
 app.use("/api_department", departmentRouter);
+app.use("/auth/api_refresh", refreshTokenRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
