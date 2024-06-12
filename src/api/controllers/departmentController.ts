@@ -3,14 +3,14 @@ import prisma from "../../prisma/client";
 import departmentService from "../services/departmentService";
 
 interface AuthenticatedRequest extends Request {
-  user?: { email: string; orgId: string };
+  user?: { email: string; organizationId: string };
 }
 
 // Create department
 const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name } = req.body;
-    const { email, orgId } = req.user!;
+    const { email, organizationId } = req.user!;
 
     // Check if user exists
     const user = await prisma.user.findUnique({
@@ -22,8 +22,11 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     // check if user belongs to the organization
-    const userOrganization = await prisma.organization.findUnique({
-      where: { userId: user.id },
+    const userOrganization = await prisma.userOrganizationRole.findFirst({
+      where: {
+        userId: user.id,
+        organizationId,
+      },
     });
 
     // Check if the user type is an owner or admin
@@ -41,7 +44,7 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
 
     // Check if the organization exists
     const organization = await prisma.organization.findUnique({
-      where: { orgId },
+      where: { id: organizationId },
     });
 
     if (!organization) {
@@ -52,15 +55,14 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     // attach the organizationId to the department
-    const organizationId = organization.orgId;
 
     // Create the department
-    const newDepartment = departmentService.createDepartment(
+    const newDepartment = await departmentService.createDepartment(
       name,
       organizationId,
       res
     );
-    res.status(201).json(newDepartment);
+    res.status(201).json({ message: "Department created", newDepartment });
   } catch (error) {
     console.error("Error creating department:", error);
     res.status(500).send("Error creating department");

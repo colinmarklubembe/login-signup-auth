@@ -53,6 +53,11 @@ router.post("/login", limiter, async (req, res) => {
       (userOrganizationRole: any) => userOrganizationRole.role.name
     );
 
+    const organizationId =
+      user.userOrganizationRoles.length > 0
+        ? user.userOrganizationRoles[0].organizationId
+        : null;
+
     // Create token data
     const tokenData = {
       id: user.id,
@@ -60,7 +65,7 @@ router.post("/login", limiter, async (req, res) => {
       name: user.name,
       userType: user.userType,
       isVerified: user.isVerified,
-      organizationId: user.organizationId,
+      organizationId: organizationId,
       roles,
       createdAt: new Date().toISOString(), // temporarily store the token creation date
     };

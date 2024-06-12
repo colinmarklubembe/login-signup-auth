@@ -52,14 +52,13 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     // create UserOrganization record
-    const updatedUser = await prisma.userOrganizationRole.create({
+    await prisma.userOrganizationRole.create({
       data: {
         user: { connect: { id: user.id } },
         organization: { connect: { id: newOrganization.id } },
         role: { connect: { id: ownerRole.id } },
       },
     });
-    console.log(updatedUser);
 
     res.status(201).json(newOrganization);
   } catch (error) {

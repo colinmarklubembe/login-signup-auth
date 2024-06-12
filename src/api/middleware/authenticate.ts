@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 interface AuthenticatedRequest extends Request {
-  user?: { email: string };
+  user?: { email: string; organizationId: string };
 }
 
 const authenticateToken = (
@@ -18,7 +18,7 @@ const authenticateToken = (
   jwt.verify(token, process.env.JWT_SECRET!, (err, user) => {
     if (err) return res.sendStatus(403);
 
-    req.user = user as { email: string };
+    req.user = user as { email: string; organizationId: string };
     next();
   });
 };

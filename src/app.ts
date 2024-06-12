@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import forgotPasswordRouter from "./api/auth/forgotPassword";
 import changePasswordRouter from "./api/auth/changePassword";
 import organizationRouter from "./api/routes/organizationRoutes";
+import departmentRouter from "./api/routes/departmentRoutes";
 import loginRouter from "./api/auth/login";
 
 // new routes for signup
@@ -41,6 +42,7 @@ app.use("/auth/api", changePasswordRouter);
 app.use("/auth/api_login", loginRouter);
 app.use("/api_organization", organizationRouter);
 app.use("/auth/api_invite", inviteUserRouter);
+app.use("/api_department", departmentRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
