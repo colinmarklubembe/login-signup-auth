@@ -1,8 +1,8 @@
 import { PrismaClient, UserType } from "@prisma/client";
 import { Response } from "express";
 import jwt from "jsonwebtoken";
-import { generateToken } from "../utils/generateToken";
-import { hashPassword } from "../utils/hashPassword";
+import { generateToken } from "./generateToken";
+import { hashPassword } from "./hashPassword";
 import sendEmails from "./sendEmails";
 
 const prisma = new PrismaClient();

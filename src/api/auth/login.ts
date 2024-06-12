@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import prisma from "../../prisma/client";
-import { comparePassword } from "./utils/comparePassword";
+import { comparePassword } from "../../utils/comparePassword";
 
 const router = Router();
 

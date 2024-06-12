@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import checkVerification from "./utils/checkVerification";
+import checkVerification from "../../utils/checkVerification";
 
 const router = Router();
 

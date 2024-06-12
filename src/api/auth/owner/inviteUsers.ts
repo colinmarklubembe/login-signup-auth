@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { PrismaClient, UserType } from "@prisma/client";
-import { createInvitedUser } from "../utils/createUserAndAssignRole";
-import generateRandomPassword from "../utils/generateRandonPassword";
+import { createInvitedUser } from "../../../utils/createUserAndAssignRole";
+import generateRandomPassword from "../../../utils/generateRandonPassword";
 
 const router = Router();
 const prisma = new PrismaClient();

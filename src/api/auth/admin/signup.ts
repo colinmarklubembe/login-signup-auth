@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { UserType } from "@prisma/client";
-import { createUserAndAssignRole } from "../utils/createUserAndAssignRole";
-import { validatePasswordStrength } from "../utils/checkPasswordStrength";
+import { createUserAndAssignRole } from "../../../utils/createUserAndAssignRole";
+import { validatePasswordStrength } from "../../../utils/checkPasswordStrength";
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-import prisma from "../../../prisma/client";
+import prisma from "../prisma/client";
 import jwt from "jsonwebtoken";
 import sendEmails from "./sendEmails";
 import { Response } from "express";

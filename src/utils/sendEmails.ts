@@ -53,7 +53,6 @@ const sendForgotPasswordEmail = async (
     id: string;
     email: string;
     name: string;
-    token: string;
   };
   try {
     await resend.emails.send({
@@ -66,7 +65,7 @@ const sendForgotPasswordEmail = async (
         <p>Hello ${decoded.name},</p>
         <p>We received a request to reset your password for your NOVA CRM account associated with this email address. If you made this request, please click the button below to reset your password:</p>
         <div style="text-align: center; margin: 20px 0;">
-          <a href="http://localhost:4000/auth/api/reset-password/${decoded.id}?token=${decoded.token}" 
+          <a href="http://localhost:3000/reset-password" 
              style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
              Reset Your Password
           </a>
@@ -74,13 +73,15 @@ const sendForgotPasswordEmail = async (
         <p>If you did not request a password reset, please ignore this email. Your password will remain unchanged and no further action is required.</p>
         <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
         <p style="word-wrap: break-word;">
-          <a href="http://localhost:4000/auth/api/reset-password/${decoded.id}?token=${decoded.token}" style="color: #007BFF;">
-            http://localhost:4000/auth/api/reset-password/${decoded.id}?token=${decoded.token}
+          <a href="http://localhost:3000/reset-password" style="color: #007BFF;">
+            http://localhost:3000/reset-password
           </a>
         </p>
         <p>Thank you,<br>The NOVA CRM Team</p>
       </div>
     `,
+
+      // make a call to the backend to reset the user's password(http://localhost:4000/auth/api/reset-password/:id)
     });
     res.status(200).json({ message: "Email sent successfully" });
   } catch (error) {
@@ -111,20 +112,22 @@ const sendInviteEmail = async (generateEmailToken: string, res: Response) => {
           <p>You will login using the current email to which this invite was sent.</p>
           <p>Please click the button below to accept the invitation and get started:</p>
           <div style="text-align: center; margin: 20px 0;">
-            <a href="http://localhost:4000/auth/api_login/login" 
+            <a href="http://localhost:3000/login" 
                style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
                Accept Invitation and Login
             </a>
           </div>
           <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
           <p style="word-wrap: break-word;">
-            <a href="http://localhost:4000/auth/api_login/login" style="color: #007BFF;">
-              http://localhost:4000/auth/api_login/login
+            <a href="http://localhost:3000/login" style="color: #007BFF;">
+              http://localhost:3000/login
             </a>
           </p>
           <p>Thank you,<br>The NOVA CRM Team</p>
         </div>
       `,
+
+      // make a call to the backend login api (http://localhost:4000/auth/api_login/login)
     });
   } catch (error) {
     console.error("Error sending invitation email:", error);
