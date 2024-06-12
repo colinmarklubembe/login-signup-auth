@@ -11,4 +11,10 @@ router.post(
 );
 router.put("/update-department/:id", departmentController.updateDepartment);
 
+router.get("/get-departments", departmentController.getAllDepartments);
+
+router.get("/get-department/:id", departmentController.getDepartmentById);
+
+router.delete("/delete-department/:id", departmentController.deleteDepartment);
+
 export default router;
