@@ -9,10 +9,20 @@ router.post(
   authenticateToken,
   organizationController.createOrganization
 );
+
 router.put(
   "/update-organization/:id",
-  authenticateToken,
   organizationController.updateOrganization
+);
+
+router.get("/organizations/:id", organizationController.getOrganizationById);
+
+router.get("/organizations", organizationController.getAllOrganizations);
+
+router.delete(
+  "/delete-organization/:id",
+  authenticateToken,
+  organizationController.deleteOrganization
 );
 
 export default router;

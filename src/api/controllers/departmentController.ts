@@ -12,6 +12,8 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
     const { name } = req.body;
     const { email, organizationId } = req.user!;
 
+    console.log(organizationId);
+
     // Check if user exists
     const user = await prisma.user.findUnique({
       where: { email },

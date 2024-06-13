@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import prisma from "../../prisma/client";
 import organizationService from "../services/organizationService";
-import { generateToken } from "../../utils/generateToken";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string };
 }
 
+//creating organization
 const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name } = req.body;
@@ -16,13 +16,6 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
     const user = await prisma.user.findUnique({
       where: {
         email,
-      },
-      include: {
-        userOrganizationRoles: {
-          include: {
-            role: true, // Ensure roles are included
-          },
-        },
       },
     });
 
@@ -36,6 +29,8 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
         error: "You do not have permission to create an organization",
       });
     }
+
+    const userId = user.id;
 
     if (!name) {
       return res.status(400).send("Name is required for creating a workspace");
@@ -54,7 +49,7 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(500).json({ error: "Owner role not found" });
     }
 
-    // create UserOrganizationRole record
+    // create UserOrganization record
     await prisma.userOrganizationRole.create({
       data: {
         user: { connect: { id: user.id } },
@@ -63,62 +58,23 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       },
     });
 
-    // get all user organization roles
-    const userOrganizationRoles = await prisma.userOrganizationRole.findMany({
-      where: {
-        userId: user.id,
-      },
-      include: {
-        role: true,
-      },
-    });
-
-    // Ensure userOrganizationRoles is always an array
-    const roles = userOrganizationRoles.map(
-      (userOrganizationRole: any) =>
-        userOrganizationRole.role?.name || "Unknown"
-    );
-
-    // create a new token of the user with the updated organizationId
-    const tokenData = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      userType: user.userType,
-      isVerified: user.isVerified,
-      newOrganizationId: newOrganization.id,
-      organizations: userOrganizationRoles,
-      roles,
-      createdAt: new Date().toISOString(), // Store the token creation date
-    };
-
-    // create a new token
-    const newToken = generateToken(tokenData);
-
-    // Set the token in the Authorization header
-    res.setHeader("Authorization", `Bearer ${newToken}`);
-
-    res.status(201).json({
-      message: "Organization created successfully",
-      success: true,
-      token: newToken,
-      organization: newOrganization,
-    });
+    res.status(201).json(newOrganization);
   } catch (error) {
     console.error("Error creating organization", error);
     res.status(500).send("Error creating organization");
   }
 };
 
+//updating organization
 const updateOrganization = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { orgId } = req.params;
     const { name } = req.body;
 
     // check if the organization exists in the database
     const organization = await prisma.organization.findUnique({
       where: {
-        id,
+        orgId,
       },
     });
 
@@ -131,7 +87,7 @@ const updateOrganization = async (req: Request, res: Response) => {
     }
 
     const updatedOrganization = await organizationService.updateOrganization(
-      id,
+      orgId,
       name
     );
     console.log(updatedOrganization);
@@ -142,7 +98,93 @@ const updateOrganization = async (req: Request, res: Response) => {
   }
 };
 
+//read by organization by id
+const getOrganizationById = async (req: Request, res: Response) => {
+  try {
+    const { orgId } = req.params;
+
+    const organization = await prisma.organization.findUnique({
+      where: {
+        orgId,
+      },
+    });
+
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    res.status(200).json(organization);
+  } catch (error) {
+    console.error("Error fetching organization by ID", error);
+    res.status(500).send("Error fetching organization by ID");
+  }
+};
+
+//read all organizations
+const getAllOrganizations = async (req: Request, res: Response) => {
+  try {
+    const organizations = await prisma.organization.findMany();
+
+    res.status(200).json(organizations);
+  } catch (error) {
+    console.error("Error fetching all organizations", error);
+    res.status(500).send("Error fetching all organizations");
+  }
+};
+
+// Delete organization
+const deleteOrganization = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { orgId } = req.params;
+    const { email } = req.user!;
+
+    // check if email exists in the database
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User does not exist" });
+    }
+
+    // check if the user type is an owner
+    if (user.userType !== "OWNER") {
+      return res.status(403).json({
+        error: "You do not have permission to delete an organization",
+      });
+    }
+
+    // Check if the organization exists
+    const organization = await prisma.organization.findUnique({
+      where: {
+        orgId,
+      },
+    });
+
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    // Perform deletion
+    await prisma.organization.delete({
+      where: {
+        orgId,
+      },
+    });
+
+    res.status(200).json({ message: "Organization deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting organization", error);
+    res.status(500).send("Error deleting organization");
+  }
+};
+
 export default {
   createOrganization,
   updateOrganization,
+  getOrganizationById,
+  getAllOrganizations,
+  deleteOrganization,
 };
