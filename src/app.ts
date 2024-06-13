@@ -29,20 +29,20 @@ mongoose
 app.use(express.json());
 
 // new routes for signup
-app.use("/auth/api_owner", ownerSignupRouter);
-app.use("/auth/api_user", userSignupRouter);
-app.use("/auth/api_admin", adminSignupRouter);
-app.use("/auth/api_verify", verifyUserRouter);
+app.use("/api/v1/auth", ownerSignupRouter);
+// app.use("/auth/api_user", userSignupRouter);
+// app.use("/auth/api_admin", adminSignupRouter);
+app.use("/api/v1/auth", verifyUserRouter);
 
 // new routes for password change
-app.use("/auth/api", forgotPasswordRouter);
-app.use("/auth/api", changePasswordRouter);
+app.use("/api/v1/users", forgotPasswordRouter);
+app.use("/api/v1/users", changePasswordRouter);
 
-app.use("/auth/api_login", loginRouter);
-app.use("/api_organization", organizationRouter);
-app.use("/auth/api_invite", inviteUserRouter);
-app.use("/api_department", departmentRouter);
-app.use("/auth/api_refresh", refreshTokenRouter);
+app.use("/api/v1/auth", loginRouter);
+app.use("/api/v1/organizations", organizationRouter);
+app.use("/api/v1/users", inviteUserRouter);
+app.use("/api/v1/departments", departmentRouter);
+app.use("/ap1/v1/tokens", refreshTokenRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
