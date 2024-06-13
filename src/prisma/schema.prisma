@@ -74,6 +74,7 @@ model Tasks {
   description             String?
   dueDate                 DateTime
   status                  String
+  priority                String
   assignedTo              String                     @db.ObjectId
   assignedBy              String                     @db.ObjectId
   createdAt               DateTime? 
