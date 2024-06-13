@@ -5,8 +5,6 @@ import { Response } from "express";
 import { generateToken } from "./generateToken";
 
 const verifyUser = async (token: string, res: Response) => {
-  console.log(token);
-
   if (!token) {
     return res.status(400).json({ error: "Invalid token" });
   }
@@ -33,7 +31,6 @@ const verifyUser = async (token: string, res: Response) => {
 
     // check if token has expired
     const tokenAge = Date.now() - new Date(decoded.createdAt).getTime();
-    console.log(tokenAge);
 
     if (tokenAge > 3600000) {
       return res.status(400).json({ error: "Token has expired" });
@@ -86,8 +83,6 @@ const reverifyUser = async (email: string, res: Response) => {
         verificationToken: token,
       },
     });
-
-    console.log("Token: ", token);
 
     const emailTokenData = {
       email: user.email,

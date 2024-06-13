@@ -34,7 +34,6 @@ router.post("/forgot-password", async (req, res) => {
     // send email with password reset link
     sendEmails.sendForgotPasswordEmail(generateEmailToken, res);
   } catch (error) {
-    console.log("An error occurred. Please retry!", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

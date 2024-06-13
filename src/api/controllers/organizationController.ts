@@ -135,7 +135,6 @@ const updateOrganization = async (req: Request, res: Response) => {
       id,
       name
     );
-    console.log(updatedOrganization);
     res.status(200).json(updatedOrganization);
   } catch (error) {
     console.error("Error updating organization", error);

@@ -14,7 +14,6 @@ router.get(
   "/refresh-token",
   authenticateToken,
   async (req: AuthenticatedRequest, res: Response) => {
-    console.log("Refresh token route hit");
     try {
       // Fetch the latest user data from the database
       const user = await prisma.user.findUnique({
@@ -29,7 +28,6 @@ router.get(
       });
 
       if (!user) {
-        console.log("User not found for given token");
         return res.status(400).json({ error: "Invalid token" });
       }
 
@@ -61,8 +59,6 @@ router.get(
       });
 
       res.setHeader("Authorization", `Bearer ${newToken}`);
-
-      console.log("New token generated:", newToken);
 
       res.json({
         message: "Token refreshed successfully",

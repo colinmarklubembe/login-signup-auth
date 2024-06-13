@@ -45,8 +45,6 @@ const createUserAndAssignRole = async (
 
     // create token
     const token = generateToken(tokenData);
-    console.log("Token: ", token);
-    console.log("Token expires : ", new Date(Date.now() + 3600000));
 
     // store the token in the database
     await prisma.user.update({
@@ -158,8 +156,6 @@ const createInvitedUser = async (
         departmentId: department.id,
       },
     });
-
-    console.log("User Department: ", userDepartment);
 
     const emailTokenData = {
       email: user.email,

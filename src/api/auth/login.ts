@@ -81,14 +81,12 @@ router.post("/login", limiter, async (req, res) => {
       roles,
       createdAt: new Date().toISOString(), // temporarily store the token creation date
     };
-    console.log("Token Data: ", tokenData);
 
     // Create token
     const loginToken = generateToken(tokenData);
 
     // Set the token in the Authorization header
     res.setHeader("Authorization", `Bearer ${loginToken}`);
-    console.log("Authorization Header Set: ", res.getHeader("Authorization"));
 
     res.json({
       message: `Logged in successfully as ${user.userType.toLowerCase()}`,
