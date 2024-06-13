@@ -86,7 +86,9 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       userType: user.userType,
       isVerified: user.isVerified,
       organizationId: newOrganization.id,
-      organizations: userOrganizationRoles,
+      organizations: user.userOrganizationRoles.map((userOrgRole: any) => ({
+        organizationId: userOrgRole.organizationId,
+      })),
       roles,
       createdAt: new Date().toISOString(), // Store the token creation date
     };

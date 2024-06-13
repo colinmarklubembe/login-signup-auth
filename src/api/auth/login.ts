@@ -76,7 +76,9 @@ router.post("/login", limiter, async (req, res) => {
       name: user.name,
       userType: user.userType,
       isVerified: user.isVerified,
-      organizations: userOrganizationRoles,
+      organizations: user.userOrganizationRoles.map((userOrgRole: any) => ({
+        organizationId: userOrgRole.organizationId,
+      })),
       organizationId: organizationId,
       roles,
       createdAt: new Date().toISOString(), // temporarily store the token creation date
