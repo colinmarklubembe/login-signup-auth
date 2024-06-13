@@ -143,9 +143,21 @@ const getDepartmentById = async (req: Request, res: Response) => {
   }
 };
 
-const getDepartmentsByOrganization = async (req: Request, res: Response) => {
+const getDepartmentsByOrganization = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
   try {
-    const { organizationId } = req.params;
+    const { organizationId } = req.user!;
+
+    // Check if the organization exists
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
+    });
+
+    if (!organization) {
+      return res.status(404).json({ error: "Organization does not exist" });
+    }
 
     const departments = await prisma.department.findMany({
       where: {
@@ -157,6 +169,10 @@ const getDepartmentsByOrganization = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Departments do not exist" });
     }
 
+    console.log(
+      "Departments' names:",
+      departments.map((department: any) => department.name)
+    );
     res.status(200).json(departments);
   } catch (error) {
     console.error("Error getting departments:", error);
