@@ -30,8 +30,6 @@ app.use(express.json());
 
 // new routes for signup
 app.use("/api/v1/auth", ownerSignupRouter);
-// app.use("/auth/api_user", userSignupRouter);
-// app.use("/auth/api_admin", adminSignupRouter);
 app.use("/api/v1/auth", verifyUserRouter);
 
 // new routes for password change
