@@ -83,6 +83,7 @@ const createInvitedUser = async (
   userType: UserType,
   organizationId: string,
   userOrganizationRoles: string[],
+  departmentName: string,
   res: Response
 ) => {
   try {
@@ -103,6 +104,22 @@ const createInvitedUser = async (
     // Validate roles
     if (roleEntities.length !== userOrganizationRoles.length) {
       return res.status(400).json({ error: "One or more roles are invalid" });
+    }
+
+    // get the deparmtnet id with the department name provided
+    const department = await prisma.department.findFirst({
+      where: { name: departmentName },
+    });
+
+    if (!department) {
+      return res.status(400).json({ error: "Department not found" });
+    }
+
+    // check if the department belongs to the organization
+    if (department.organizationId !== organizationId) {
+      return res
+        .status(400)
+        .json({ error: "Department does not belong to the organization" });
     }
 
     // Create the user along with user roles in a single transaction
@@ -134,6 +151,16 @@ const createInvitedUser = async (
       },
     });
 
+    // add userDepartment
+    const userDepartment = await prisma.userDepartment.create({
+      data: {
+        userId: user.id,
+        departmentId: department.id,
+      },
+    });
+
+    console.log("User Department: ", userDepartment);
+
     const emailTokenData = {
       email: user.email,
       name: user.name,
@@ -152,6 +179,7 @@ const createInvitedUser = async (
       message: "Invitation email sent successfully!",
       success: true,
       user,
+      userDepartment,
     });
   } catch (error) {
     console.error("Error creating user:", error);

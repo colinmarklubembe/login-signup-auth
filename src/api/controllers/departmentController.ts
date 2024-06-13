@@ -21,6 +21,13 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ error: "User does not exist" });
     }
 
+    // Check if the user type is an owner or admin
+    if (user.userType !== "OWNER" && user.userType !== "ADMIN") {
+      return res.status(403).json({
+        error: "You do not have permission to create a department",
+      });
+    }
+
     // check if user belongs to the organization
     const userOrganization = await prisma.userOrganizationRole.findFirst({
       where: {
@@ -28,13 +35,6 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
         organizationId,
       },
     });
-
-    // Check if the user type is an owner or admin
-    if (user.userType !== "OWNER" && user.userType !== "ADMIN") {
-      return res.status(403).json({
-        error: "You do not have permission to create a department",
-      });
-    }
 
     if (!userOrganization) {
       return res.status(404).json({
@@ -53,8 +53,6 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
           "A department needs to belong to an organization. Please create an organization first!",
       });
     }
-
-    // attach the organizationId to the department
 
     // Create the department
     const newDepartment = await departmentService.createDepartment(

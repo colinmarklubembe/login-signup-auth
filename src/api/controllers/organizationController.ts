@@ -112,13 +112,13 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
 
 const updateOrganization = async (req: Request, res: Response) => {
   try {
-    const { orgId } = req.params;
+    const { id } = req.params;
     const { name } = req.body;
 
     // check if the organization exists in the database
     const organization = await prisma.organization.findUnique({
       where: {
-        orgId,
+        id,
       },
     });
 
@@ -131,7 +131,7 @@ const updateOrganization = async (req: Request, res: Response) => {
     }
 
     const updatedOrganization = await organizationService.updateOrganization(
-      orgId,
+      id,
       name
     );
     console.log(updatedOrganization);

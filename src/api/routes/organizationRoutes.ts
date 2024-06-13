@@ -10,7 +10,7 @@ router.post(
   organizationController.createOrganization
 );
 router.put(
-  "/update-organization/:orgId",
+  "/update-organization/:id",
   authenticateToken,
   organizationController.updateOrganization
 );
