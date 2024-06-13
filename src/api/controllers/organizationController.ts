@@ -230,7 +230,7 @@ const selectOrganization = async (req: AuthenticatedRequest, res: Response) => {
     const { email } = req.user!;
 
     // Get the organization ID based on organizationName
-    const organization = await prisma.organization.findUnique({
+    const organization = await prisma.organization.findFirst({
       where: {
         name: organizationName,
       },
