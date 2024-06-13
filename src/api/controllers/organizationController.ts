@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import prisma from "../../prisma/client";
 import organizationService from "../services/organizationService";
+import { generateToken } from "../../utils/generateToken";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string };
 }
 
-//creating organization
 const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name } = req.body;
@@ -16,6 +16,13 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
     const user = await prisma.user.findUnique({
       where: {
         email,
+      },
+      include: {
+        userOrganizationRoles: {
+          include: {
+            role: true, // Ensure roles are included
+          },
+        },
       },
     });
 
@@ -29,8 +36,6 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
         error: "You do not have permission to create an organization",
       });
     }
-
-    const userId = user.id;
 
     if (!name) {
       return res.status(400).send("Name is required for creating a workspace");
@@ -49,7 +54,7 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(500).json({ error: "Owner role not found" });
     }
 
-    // create UserOrganization record
+    // create UserOrganizationRole record
     await prisma.userOrganizationRole.create({
       data: {
         user: { connect: { id: user.id } },
@@ -58,7 +63,47 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       },
     });
 
-    res.status(201).json(newOrganization);
+    // get all user organization roles
+    const userOrganizationRoles = await prisma.userOrganizationRole.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        role: true,
+      },
+    });
+
+    // Ensure userOrganizationRoles is always an array
+    const roles = userOrganizationRoles.map(
+      (userOrganizationRole: any) =>
+        userOrganizationRole.role?.name || "Unknown"
+    );
+
+    // create a new token of the user with the updated organizationId
+    const tokenData = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      userType: user.userType,
+      isVerified: user.isVerified,
+      newOrganizationId: newOrganization.id,
+      organizations: userOrganizationRoles,
+      roles,
+      createdAt: new Date().toISOString(), // Store the token creation date
+    };
+
+    // create a new token
+    const newToken = generateToken(tokenData);
+
+    // Set the token in the Authorization header
+    res.setHeader("Authorization", `Bearer ${newToken}`);
+
+    res.status(201).json({
+      message: "Organization created successfully",
+      success: true,
+      token: newToken,
+      organization: newOrganization,
+    });
   } catch (error) {
     console.error("Error creating organization", error);
     res.status(500).send("Error creating organization");
@@ -68,13 +113,13 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
 //updating organization
 const updateOrganization = async (req: Request, res: Response) => {
   try {
-    const { orgId } = req.params;
+    const { id } = req.params;
     const { name } = req.body;
 
     // check if the organization exists in the database
     const organization = await prisma.organization.findUnique({
       where: {
-        orgId,
+        id,
       },
     });
 
@@ -87,7 +132,7 @@ const updateOrganization = async (req: Request, res: Response) => {
     }
 
     const updatedOrganization = await organizationService.updateOrganization(
-      orgId,
+      id,
       name
     );
     console.log(updatedOrganization);
@@ -101,11 +146,11 @@ const updateOrganization = async (req: Request, res: Response) => {
 //read by organization by id
 const getOrganizationById = async (req: Request, res: Response) => {
   try {
-    const { orgId } = req.params;
+    const { id } = req.params;
 
     const organization = await prisma.organization.findUnique({
       where: {
-        orgId,
+        id,
       },
     });
 
@@ -135,7 +180,7 @@ const getAllOrganizations = async (req: Request, res: Response) => {
 // Delete organization
 const deleteOrganization = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { orgId } = req.params;
+    const { id } = req.params;
     const { email } = req.user!;
 
     // check if email exists in the database
@@ -159,7 +204,7 @@ const deleteOrganization = async (req: AuthenticatedRequest, res: Response) => {
     // Check if the organization exists
     const organization = await prisma.organization.findUnique({
       where: {
-        orgId,
+        id,
       },
     });
 
@@ -170,7 +215,7 @@ const deleteOrganization = async (req: AuthenticatedRequest, res: Response) => {
     // Perform deletion
     await prisma.organization.delete({
       where: {
-        orgId,
+        id,
       },
     });
 
