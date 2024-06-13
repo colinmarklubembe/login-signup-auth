@@ -67,6 +67,18 @@ model Product {
   updatedAt               DateTime? 
 }
 
+model Tasks {
+  id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
+  title                   String
+  description             String?
+  dueDate                 DateTime
+  status                  String
+  assignedTo              String                     @db.ObjectId
+  assignedBy              String                     @db.ObjectId
+  createdAt               DateTime? 
+  updatedAt               DateTime? 
+}
+
 model RolePermission {
   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
   roleId                  String                     @db.ObjectId
