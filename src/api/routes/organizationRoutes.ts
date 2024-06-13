@@ -31,4 +31,10 @@ router.post(
   organizationController.selectOrganization
 );
 
+router.get(
+  "/user-organizations",
+  authenticateToken,
+  organizationController.getUserOrganizations
+);
+
 export default router;
