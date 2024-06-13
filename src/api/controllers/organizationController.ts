@@ -335,6 +335,7 @@ const getUserOrganizations = async (
         organizationId: userOrgRole.organizationId,
       })
     );
+
     console.log(organizations);
     res.status(200).json(organizations);
   } catch (error) {
