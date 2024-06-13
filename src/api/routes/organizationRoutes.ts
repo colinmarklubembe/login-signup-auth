@@ -25,4 +25,10 @@ router.delete(
   organizationController.deleteOrganization
 );
 
+router.post(
+  "/select-orgnization",
+  authenticateToken,
+  organizationController.selectOrganization
+);
+
 export default router;

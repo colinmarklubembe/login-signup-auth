@@ -73,7 +73,6 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       },
     });
 
-    // Ensure userOrganizationRoles is always an array
     const roles = userOrganizationRoles.map(
       (userOrganizationRole: any) =>
         userOrganizationRole.role?.name || "Unknown"
@@ -225,10 +224,95 @@ const deleteOrganization = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
+const selectOrganization = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { organizationName } = req.body;
+    const { email } = req.user!;
+
+    // Get the organization ID based on organizationName
+    const organization = await prisma.organization.findUnique({
+      where: {
+        name: organizationName,
+      },
+    });
+
+    if (!organization) {
+      return res.status(404).json({ error: "Organization does not exist" });
+    }
+
+    const organizationId = organization.id;
+
+    // check if email exists in the database
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      include: {
+        userOrganizationRoles: {
+          include: {
+            role: true, // Ensure roles are included
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User does not exist" });
+    }
+
+    // Check if the user belongs to the selected organization
+    const userOrganization = user.userOrganizationRoles.find(
+      (userOrgRole: any) => userOrgRole.organizationId === organizationId
+    );
+
+    if (!userOrganization) {
+      return res
+        .status(403)
+        .json({ error: "Access denied to the organization" });
+    }
+
+    const roles = user.userOrganizationRoles.map(
+      (userOrganizationRole: any) =>
+        userOrganizationRole.role?.name || "Unknown"
+    );
+
+    // create a new token of the user with the updated organizationId
+    const tokenData = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      userType: user.userType,
+      isVerified: user.isVerified,
+      organizationId: organizationId,
+      organizations: user.userOrganizationRoles.map((userOrgRole: any) => ({
+        organizationId: userOrgRole.organizationId,
+      })),
+      roles,
+      createdAt: new Date().toISOString(), // Store the token creation date
+    };
+
+    // generate new token
+    const newToken = generateToken(tokenData);
+
+    // Set the token in the Authorization header
+    res.setHeader("Authorization", `Bearer ${newToken}`);
+
+    res.status(201).json({
+      message: `Organization ${organizationName} selected successfully`,
+      success: true,
+      token: newToken,
+    });
+  } catch (error) {
+    console.error("Error selecting organization:", error);
+    res.status(500).send("Error selecting organization");
+  }
+};
+
 export default {
   createOrganization,
   updateOrganization,
   getOrganizationById,
   getAllOrganizations,
   deleteOrganization,
+  selectOrganization,
 };
