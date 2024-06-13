@@ -73,6 +73,11 @@ const getDepartmentById = async (id: string, res: Response) => {
   }
 };
 
+const getDepartmentsByOrganization = async (
+  organizationId: string,
+  res: Response
+) => {};
+
 export default {
   createDepartment,
   updateDepartment,

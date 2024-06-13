@@ -17,4 +17,9 @@ router.get("/get-department/:id", departmentController.getDepartmentById);
 
 router.delete("/delete-department/:id", departmentController.deleteDepartment);
 
+router.get(
+  "/get-departments/:organizationId",
+  departmentController.getDepartmentsByOrganization
+);
+
 export default router;
