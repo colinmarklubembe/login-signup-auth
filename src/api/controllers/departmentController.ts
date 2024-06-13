@@ -9,7 +9,7 @@ interface AuthenticatedRequest extends Request {
 // Create department
 const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, description } = req.body;
     const { email, organizationId } = req.user!;
 
     // Check if user exists
@@ -57,6 +57,7 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
     // Create the department
     const newDepartment = await departmentService.createDepartment(
       name,
+      description,
       organizationId,
       res
     );

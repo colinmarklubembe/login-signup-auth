@@ -33,7 +33,8 @@ model Organization {
 
 model Department {
   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String    
+  name                    String
+  description             String?    
   organizationId          String                     @db.ObjectId
   organization            Organization               @relation("OrganizationDepartments", fields: [organizationId], references: [id])
   userDepartments         UserDepartment[]           @relation("UserDepartments")

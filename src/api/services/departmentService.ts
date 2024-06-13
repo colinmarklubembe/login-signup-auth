@@ -3,6 +3,7 @@ import { Response } from "express";
 
 const createDepartment = async (
   name: string,
+  description: string,
   organizationId: string,
   res: Response
 ) => {
@@ -10,6 +11,7 @@ const createDepartment = async (
     return prisma.department.create({
       data: {
         name,
+        description,
         organizationId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
