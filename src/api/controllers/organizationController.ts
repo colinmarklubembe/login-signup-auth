@@ -322,11 +322,7 @@ const getUserOrganizations = async (
         email,
       },
       include: {
-        userOrganizationRoles: {
-          include: {
-            organization: true,
-          },
-        },
+        userOrganizationRoles: true,
       },
     });
 
@@ -335,9 +331,11 @@ const getUserOrganizations = async (
     }
 
     const organizations = user.userOrganizationRoles.map(
-      (userOrganizationRole: any) => userOrganizationRole.organization
+      (userOrgRole: any) => ({
+        organizationId: userOrgRole.organizationId,
+      })
     );
-
+    console.log(organizations);
     res.status(200).json(organizations);
   } catch (error) {
     console.error("Error fetching user organizations", error);
