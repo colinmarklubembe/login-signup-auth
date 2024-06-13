@@ -57,6 +57,16 @@ model Permission {
   roles                   RolePermission[]           @relation("RolePermissions")
 }
 
+model Product {
+  id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String
+  description             String?
+  unitPrice               Int
+  quantity                Int
+  createdAt               DateTime? 
+  updatedAt               DateTime? 
+}
+
 model RolePermission {
   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
   roleId                  String                     @db.ObjectId

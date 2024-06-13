@@ -11,6 +11,7 @@ import adminSignupRouter from "./api/auth/admin/signup";
 import verifyUserRouter from "./api/auth/verifyUser";
 import inviteUserRouter from "./api/auth/owner/inviteUsers";
 import refreshTokenRouter from "./api/auth/refreshToken";
+import productRouter from "./api/routes/productRoutes";
 
 const cors = require("cors");
 const app = express();
@@ -28,19 +29,16 @@ mongoose
 
 app.use(express.json());
 
-// new routes for signup
 app.use("/api/v1/auth", ownerSignupRouter);
 app.use("/api/v1/auth", verifyUserRouter);
-
-// new routes for password change
 app.use("/api/v1/users", forgotPasswordRouter);
 app.use("/api/v1/users", changePasswordRouter);
-
 app.use("/api/v1/auth", loginRouter);
 app.use("/api/v1/organizations", organizationRouter);
 app.use("/api/v1/users", inviteUserRouter);
 app.use("/api/v1/departments", departmentRouter);
 app.use("/ap1/v1/tokens", refreshTokenRouter);
+app.use("/api/v1/products", productRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
