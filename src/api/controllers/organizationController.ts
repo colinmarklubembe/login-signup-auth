@@ -41,6 +41,19 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(400).send("Name is required for creating a workspace");
     }
 
+    // check if user already has an organization with the same name
+    const organization = await prisma.organization.findFirst({
+      where: {
+        name,
+      },
+    });
+
+    if (organization) {
+      return res.status(400).json({
+        error: "You cannot create another organization with the same name",
+      });
+    }
+
     const newOrganization = await organizationService.createOrganization(name);
 
     // fetch the role id of the owner
