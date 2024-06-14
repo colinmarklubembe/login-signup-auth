@@ -83,7 +83,9 @@ const sendForgotPasswordEmail = async (
 
       // make a call to the backend to reset the user's password(http://localhost:4000/auth/api/reset-password/:id)
     });
-    res.status(200).json({ message: "Email sent successfully" });
+    res
+      .status(200)
+      .json({ message: "Email sent successfully", token: generateEmailToken });
   } catch (error) {
     console.error("Error sending email:", error);
     return res.status(400).json(error);
