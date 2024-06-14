@@ -45,6 +45,8 @@ const sendVerificationEmail = async (
   }
 };
 
+const sendUpdateProfileEmail = async (res: Response) => {};
+
 const sendForgotPasswordEmail = async (
   generateEmailToken: any,
   res: Response

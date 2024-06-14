@@ -45,7 +45,7 @@ const verifyUser = async (token: string, res: Response) => {
       },
     });
 
-    res.status(200).json({ message: "User verified successfully", user });
+    res.redirect("http://localhost:3000/verifiedEmail");
   } catch (error) {
     console.error("Error verifying user account: ", error);
     res.status(400).send({ message: "Error verifying user account" });
