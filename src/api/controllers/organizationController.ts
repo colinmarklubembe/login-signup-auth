@@ -336,8 +336,20 @@ const getUserOrganizations = async (
       })
     );
 
-    console.log(organizations);
-    res.status(200).json(organizations);
+    // check the organization table for the organization name matching the organizationId
+    const organizationNames = await Promise.all(
+      organizations.map(async (org: any) => {
+        const organization = await prisma.organization.findUnique({
+          where: {
+            id: org.organizationId,
+          },
+        });
+
+        return organization?.name;
+      })
+    );
+
+    res.status(200).json(organizationNames);
   } catch (error) {
     console.error("Error fetching user organizations", error);
     res.status(500).send("Error fetching user organizations");
