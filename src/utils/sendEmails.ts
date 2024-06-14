@@ -1,4 +1,3 @@
-import { generateToken } from "./generateToken";
 import { Resend } from "resend";
 import { Response } from "express";
 import jwt from "jsonwebtoken";
@@ -45,7 +44,44 @@ const sendVerificationEmail = async (
   }
 };
 
-const sendUpdateProfileEmail = async (res: Response) => {};
+const sendUpdatedProfileEmail = async (
+  generateEmailToken: string,
+  res: Response
+) => {
+  const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
+    email: string;
+    name: string;
+  };
+  try {
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: decoded.email,
+      subject: "Your Profile Has Been Updated",
+      html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          <h2>Profile Update Notification</h2>
+          <p>Dear ${decoded.name},</p>
+          <p>We wanted to let you know that your profile has been successfully updated. Here are the details:</p>
+          <ul>
+            <li><strong>Name:</strong> ${decoded.name}</li>
+            <li><strong>Email:</strong> ${decoded.email}</li>
+          </ul>
+          <p>You can view and manage your profile using the following link:</p>
+          <p><a href="#" style="color: #1a73e8;">View Profile</a></p>
+          <p>If you did not make this change or if you have any concerns, please contact our support team immediately.</p>
+          <p>Thank you for keeping your profile up-to-date!</p>
+          <p>Best regards,</p>
+          <p>The Nova Team</p>
+          <hr>
+          <p style="font-size: 0.9em;">If you have any questions, feel free to reach out to our support team at <a href="#">$----------</a>.</p>
+        </div>`,
+    });
+  } catch (error) {
+    console.error("Error sending update profile email:", error);
+    return res
+      .status(500)
+      .json({ error: "Failed to send update profile email" });
+  }
+};
 
 const sendForgotPasswordEmail = async (
   generateEmailToken: any,
@@ -143,4 +179,5 @@ export default {
   sendVerificationEmail,
   sendForgotPasswordEmail,
   sendInviteEmail,
+  sendUpdatedProfileEmail,
 };

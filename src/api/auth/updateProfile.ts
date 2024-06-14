@@ -1,12 +1,14 @@
 import { Request, Response, Router } from "express";
 import prisma from "../../prisma/client";
+import sendEmails from "../../utils/sendEmails";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 
 router.put("/update-profile", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, email, password } = req.body;
+    const { name } = req.body;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -18,13 +20,24 @@ router.put("/update-profile", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "User does not exist" });
     }
 
-    if (!name || !email || !password) {
+    if (!name) {
       return res
         .status(400)
-        .send("All fields are required for updating a user profile");
+        .send("Missing required fields for updating a user profile");
     }
 
     // send update profile email to user
+    const emailTokenData = {
+      email: user.email,
+      name: user.name,
+    };
+
+    const generateEmailToken = jwt.sign(
+      emailTokenData,
+      process.env.JWT_SECRET!
+    );
+    // Send invitation email
+    sendEmails.sendInviteEmail(generateEmailToken, res);
 
     const updatedUser = await prisma.user.update({
       where: {
@@ -32,8 +45,6 @@ router.put("/update-profile", async (req: Request, res: Response) => {
       },
       data: {
         name,
-        email,
-        password,
         updatedAt: new Date().toISOString(),
       },
     });
