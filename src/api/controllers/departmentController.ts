@@ -54,6 +54,21 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
       });
     }
 
+    // check if the organization has a department with the same name
+    const checkDepartment = await prisma.department.findFirst({
+      where: {
+        name,
+        organizationId,
+      },
+    });
+
+    if (checkDepartment) {
+      return res.status(400).json({
+        error:
+          "A department with the same name already exists in this organization",
+      });
+    }
+
     // Create the department
     const newDepartment = await departmentService.createDepartment(
       name,
