@@ -6,13 +6,12 @@ import organizationRouter from "./api/routes/organizationRoutes";
 import departmentRouter from "./api/routes/departmentRoutes";
 import loginRouter from "./api/auth/login";
 import ownerSignupRouter from "./api/auth/owner/signup";
-import userSignupRouter from "./api/auth/User/signup";
-import adminSignupRouter from "./api/auth/admin/signup";
 import verifyUserRouter from "./api/auth/verifyUser";
 import inviteUserRouter from "./api/auth/owner/inviteUsers";
 import refreshTokenRouter from "./api/auth/refreshToken";
 import productRouter from "./api/routes/productRoutes";
 import userUpdateProfileRouter from "./api/auth/updateProfile";
+import rolesRouter from "./api/routes/rolesRoute";
 
 const cors = require("cors");
 const app = express();
@@ -41,6 +40,7 @@ app.use("/api/v1/departments", departmentRouter);
 app.use("/ap1/v1/tokens", refreshTokenRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/users", userUpdateProfileRouter);
+app.use("/api/v1/roles", rolesRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
