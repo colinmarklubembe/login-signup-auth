@@ -1,6 +1,3 @@
-// comparePassword.ts
-import bcryptjs from "bcryptjs";
-
 import bcrypt from "bcryptjs";
 
 export const comparePassword = (
