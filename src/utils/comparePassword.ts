@@ -1,9 +1,11 @@
 // comparePassword.ts
 import bcryptjs from "bcryptjs";
 
-export const comparePassword = async (
+import bcrypt from "bcryptjs";
+
+export const comparePassword = (
   password: string,
   hashedPassword: string
-): Promise<boolean> => {
-  return await bcryptjs.compare(password, hashedPassword);
+): boolean => {
+  return bcrypt.compareSync(password, hashedPassword);
 };
