@@ -26,7 +26,7 @@ router.delete(
 );
 
 router.post(
-  "/select-orgnization",
+  "/select-organization",
   authenticateToken,
   organizationController.selectOrganization
 );
