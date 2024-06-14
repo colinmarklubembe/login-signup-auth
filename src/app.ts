@@ -12,6 +12,7 @@ import refreshTokenRouter from "./api/auth/refreshToken";
 import productRouter from "./api/routes/productRoutes";
 import userUpdateProfileRouter from "./api/auth/updateProfile";
 import rolesRouter from "./api/routes/rolesRoute";
+import deleteUserRouter from "./api/auth/deleteUser";
 
 const cors = require("cors");
 const app = express();
@@ -41,7 +42,8 @@ app.use("/ap1/v1/tokens", refreshTokenRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/users", userUpdateProfileRouter);
 app.use("/api/v1/roles", rolesRouter);
+app.use("/api/v1/users", deleteUserRouter);
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 });
