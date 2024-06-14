@@ -15,7 +15,11 @@ router.put(
   organizationController.updateOrganization
 );
 
-router.get("/organizations/:id", organizationController.getOrganizationById);
+router.get(
+  "/organization",
+  authenticateToken,
+  organizationController.getOrganizationById
+);
 
 router.get("/organizations", organizationController.getAllOrganizations);
 

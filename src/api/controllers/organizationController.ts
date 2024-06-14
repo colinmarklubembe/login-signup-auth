@@ -4,7 +4,7 @@ import organizationService from "../services/organizationService";
 import { generateToken } from "../../utils/generateToken";
 
 interface AuthenticatedRequest extends Request {
-  user?: { email: string };
+  user?: { email: string; organizationId: string };
 }
 
 const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
@@ -144,13 +144,16 @@ const updateOrganization = async (req: Request, res: Response) => {
 };
 
 //read by organization by id
-const getOrganizationById = async (req: Request, res: Response) => {
+const getOrganizationById = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
   try {
-    const { id } = req.params;
+    const { organizationId } = req.user!;
 
     const organization = await prisma.organization.findUnique({
       where: {
-        id,
+        organizationId,
       },
     });
 
@@ -345,7 +348,7 @@ const getUserOrganizations = async (
           },
         });
 
-        return organization?.name;
+        return organization;
       })
     );
 

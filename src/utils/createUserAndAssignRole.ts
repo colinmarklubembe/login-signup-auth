@@ -149,7 +149,7 @@ const createInvitedUser = async (
       },
     });
 
-    // add userDepartment
+    // add user to Department
     const userDepartment = await prisma.userDepartment.create({
       data: {
         userId: user.id,

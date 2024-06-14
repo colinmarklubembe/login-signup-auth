@@ -61,6 +61,14 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
       organizationId,
       res
     );
+
+    // Add the user to the department
+    await prisma.userDepartment.create({
+      data: {
+        userId: user.id,
+        departmentId: newDepartment.id,
+      },
+    });
     res.status(201).json({ message: "Department created", newDepartment });
   } catch (error) {
     console.error("Error creating department:", error);
@@ -136,7 +144,14 @@ const getDepartmentById = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Department does not exist" });
     }
 
-    res.status(200).json(department);
+    // get users in the department
+    const users = await prisma.userDepartment.findMany({
+      where: {
+        departmentId: id,
+      },
+    });
+
+    res.status(200).json({ department, users });
   } catch (error) {
     console.error("Error getting department:", error);
     res.status(500).send("Error getting department");
