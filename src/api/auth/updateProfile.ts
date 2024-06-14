@@ -56,3 +56,5 @@ router.put("/update-profile", async (req: Request, res: Response) => {
     res.status(500).send("Error updating user");
   }
 });
+
+export default router;
