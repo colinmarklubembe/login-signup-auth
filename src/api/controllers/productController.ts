@@ -4,17 +4,16 @@ import prisma from "../../prisma/client";
 
 const createProduct = async (req: Request, res: Response) => {
   try {
-    const { name, unitPrice, description, quantity } = req.body;
+    const { name, unitPrice, description } = req.body;
 
-    if (!name || !unitPrice || !description || !quantity) {
+    if (!name || !unitPrice || !description) {
       return res.status(400).send("All fields are required");
     }
 
     const newProduct = await productService.createProduct(
       name,
       unitPrice,
-      description,
-      quantity
+      description
     );
     console.log("Product created successfully");
     res.status(201).json({ message: "Product:", newProduct });
@@ -27,7 +26,7 @@ const createProduct = async (req: Request, res: Response) => {
 const updateProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, unitPrice, description, quantity } = req.body;
+    const { name, unitPrice, description } = req.body;
 
     // check if the product exists in the database
     const product = await prisma.product.findUnique({
@@ -40,7 +39,7 @@ const updateProduct = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Product does not exist" });
     }
 
-    if (!name || !unitPrice || !description || !quantity) {
+    if (!name || !unitPrice || !description) {
       return res
         .status(400)
         .send("All fields are required for updating a product");
@@ -50,8 +49,7 @@ const updateProduct = async (req: Request, res: Response) => {
       id,
       name,
       unitPrice,
-      description,
-      quantity
+      description
     );
     console.log("Product updated successfully");
     res.status(200).json({ message: "Updated Product:", updatedProduct });
@@ -84,4 +82,23 @@ const getAllProducts = async (req: Request, res: Response) => {
   }
 };
 
-export default { createProduct, updateProduct, getProductById, getAllProducts };
+const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const product = productService.deleteProduct(id, res);
+
+    res.status(200).json({ message: "Deleted Product:", product });
+  } catch (error) {
+    console.error("Error deleting product", error);
+    res.status(500).send("Error deleting product");
+  }
+};
+
+export default {
+  createProduct,
+  updateProduct,
+  getProductById,
+  getAllProducts,
+  deleteProduct,
+};
