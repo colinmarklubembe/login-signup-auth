@@ -1,14 +1,18 @@
-import { UserType, LeadStatus } from "@prisma/client";
+import { UserType, LeadStatus, BusinessType } from "@prisma/client";
 
 export enum UserType {
-  OWNER = "owner",
-  ADMIN = "admin",
-  USER = "user",
+  OWNER,
+  ADMIN,
+  USER,
 }
 
 export enum LeadStatus {
-  NEW = "new",
-  CONTACTED = "contacted",
-  IN_PROGRESS = "in_progress",
-  CLOSED = "closed",
+  LEAD,
+  PROSPECT,
+  CUSTOMER,
+}
+
+export enum BusinessType {
+  INDIVIDUAL,
+  BUSINESS,
 }

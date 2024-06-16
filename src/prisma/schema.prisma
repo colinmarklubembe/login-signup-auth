@@ -81,6 +81,21 @@ model Tasks {
   updatedAt               DateTime? 
 }
 
+model Contact {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  fullName    String
+  contactEmail       String      @unique
+  phoneNumber String
+  title       String
+  leadStatus  LeadStatus  @default(LEAD)
+  location    String?
+  businessType BusinessType
+  description String?
+  addedByUserId String      
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
 model RolePermission {
   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
   roleId                  String                     @db.ObjectId
@@ -123,9 +138,13 @@ enum UserType {
 }
 
 enum LeadStatus {
-  NEW
-  CONTACTED
-  QUALIFIED
-  LOST
-  WON
+  LEAD
+  PROSPECT
+  CLOSED
 }
+
+enum BusinessType {
+  INDIVIDUAL
+  BUSINESS
+}
+
