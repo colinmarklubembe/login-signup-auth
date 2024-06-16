@@ -76,7 +76,18 @@ const getDepartmentById = async (id: string, res: Response) => {
 const getDepartmentsByOrganization = async (
   organizationId: string,
   res: Response
-) => {};
+) => {
+  try {
+    return prisma.department.findMany({
+      where: {
+        organizationId,
+      },
+    });
+  } catch (error) {
+    console.error("Error getting departments:", error);
+    res.status(500).send("Error getting departments");
+  }
+};
 
 export default {
   createDepartment,
@@ -84,4 +95,5 @@ export default {
   deleteDepartment,
   getAllDepartments,
   getDepartmentById,
+  getDepartmentsByOrganization,
 };

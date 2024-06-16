@@ -6,7 +6,6 @@ interface AuthenticatedRequest extends Request {
   user?: { email: string; organizationId: string };
 }
 
-// Create department
 const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name, description } = req.body;
@@ -189,14 +188,15 @@ const getDepartmentsByOrganization = async (
       return res.status(404).json({ error: "Organization does not exist" });
     }
 
-    const departments = await prisma.department.findMany({
-      where: {
-        organizationId,
-      },
-    });
+    const departments = await departmentService.getDepartmentsByOrganization(
+      organizationId,
+      res
+    );
 
     if (!departments) {
-      return res.status(404).json({ error: "Departments do not exist" });
+      return res
+        .status(404)
+        .json({ error: "Departments do not exist in this organization" });
     }
 
     console.log(
