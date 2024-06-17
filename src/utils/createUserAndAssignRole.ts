@@ -120,6 +120,11 @@ const createInvitedUser = async (
         .json({ error: "Department does not belong to the organization" });
     }
 
+    // get the name of the organization with the id of organizationId
+    const organization = await prisma.organization.findFirst({
+      where: { id: organizationId },
+    });
+
     // Create the user along with user roles in a single transaction
     const user = await prisma.user.create({
       data: {
@@ -161,6 +166,8 @@ const createInvitedUser = async (
       email: user.email,
       name: user.name,
       password: defaultPassword,
+      department: department.name,
+      organization: organization?.name,
     };
 
     const generateEmailToken = jwt.sign(

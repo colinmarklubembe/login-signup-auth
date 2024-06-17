@@ -135,6 +135,8 @@ const sendInviteEmail = async (generateEmailToken: string, res: Response) => {
     email: string;
     name: string;
     password: string;
+    department: string;
+    organization: string;
   };
 
   try {
@@ -147,7 +149,7 @@ const sendInviteEmail = async (generateEmailToken: string, res: Response) => {
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <h1 style="color: #333;">Invitation to Join NOVA CRM</h1>
           <p>Hello ${decoded.name},</p>
-          <p>You have been invited to join NOVA CRM. We're excited to have you on board.</p>
+          <p>You have been invited to join NOVA CRM under the organization <strong>${decoded.organization}</strong> belonging to the department <strong>${decoded.department}</strong>. We're excited to have you on board.</p>
           <p>Your default password for the first login is: <strong>${decoded.password}</strong></p>
           <p>You will login using the current email to which this invite was sent.</p>
           <p>Please click the button below to accept the invitation and get started:</p>
