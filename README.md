@@ -35,13 +35,12 @@ This endpoint allows users to sign up for a new account.
 
 **Response:**
 
-````json
+```json
 {
   "userId": "string",
   "token": "string"
 }
-
-
+```
 
 ### 2. Auth Login
 
@@ -50,16 +49,19 @@ This endpoint allows users to sign up for a new account.
 This endpoint allows users to log in and obtain an authentication token.
 
 **Request Body Parameters:**
+
 - `email` (string): The email address of the user.
 - `password` (string): The password of the user.
 
 **Response:**
+
 ```json
 {
   "message": "string",
   "success": true,
   "token": "string"
 }
+```
 
 ### 3. Invite User
 
@@ -68,6 +70,7 @@ This endpoint allows users to log in and obtain an authentication token.
 This endpoint allows you to invite a user.
 
 **Request Body Parameters:**
+
 - `name` (string, required): The name of the user to be invited.
 - `email` (string, required): The email address of the user to be invited.
 - `userType` (string, required): The type of user to be invited.
@@ -75,6 +78,7 @@ This endpoint allows you to invite a user.
 - `departmentName` (string, required): The name of the department to which the user belongs.
 
 **Response (200 - OK):**
+
 ```json
 {
   "message": "string",
@@ -111,7 +115,7 @@ This endpoint allows you to invite a user.
     "departmentId": "string"
   }
 }
-
+```
 
 ### 4. Forgot Password Request
 
@@ -120,15 +124,17 @@ This endpoint allows you to invite a user.
 This endpoint is used to initiate the process of resetting a user's password.
 
 **Request Body Parameters:**
+
 - `email` (string, required): The email address of the user for whom the password reset is requested.
 
 **Response:**
+
 ```json
 {
   "message": "string",
   "success": true
 }
-
+```
 
 ### 5. Change User Password
 
@@ -137,13 +143,16 @@ This endpoint is used to initiate the process of resetting a user's password.
 This endpoint allows the user to change their password.
 
 **Request Headers:**
+
 - `Content-Type: application/json`
 
 **Request Body Parameters:**
+
 - `oldPassword` (string, required): The user's current password.
 - `newPassword` (string, required): The new password.
 
 **Response:**
+
 ```json
 {
   "type": "object",
@@ -153,6 +162,7 @@ This endpoint allows the user to change their password.
     }
   }
 }
+```
 
 ### 6. Update User Password
 
@@ -161,13 +171,16 @@ This endpoint allows the user to change their password.
 This endpoint is used to reset the password for a specific user.
 
 **Request Body Parameters:**
+
 - `newPassword` (string, required): The new password for the user.
 
 **Response:**
+
 ```json
 {
   // Schema representing the structure of the response data
 }
+```
 
 ### 7. Delete User
 
@@ -176,17 +189,18 @@ This endpoint is used to reset the password for a specific user.
 This endpoint sends an HTTP DELETE request to delete a specific user identified by their unique ID.
 
 **Request:**
+
 - Method: DELETE
 - Endpoint: `{{localURL}}/api/v1/users/delete-user/:id`
 - No request body parameters are required for this endpoint.
 
 **Response:**
+
 ```json
 {
   // Schema describing the structure of the response body
 }
-
-
+```
 
 ## B. ORGANIZATION
 
@@ -197,9 +211,11 @@ This endpoint sends an HTTP DELETE request to delete a specific user identified 
 This endpoint allows you to create a new organization.
 
 **Request Body Parameters:**
+
 - `name` (string, required): The name of the organization.
 
 **Response (Status: 201 - Created):**
+
 ```json
 {
   "message": "string",
@@ -212,7 +228,7 @@ This endpoint allows you to create a new organization.
     "updatedAt": "string"
   }
 }
-
+```
 
 ### 2. Update Organization
 
@@ -221,17 +237,19 @@ This endpoint allows you to create a new organization.
 This endpoint allows updating an organization with the specified ID.
 
 **Request:**
+
 - Method: PUT
 - URL: `{{baseURL}}/api/v1/organizations/update-organization/:id`
 - Headers:
   - Content-Type: application/json
 
 **Request Body Parameters:**
+
 ```json
 {
   "name": "string"
 }
-
+```
 
 ### 3. Select Organization
 
@@ -240,9 +258,11 @@ This endpoint allows updating an organization with the specified ID.
 This endpoint allows the user to select an organization by providing the organization name.
 
 **Request Body Parameters:**
+
 - `organizationName` (string, required): The name of the organization to be selected.
 
 **Response:**
+
 ```json
 {
   "status": "string",
@@ -252,7 +272,7 @@ This endpoint allows the user to select an organization by providing the organiz
     "organizationName": "string"
   }
 }
-
+```
 
 ### 4. Retrieve Organization Details
 
@@ -261,10 +281,12 @@ This endpoint allows the user to select an organization by providing the organiz
 This endpoint retrieves the details of a specific organization.
 
 **Request:**
+
 - Method: GET
 - Endpoint: `{{baseURL}}/api/v1/organizations/organization`
 
 **Response:**
+
 ```json
 {
   "organizationId": "string",
@@ -275,7 +297,7 @@ This endpoint retrieves the details of a specific organization.
     "phone": "string"
   }
 }
-
+```
 
 ## C. DEPARTMENTS
 
@@ -286,62 +308,32 @@ This endpoint retrieves the details of a specific organization.
 This endpoint retrieves the list of departments associated with a specific organization.
 
 **Request:**
+
 - Method: GET
 - URL: `{{baseURL}}/api/v1/departments/get-departments-by-organization`
 - Headers:
   - Content-Type: application/json
 
 **Request Body Parameters (Optional):**
+
 - `name` (string, optional): The name of the department.
 
 **Response:**
+
 ```json
 [
   {
     "departmentId": "string",
-    "name": "string",
+    "name": "string"
     // Include any other relevant information here
   },
   {
     "departmentId": "string",
-    "name": "string",
+    "name": "string"
     // Include any other relevant information here
   }
 ]
-
-
-2. Get Department Details
-This endpoint retrieves the details of a specific department.
-Request
-Method: GET
-URL: {{baseURL}}/api/v1/departments/get-department/:id
-
-Response
-The response for this request will be a JSON object representing the details of the department. Below is a JSON schema representing the structure of the response:
-
-{
-  "type": "object",
-  "properties": {
-    "departmentId": {
-      "type": "string"
-    },
-    "name": {
-      "type": "string"
-    },
-    "manager": {
-      "type": "string"
-    },
-    "location": {
-      "type": "string"
-    },
-    "employees": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    }
-  }
-}
+```
 
 ### 2. Get Department Details
 
@@ -350,18 +342,18 @@ The response for this request will be a JSON object representing the details of 
 This endpoint retrieves the details of a specific department.
 
 **Request:**
+
 - Method: GET
 - URL: `{{baseURL}}/api/v1/departments/get-department/:id`
 
 **Response:**
+
 ```json
 {
   "departmentId": "string",
   "name": "string",
   "manager": "string",
   "location": "string",
-  "employees": [
-    "string"
-  ]
+  "employees": ["string"]
 }
-````
+```
