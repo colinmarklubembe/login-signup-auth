@@ -177,9 +177,7 @@ This endpoint is used to reset the password for a specific user.
 **Response:**
 
 ```json
-{
-  // Schema representing the structure of the response data
-}
+{}
 ```
 
 ### 7. Delete User
@@ -197,9 +195,7 @@ This endpoint sends an HTTP DELETE request to delete a specific user identified 
 **Response:**
 
 ```json
-{
-  // Schema describing the structure of the response body
-}
+{}
 ```
 
 ## B. ORGANIZATION
@@ -325,12 +321,10 @@ This endpoint retrieves the list of departments associated with a specific organ
   {
     "departmentId": "string",
     "name": "string"
-    // Include any other relevant information here
   },
   {
     "departmentId": "string",
     "name": "string"
-    // Include any other relevant information here
   }
 ]
 ```
