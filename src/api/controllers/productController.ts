@@ -2,9 +2,14 @@ import { Request, Response } from "express";
 import productService from "../services/productService";
 import prisma from "../../prisma/client";
 
-const createProduct = async (req: Request, res: Response) => {
+interface AuthenticatedRequest extends Request {
+  user?: { email: string; organizationId: string };
+}
+
+const createProduct = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name, unitPrice, description } = req.body;
+    const { organizationId } = req.user!;
 
     if (!name || !unitPrice || !description) {
       return res.status(400).send("All fields are required");
@@ -13,7 +18,8 @@ const createProduct = async (req: Request, res: Response) => {
     const newProduct = await productService.createProduct(
       name,
       unitPrice,
-      description
+      description,
+      organizationId
     );
     console.log("Product created successfully");
     res.status(201).json({ message: "Product:", newProduct });
@@ -95,10 +101,49 @@ const deleteProduct = async (req: Request, res: Response) => {
   }
 };
 
+const getProductsByOrganizationId = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { organizationId } = req.user!;
+    const { id } = req.params;
+
+    // check if the organization exists in the database
+    const organization = await prisma.organization.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!organization) {
+      return res.status(404).json({ error: "Organization does not exist" });
+    }
+
+    // match the id in the token with the organization id in the params
+    if (organizationId !== id) {
+      return res
+        .status(403)
+        .json({ error: "You are not authorized to view this organization's products" });
+    }
+
+    const products = await productService.getProductsByOrganizationId(
+      organizationId,
+      res
+    );
+
+    res.status(200).json({ message: "Products:", products });
+  } catch (error) {
+    console.error("Error getting products", error);
+    res.status(500).send("Error getting products");
+  }
+};
+
 export default {
   createProduct,
   updateProduct,
   getProductById,
   getAllProducts,
   deleteProduct,
+  getProductsByOrganizationId,
 };

@@ -4,13 +4,19 @@ import { Response } from "express";
 const createProduct = async (
   name: string,
   unitPrice: number,
-  description: string
+  description: string,
+  organizationId: string
 ) => {
   return prisma.product.create({
     data: {
       name,
       unitPrice,
       description,
+      organization: {
+        connect: {
+          id: organizationId,
+        },
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
@@ -74,10 +80,25 @@ const deleteProduct = async (id: string, res: Response) => {
   return product;
 };
 
+const getProductsByOrganizationId = async (organizationId: string, res: Response) => {
+  const products = await prisma.product.findMany({
+    where: {
+      organizationId,
+    },
+  });
+
+  if (products.length === 0) {
+    return res.status(404).json({ error: "No products found for this organization" });
+  }
+
+  return products;
+};
+
 export default {
   createProduct,
   updateProduct,
   getProductById,
   getAllProducts,
   deleteProduct,
+  getProductsByOrganizationId,
 };

@@ -27,6 +27,7 @@ model Organization {
   name                    String         
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
   departments             Department[]               @relation("OrganizationDepartments")
+  products                Product[]                  @relation("OrganizationProducts")
   createdAt               DateTime? 
   updatedAt               DateTime? 
 }
@@ -62,6 +63,8 @@ model Product {
   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
   name                    String
   description             String?
+  organizationId          String                     @db.ObjectId
+  organization            Organization               @relation("OrganizationProducts", fields: [organizationId], references: [id])
   unitPrice               Int
   quantity                Int
   createdAt               DateTime? 
