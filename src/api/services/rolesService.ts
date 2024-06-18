@@ -1,12 +1,10 @@
-import { Response } from "express";
 import prisma from "../../prisma/client";
 
-const getRoles = (res: Response) => {
+const getRoles = () => {
   try {
     return prisma.role.findMany();
-  } catch (error) {
-    console.error("Error fetching roles", error);
-    res.status(500).send("Error fetching roles");
+  } catch (error: any) {
+    throw { status: error.status || 500, message: error.message };
   }
 };
 

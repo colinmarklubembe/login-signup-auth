@@ -27,7 +27,7 @@ model Organization {
   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
   name                    String
   description             String?
-  address                 String
+  address                 Address
   phoneNumber             String
   organizationEmail       String                     @unique      
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
@@ -137,6 +137,15 @@ model UserDepartment {
   department              Department                 @relation("UserDepartments", fields: [departmentId], references: [id])
 
   @@unique([userId, departmentId])
+}
+
+type Address {
+  addressLine1            String
+  addressLine2            String?
+  city                    String
+  region                  String
+  postalCode              String?
+  country                 String
 }
 
 enum UserType {

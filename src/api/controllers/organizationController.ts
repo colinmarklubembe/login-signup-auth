@@ -7,10 +7,18 @@ interface AuthenticatedRequest extends Request {
 
 const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, description, address, phoneNumber, organizationEmail } =
+      req.body;
     const { email } = req.user!;
 
-    const response = await organizationService.createOrganization(name, email);
+    const response = await organizationService.createOrganization(
+      name,
+      description,
+      address,
+      phoneNumber,
+      organizationEmail,
+      email
+    );
 
     // Set the token in the Authorization header
     res.setHeader("Authorization", `Bearer ${response.newToken}`);

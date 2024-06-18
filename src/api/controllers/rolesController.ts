@@ -3,7 +3,7 @@ import rolesService from "../services/rolesService";
 
 const getRoles = async (req: Request, res: Response) => {
   try {
-    const roles = await rolesService.getRoles(res);
+    const roles = await rolesService.getRoles();
     res.status(200).json({ Roles: roles });
   } catch (error: any) {
     console.error("Error getting roles", error);

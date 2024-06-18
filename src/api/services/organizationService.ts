@@ -1,7 +1,14 @@
 import prisma from "../../prisma/client";
 import { generateToken } from "../../utils/generateToken";
 
-const createOrganization = async (name: string, email: string) => {
+const createOrganization = async (
+  name: string,
+  description: string,
+  address: string,
+  phoneNumber: string,
+  organizationEmail: string,
+  email: string
+) => {
   // check if email exists in the database
   const user = await prisma.user.findUnique({
     where: {
@@ -48,6 +55,10 @@ const createOrganization = async (name: string, email: string) => {
   const newOrganization = await prisma.organization.create({
     data: {
       name,
+      description,
+      address,
+      phoneNumber,
+      organizationEmail,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
