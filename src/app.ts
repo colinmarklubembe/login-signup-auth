@@ -1,18 +1,11 @@
 import express from "express";
 import mongoose from "mongoose";
-import forgotPasswordRouter from "./api/auth/forgotPassword";
-import changePasswordRouter from "./api/auth/changePassword";
+import authRouter from "./api/auth/routes/authRoutes";
+import contactRouter from "./api/routes/contactRoutes";
 import organizationRouter from "./api/routes/organizationRoutes";
 import departmentRouter from "./api/routes/departmentRoutes";
-import loginRouter from "./api/auth/login";
-import ownerSignupRouter from "./api/auth/owner/signup";
-import verifyUserRouter from "./api/auth/verifyUser";
-import inviteUserRouter from "./api/auth/owner/inviteUsers";
 import productRouter from "./api/routes/productRoutes";
-import userUpdateProfileRouter from "./api/auth/updateProfile";
 import rolesRouter from "./api/routes/rolesRoute";
-import deleteUserRouter from "./api/auth/deleteUser";
-import contactRouter from "./api/routes/contactRoutes";
 
 const cors = require("cors");
 const app = express();
@@ -30,19 +23,8 @@ mongoose
 
 app.use(express.json());
 
-app.use("/api/v1/auth", ownerSignupRouter);
-app.use("/api/v1/auth", verifyUserRouter);
-app.use("/api/v1/users", forgotPasswordRouter);
-app.use("/api/v1/users", changePasswordRouter);
-app.use("/api/v1/auth", loginRouter);
-app.use("/api/v1/organizations", organizationRouter);
-app.use("/api/v1/users", inviteUserRouter);
-app.use("/api/v1/departments", departmentRouter);
-app.use("/api/v1/products", productRouter);
-app.use("/api/v1/users", userUpdateProfileRouter);
-app.use("/api/v1/roles", rolesRouter);
-app.use("/api/v1/users", deleteUserRouter);
-app.use("/api/v1/contacts", contactRouter);
+// v2
+app.use("/api/v2/auth", authRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

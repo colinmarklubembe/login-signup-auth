@@ -1,63 +1,59 @@
+import { validatePasswordStrength } from "./checkPasswordStrength";
 import { Resend } from "resend";
-import { Response } from "express";
 import jwt from "jsonwebtoken";
 require("dotenv").config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const sendVerificationEmail = async (
-  generateEmailToken: any,
-  res: Response
-) => {
+const sendVerificationEmail = async (generateEmailToken: any) => {
   const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
     email: string;
     name: string;
     token: string;
   };
-  try {
-    await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: decoded.email,
-      subject: "Account Verification",
-      html: `
-          <h1>Welcome to NOVA CRM!</h1>
-          <p>Thank you for signing up, ${decoded.name}. We're excited to have you on board.</p>
-          <p>To get started, please verify your email address by clicking the button below:</p>
-          <div style="text-align: center;">
-            <a href="http://localhost:4000/api/v1/auth/verify?token=${decoded.token}" 
-               style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: blue; text-decoration: none; border-radius: 5px;">
-               Verify Your Account
-            </a>
-          </div>
-          <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
-          <p>http://localhost:4000/api/v1/auth/verify?token=${decoded.token}</p>
-          <p>Best regards,<br>The Team</p>
-        `,
-    });
 
-    res.status(201).send({
-      message: "Account created successfully, please verify your email.",
-    });
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return res.status(500).json({ error: "Failed to send verification email" });
+  const verificationResponse = await resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: decoded.email,
+    subject: "Account Verification",
+    html: `
+        <h1>Welcome to NOVA CRM!</h1>
+        <p>Thank you for signing up, ${decoded.name}. We're excited to have you on board.</p>
+        <p>To get started, please verify your email address by clicking the button below:</p>
+        <div style="text-align: center;">
+          <a href="http://localhost:4000/api/v2/auth/verify?token=${decoded.token}" 
+             style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: blue; text-decoration: none; border-radius: 5px;">
+             Verify Your Account
+          </a>
+        </div>
+        <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
+        <p>http://localhost:4000/api/v2/auth/verify?token=${decoded.token}</p>
+        <p>Best regards,<br>The Team</p>
+      `,
+  });
+
+  // check if the email was sent successfully
+  if (!verificationResponse.data) {
+    console.log(verificationResponse.error);
+    return { status: 400 };
+  } else {
+    console.log(verificationResponse.data);
+    return {
+      status: 200,
+    };
   }
 };
 
-const sendUpdatedProfileEmail = async (
-  generateEmailToken: string,
-  res: Response
-) => {
+const sendUpdatedProfileEmail = async (generateEmailToken: string) => {
   const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
     email: string;
     name: string;
   };
-  try {
-    await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: decoded.email,
-      subject: "Your Profile Has Been Updated",
-      html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
+  const updatedResponse = await resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: decoded.email,
+    subject: "Your Profile Has Been Updated",
+    html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <h2>Profile Update Notification</h2>
           <p>Dear ${decoded.name},</p>
           <p>We wanted to let you know that your profile has been successfully updated. Here are the details:</p>
@@ -74,30 +70,30 @@ const sendUpdatedProfileEmail = async (
           <hr>
           <p style="font-size: 0.9em;">If you have any questions, feel free to reach out to our support team at <a href="#">$----------</a>.</p>
         </div>`,
-    });
-  } catch (error) {
-    console.error("Error sending update profile email:", error);
-    return res
-      .status(500)
-      .json({ error: "Failed to send update profile email" });
+  });
+  // check if the email was sent successfully
+  if (!updatedResponse.data) {
+    console.log(updatedResponse.error);
+    return { status: 400 };
+  } else {
+    console.log(updatedResponse.data);
+    return {
+      status: 200,
+    };
   }
 };
 
-const sendForgotPasswordEmail = async (
-  generateEmailToken: any,
-  res: Response
-) => {
+const sendForgotPasswordEmail = async (generateEmailToken: any) => {
   const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
     id: string;
     email: string;
     name: string;
   };
-  try {
-    await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: decoded.email,
-      subject: "Reset Your Password",
-      html: `
+  const forgotPasswordResponse = await resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: decoded.email,
+    subject: "Reset Your Password",
+    html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h1 style="color: #333;">Password Reset Request</h1>
         <p>Hello ${decoded.name},</p>
@@ -119,18 +115,22 @@ const sendForgotPasswordEmail = async (
       </div>
     `,
 
-      // make a call to the backend to reset the user's password(http://localhost:4000/auth/api/reset-password/:id)
-    });
-    res
-      .status(200)
-      .json({ message: "Email sent successfully", token: generateEmailToken });
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return res.status(400).json(error);
+    // make a call to the backend to reset the user's password(http://localhost:4000/auth/api/reset-password/:id)
+  });
+
+  // check if the email was sent successfully
+  if (!forgotPasswordResponse.data) {
+    console.log(forgotPasswordResponse.error);
+    return { status: 400 };
+  } else {
+    console.log(forgotPasswordResponse.data);
+    return {
+      status: 200,
+    };
   }
 };
 
-const sendInviteEmail = async (generateEmailToken: string, res: Response) => {
+const sendInviteEmail = async (generateEmailToken: string) => {
   const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
     email: string;
     name: string;
@@ -138,14 +138,12 @@ const sendInviteEmail = async (generateEmailToken: string, res: Response) => {
     department: string;
     organization: string;
   };
-
-  try {
-    // Send the invitation email
-    await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: decoded.email,
-      subject: "You're Invited to Join NOVA CRM",
-      html: `
+  // Send the invitation email
+  const inviteResponse = await resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: decoded.email,
+    subject: "You're Invited to Join NOVA CRM",
+    html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <h1 style="color: #333;">Invitation to Join NOVA CRM</h1>
           <p>Hello ${decoded.name},</p>
@@ -169,11 +167,18 @@ const sendInviteEmail = async (generateEmailToken: string, res: Response) => {
         </div>
       `,
 
-      // make a call to the backend login api (http://localhost:4000/api/v1/users/login)
-    });
-  } catch (error) {
-    console.error("Error sending invitation email:", error);
-    return res.status(500).json({ error: "Failed to send invitation email" });
+    // make a call to the backend login api (http://localhost:4000/api/v1/users/login)
+  });
+
+  // check if the email was sent successfully
+  if (!inviteResponse.data) {
+    console.log(inviteResponse.error);
+    return { status: 400 };
+  } else {
+    console.log(inviteResponse.data);
+    return {
+      status: 200,
+    };
   }
 };
 

@@ -18,13 +18,18 @@ model User {
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
   userType                UserType                   @default(USER)
   userDepartments         UserDepartment[]           @relation("UserDepartments")
+  isActivated             Boolean                    @default(false)
   createdAt               DateTime?        
   updatedAt               DateTime?       
 }
 
 model Organization {
   id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String         
+  name                    String
+  description             String?
+  address                 String
+  phoneNumber             String
+  organizationEmail       String                     @unique      
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
   departments             Department[]               @relation("OrganizationDepartments")
   products                Product[]                  @relation("OrganizationProducts")

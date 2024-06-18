@@ -5,9 +5,9 @@ const getRoles = async (req: Request, res: Response) => {
   try {
     const roles = await rolesService.getRoles(res);
     res.status(200).json({ Roles: roles });
-  } catch (error) {
-    console.error("Error fetching roles", error);
-    res.status(500).send("Error fetching roles");
+  } catch (error: any) {
+    console.error("Error getting roles", error);
+    res.status(error.status || 500).json({ message: error.message });
   }
 };
 

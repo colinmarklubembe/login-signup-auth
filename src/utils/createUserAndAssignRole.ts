@@ -65,7 +65,7 @@ const createUserAndAssignRole = async (
       process.env.JWT_SECRET!
     );
     // Send verification email
-    sendEmails.sendVerificationEmail(generateEmailToken, res);
+    sendEmails.sendVerificationEmail(generateEmailToken);
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -175,7 +175,7 @@ const createInvitedUser = async (
       process.env.JWT_SECRET!
     );
     // Send invitation email
-    sendEmails.sendInviteEmail(generateEmailToken, res);
+    sendEmails.sendInviteEmail(generateEmailToken);
 
     // return the created user in the json response
     res.status(200).json({

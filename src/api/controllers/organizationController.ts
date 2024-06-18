@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../../prisma/client";
 import organizationService from "../services/organizationService";
-import { generateToken } from "../../utils/generateToken";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string; organizationId: string };
@@ -12,115 +10,22 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
     const { name } = req.body;
     const { email } = req.user!;
 
-    // check if email exists in the database
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-      include: {
-        userOrganizationRoles: {
-          include: {
-            role: true, // Ensure roles are included
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "User does not exist" });
-    }
-
-    // check if the user type is an owner
-    if (user.userType !== "OWNER") {
-      return res.status(403).json({
-        error: "You do not have permission to create an organization",
-      });
-    }
-
-    if (!name) {
-      return res.status(400).send("Name is required for creating a workspace");
-    }
-
-    // check if user already has an organization with the same name
-    const organization = await prisma.organization.findFirst({
-      where: {
-        name,
-      },
-    });
-
-    if (organization) {
-      return res.status(400).json({
-        error: "You cannot create another organization with the same name",
-      });
-    }
-
-    const newOrganization = await organizationService.createOrganization(name);
-
-    // fetch the role id of the owner
-    const ownerRole = await prisma.role.findFirst({
-      where: {
-        name: "OWNER",
-      },
-    });
-
-    if (!ownerRole) {
-      return res.status(500).json({ error: "Owner role not found" });
-    }
-
-    // create UserOrganizationRole record
-    await prisma.userOrganizationRole.create({
-      data: {
-        user: { connect: { id: user.id } },
-        organization: { connect: { id: newOrganization.id } },
-        role: { connect: { id: ownerRole.id } },
-      },
-    });
-
-    // get all user organization roles
-    const userOrganizationRoles = await prisma.userOrganizationRole.findMany({
-      where: {
-        userId: user.id,
-      },
-      include: {
-        role: true,
-      },
-    });
-
-    const roles = userOrganizationRoles.map(
-      (userOrganizationRole: any) =>
-        userOrganizationRole.role?.name || "Unknown"
-    );
-
-    // create a new token of the user with the updated organizationId
-    const tokenData = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      userType: user.userType,
-      isVerified: user.isVerified,
-      organizationId: newOrganization.id,
-      organizations: user.userOrganizationRoles.map((userOrgRole: any) => ({
-        organizationId: userOrgRole.organizationId,
-      })),
-      roles,
-      createdAt: new Date().toISOString(), // Store the token creation date
-    };
-
-    // create a new token
-    const newToken = generateToken(tokenData);
+    const response = await organizationService.createOrganization(name, email);
 
     // Set the token in the Authorization header
-    res.setHeader("Authorization", `Bearer ${newToken}`);
+    res.setHeader("Authorization", `Bearer ${response.newToken}`);
 
     res.status(201).json({
       message: "Organization created successfully",
       success: true,
-      token: newToken,
-      organization: newOrganization,
+      token: response.newToken,
+      organization: response.newOrganization,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating organization", error);
-    res.status(500).send("Error creating organization");
+    res
+      .status(error.status || 500)
+      .json({ message: error.message || "Error creating organization" });
   }
 };
 
@@ -130,29 +35,16 @@ const updateOrganization = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name } = req.body;
 
-    // check if the organization exists in the database
-    const organization = await prisma.organization.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!organization) {
-      return res.status(404).json({ error: "Organization does not exist" });
-    }
-
-    if (!name) {
-      return res.status(400).send("Name is required for updating a workspace");
-    }
-
     const updatedOrganization = await organizationService.updateOrganization(
       id,
       name
     );
     res.status(200).json(updatedOrganization);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating organization", error);
-    res.status(500).send("Error updating organization");
+    res
+      .status(error.status || 500)
+      .json({ message: error.message || "Error updating organization" });
   }
 };
 
@@ -164,32 +56,34 @@ const getOrganizationById = async (
   try {
     const { organizationId } = req.user!;
 
-    const organization = await prisma.organization.findUnique({
-      where: {
-        organizationId,
-      },
-    });
+    const organization = await organizationService.getOrganizationById(
+      organizationId
+    );
 
     if (!organization) {
       return res.status(404).json({ error: "Organization not found" });
     }
 
     res.status(200).json(organization);
-  } catch (error) {
-    console.error("Error fetching organization by ID", error);
-    res.status(500).send("Error fetching organization by ID");
+  } catch (error: any) {
+    console.error("Error fetching organization by id", error);
+    res
+      .status(error.status || 500)
+      .json({ message: error.message || "Error fetching organization by id" });
   }
 };
 
 //read all organizations
 const getAllOrganizations = async (req: Request, res: Response) => {
   try {
-    const organizations = await prisma.organization.findMany();
+    const organizations = organizationService.getAllOrganizations();
 
     res.status(200).json(organizations);
-  } catch (error) {
-    console.error("Error fetching all organizations", error);
-    res.status(500).send("Error fetching all organizations");
+  } catch (error: any) {
+    console.error("Error fetching organizations", error);
+    res
+      .status(error.status || 500)
+      .json({ message: error.message || "Error fetching organizations" });
   }
 };
 
@@ -199,46 +93,16 @@ const deleteOrganization = async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const { email } = req.user!;
 
-    // check if email exists in the database
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const response = await organizationService.deleteOrganization(id, email);
 
-    if (!user) {
-      return res.status(404).json({ error: "User does not exist" });
-    }
-
-    // check if the user type is an owner
-    if (user.userType !== "OWNER") {
-      return res.status(403).json({
-        error: "You do not have permission to delete an organization",
-      });
-    }
-
-    // Check if the organization exists
-    const organization = await prisma.organization.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
-    }
-
-    // Perform deletion
-    await prisma.organization.delete({
-      where: {
-        id,
-      },
-    });
-
-    res.status(200).json({ message: "Organization deleted successfully" });
-  } catch (error) {
+    res
+      .status(200)
+      .json({ message: "Organization deleted successfully", response });
+  } catch (error: any) {
     console.error("Error deleting organization", error);
-    res.status(500).send("Error deleting organization");
+    res
+      .status(error.status || 500)
+      .json({ message: error.message || "Error deleting organization" });
   }
 };
 
@@ -247,82 +111,24 @@ const selectOrganization = async (req: AuthenticatedRequest, res: Response) => {
     const { organizationName } = req.body;
     const { email } = req.user!;
 
-    // Get the organization ID based on organizationName
-    const organization = await prisma.organization.findFirst({
-      where: {
-        name: organizationName,
-      },
-    });
-
-    if (!organization) {
-      return res.status(404).json({ error: "Organization does not exist" });
-    }
-
-    const organizationId = organization.id;
-
-    // check if email exists in the database
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-      include: {
-        userOrganizationRoles: {
-          include: {
-            role: true, // Ensure roles are included
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "User does not exist" });
-    }
-
-    // Check if the user belongs to the selected organization
-    const userOrganization = user.userOrganizationRoles.find(
-      (userOrgRole: any) => userOrgRole.organizationId === organizationId
+    const response = await organizationService.selectOrganization(
+      organizationName,
+      email
     );
-
-    if (!userOrganization) {
-      return res
-        .status(403)
-        .json({ error: "Access denied to the organization" });
-    }
-
-    const roles = user.userOrganizationRoles.map(
-      (userOrganizationRole: any) =>
-        userOrganizationRole.role?.name || "Unknown"
-    );
-
-    // create a new token of the user with the updated organizationId
-    const tokenData = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      userType: user.userType,
-      isVerified: user.isVerified,
-      organizationId: organizationId,
-      organizations: user.userOrganizationRoles.map((userOrgRole: any) => ({
-        organizationId: userOrgRole.organizationId,
-      })),
-      roles,
-      createdAt: new Date().toISOString(), // Store the token creation date
-    };
-
-    // generate new token
-    const newToken = generateToken(tokenData);
 
     // Set the token in the Authorization header
-    res.setHeader("Authorization", `Bearer ${newToken}`);
+    res.setHeader("Authorization", `Bearer ${response.newToken}`);
 
     res.status(201).json({
       message: `Organization ${organizationName} selected successfully`,
       success: true,
-      token: newToken,
+      token: response.newToken,
     });
-  } catch (error) {
-    console.error("Error selecting organization:", error);
-    res.status(500).send("Error selecting organization");
+  } catch (error: any) {
+    console.error("Error selecting organization", error);
+    res
+      .status(error.status || 500)
+      .json({ message: error.message || "Error selecting organization" });
   }
 };
 
@@ -333,42 +139,16 @@ const getUserOrganizations = async (
   try {
     const { email } = req.user!;
 
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-      include: {
-        userOrganizationRoles: true,
-      },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "User does not exist" });
-    }
-
-    const organizations = user.userOrganizationRoles.map(
-      (userOrgRole: any) => ({
-        organizationId: userOrgRole.organizationId,
-      })
+    const userOrganizations = await organizationService.getUserOrganizations(
+      email
     );
 
-    // check the organization table for the organization name matching the organizationId
-    const organizationNames = await Promise.all(
-      organizations.map(async (org: any) => {
-        const organization = await prisma.organization.findUnique({
-          where: {
-            id: org.organizationId,
-          },
-        });
-
-        return organization;
-      })
-    );
-
-    res.status(200).json(organizationNames);
-  } catch (error) {
+    res.status(200).json(userOrganizations);
+  } catch (error: any) {
     console.error("Error fetching user organizations", error);
-    res.status(500).send("Error fetching user organizations");
+    res.status(error.status || 500).json({
+      message: error.message || "Error fetching user organizations",
+    });
   }
 };
 

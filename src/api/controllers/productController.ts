@@ -12,7 +12,10 @@ const createProduct = async (req: AuthenticatedRequest, res: Response) => {
     const { organizationId } = req.user!;
 
     if (!name || !unitPrice || !description) {
-      return res.status(400).send("All fields are required");
+      throw {
+        status: 400,
+        message: "All fields are required for creating a product",
+      };
     }
 
     const newProduct = await productService.createProduct(
@@ -23,9 +26,11 @@ const createProduct = async (req: AuthenticatedRequest, res: Response) => {
     );
     console.log("Product created successfully");
     res.status(201).json({ message: "Product:", newProduct });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating product", error);
-    res.status(500).send("Error creating product");
+    res
+      .status(error.status || 500)
+      .json({ message: error.message || "Internal server Error" });
   }
 };
 
@@ -33,23 +38,6 @@ const updateProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name, unitPrice, description } = req.body;
-
-    // check if the product exists in the database
-    const product = await prisma.product.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!product) {
-      return res.status(404).json({ error: "Product does not exist" });
-    }
-
-    if (!name || !unitPrice || !description) {
-      return res
-        .status(400)
-        .send("All fields are required for updating a product");
-    }
 
     const updatedProduct = await productService.updateProduct(
       id,
@@ -59,9 +47,11 @@ const updateProduct = async (req: Request, res: Response) => {
     );
     console.log("Product updated successfully");
     res.status(200).json({ message: "Updated Product:", updatedProduct });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating product", error);
-    res.status(500).send("Error updating product");
+    res
+      .status(error.status || 500)
+      .json({ message: error.message || "Internal server Error" });
   }
 };
 
@@ -72,9 +62,9 @@ const getProductById = async (req: Request, res: Response) => {
     const product = productService.getProductById(id, res);
 
     res.status(200).json({ message: "Product found:", product });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting product", error);
-    res.status(500).send("Error getting product");
+    res.status(error.status || 500).json({ message: error.message });
   }
 };
 
@@ -82,7 +72,7 @@ const getAllProducts = async (req: Request, res: Response) => {
   try {
     const products = await productService.getAllProducts();
     res.status(200).json({ message: "All Products:", products });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting products", error);
     res.status(500).send("Error getting products");
   }
@@ -95,9 +85,9 @@ const deleteProduct = async (req: Request, res: Response) => {
     const product = productService.deleteProduct(id, res);
 
     res.status(200).json({ message: "Deleted Product:", product });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting product", error);
-    res.status(500).send("Error deleting product");
+    res.status(error.status || 500).json({ message: error.message });
   }
 };
 
@@ -109,33 +99,15 @@ const getProductsByOrganizationId = async (
     const { organizationId } = req.user!;
     const { id } = req.params;
 
-    // check if the organization exists in the database
-    const organization = await prisma.organization.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!organization) {
-      return res.status(404).json({ error: "Organization does not exist" });
-    }
-
-    // match the id in the token with the organization id in the params
-    if (organizationId !== id) {
-      return res
-        .status(403)
-        .json({ error: "You are not authorized to view this organization's products" });
-    }
-
     const products = await productService.getProductsByOrganizationId(
       organizationId,
-      res
+      id
     );
 
     res.status(200).json({ message: "Products:", products });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting products", error);
-    res.status(500).send("Error getting products");
+    res.status(error.status || 500).json({ message: error.message });
   }
 };
 

@@ -29,6 +29,21 @@ const updateProduct = async (
   unitPrice: number,
   description: string
 ) => {
+  // check if the product exists in the database
+  const product = await prisma.product.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!product) {
+    throw { status: 404, message: "Product does not exist" };
+  }
+
+  if (!name || !unitPrice || !description) {
+    throw { status: 400, message: "All fields are required" };
+  }
+
   return prisma.product.update({
     where: {
       id,
@@ -80,7 +95,29 @@ const deleteProduct = async (id: string, res: Response) => {
   return product;
 };
 
-const getProductsByOrganizationId = async (organizationId: string, res: Response) => {
+const getProductsByOrganizationId = async (
+  organizationId: string,
+  id: string
+) => {
+  // check if the organization exists in the database
+  const organization = await prisma.organization.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!organization) {
+    throw { status: 404, message: "Organization does not exist" };
+  }
+
+  // match the id in the token with the organization id in the params
+  if (organizationId !== id) {
+    throw {
+      status: 403,
+      message: "User is not authorized to view products for this organization",
+    };
+  }
+
   const products = await prisma.product.findMany({
     where: {
       organizationId,
@@ -88,7 +125,7 @@ const getProductsByOrganizationId = async (organizationId: string, res: Response
   });
 
   if (products.length === 0) {
-    return res.status(404).json({ error: "No products found for this organization" });
+    throw { status: 404, message: "No products found for this organization" };
   }
 
   return products;

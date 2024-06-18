@@ -11,8 +11,33 @@ const createContact = async (
   location: string,
   businessType: BusinessType,
   description: string,
-  addedByUserId: string
+  email: string
 ) => {
+  if (
+    !fullName ||
+    !contactEmail ||
+    !phoneNumber ||
+    !title ||
+    !location ||
+    !businessType ||
+    !description
+  ) {
+    throw { status: 400, message: "Missing required fields" };
+  }
+
+  // Check if the user exists in the database
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    throw { status: 404, message: "User not found" };
+  }
+
+  const addedByUserId = user.id;
+
   return prisma.contact.create({
     data: {
       fullName,
@@ -29,10 +54,8 @@ const createContact = async (
 };
 
 const getContactById = async (id: string) => {
-  return prisma.contact.findUnique({
-    where: {
-      id,
-    },
+  return await prisma.contact.findUnique({
+    where: { id },
   });
 };
 
@@ -54,7 +77,7 @@ const updateContact = async (
     description?: string;
   }
 ) => {
-  return prisma.contact.update({
+  return await prisma.contact.update({
     where: {
       id,
     },
@@ -63,7 +86,7 @@ const updateContact = async (
 };
 
 const deleteContact = async (id: string) => {
-  return prisma.contact.delete({
+  return await prisma.contact.delete({
     where: {
       id,
     },
