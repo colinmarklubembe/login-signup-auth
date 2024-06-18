@@ -23,8 +23,12 @@ mongoose
 
 app.use(express.json());
 
-// v2
-app.use("/api/v2/auth", authRouter);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/contacts", contactRouter);
+app.use("/api/v1/organizations", organizationRouter);
+app.use("/api/v1/departments", departmentRouter);
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/roles", rolesRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
