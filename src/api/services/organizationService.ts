@@ -35,10 +35,6 @@ const createOrganization = async (
     };
   }
 
-  if (!name) {
-    throw { status: 400, message: "Organization name is required" };
-  }
-
   // check if user already has an organization with the same name
   const organization = await prisma.organization.findFirst({
     where: {
@@ -119,7 +115,14 @@ const createOrganization = async (
   return { newOrganization, newToken };
 };
 
-const updateOrganization = async (id: string, name: string) => {
+const updateOrganization = async (
+  id: string,
+  name: string,
+  description: string,
+  address: string,
+  phoneNumber: string,
+  organizationEmail: string
+) => {
   // check if the organization exists in the database
   const organization = await prisma.organization.findUnique({
     where: {
@@ -140,6 +143,10 @@ const updateOrganization = async (id: string, name: string) => {
     },
     data: {
       name,
+      description,
+      address,
+      phoneNumber,
+      organizationEmail,
       updatedAt: new Date().toISOString(),
     },
   });

@@ -40,10 +40,6 @@ const updateProduct = async (
     throw { status: 404, message: "Product does not exist" };
   }
 
-  if (!name || !unitPrice || !description) {
-    throw { status: 400, message: "All fields are required" };
-  }
-
   return prisma.product.update({
     where: {
       id,

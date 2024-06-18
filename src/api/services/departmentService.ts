@@ -91,7 +91,11 @@ const createDepartment = async (
   }
 };
 
-const updateDepartment = async (id: string, name: string) => {
+const updateDepartment = async (
+  id: string,
+  name: string,
+  description: string
+) => {
   try {
     // Check if the department exists
     const department = await prisma.department.findUnique({
@@ -102,16 +106,13 @@ const updateDepartment = async (id: string, name: string) => {
       throw { status: 404, message: "Department not found" };
     }
 
-    if (!name) {
-      throw { status: 400, message: "Name is required" };
-    }
-
     const updatedDepartment = await prisma.department.update({
       where: {
         id,
       },
       data: {
         name,
+        description,
         updatedAt: new Date().toISOString(),
       },
     });

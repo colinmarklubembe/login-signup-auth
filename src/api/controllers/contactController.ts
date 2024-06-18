@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import prisma from "../../prisma/client";
 import contactService from "../services/contactService";
 
 interface AuthenticatedRequest extends Request {

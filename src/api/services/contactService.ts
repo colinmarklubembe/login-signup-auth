@@ -13,18 +13,6 @@ const createContact = async (
   description: string,
   email: string
 ) => {
-  if (
-    !fullName ||
-    !contactEmail ||
-    !phoneNumber ||
-    !title ||
-    !location ||
-    !businessType ||
-    !description
-  ) {
-    throw { status: 400, message: "Missing required fields" };
-  }
-
   // Check if the user exists in the database
   const user = await prisma.user.findUnique({
     where: {

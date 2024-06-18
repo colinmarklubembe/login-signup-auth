@@ -18,9 +18,6 @@ const verifyUser = async (req: Request, res: Response) => {
 const reverifyUser = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
 
     await verifyUserService.reverifyUser(email);
   } catch (error: any) {

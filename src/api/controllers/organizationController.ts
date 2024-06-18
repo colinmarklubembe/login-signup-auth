@@ -41,11 +41,16 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
 const updateOrganization = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, description, address, phoneNumber, organizationEmail } =
+      req.body;
 
     const updatedOrganization = await organizationService.updateOrganization(
       id,
-      name
+      name,
+      description,
+      address,
+      phoneNumber,
+      organizationEmail
     );
     res.status(200).json(updatedOrganization);
   } catch (error: any) {

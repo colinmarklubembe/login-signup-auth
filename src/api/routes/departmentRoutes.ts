@@ -1,15 +1,21 @@
 import { Router } from "express";
 import departmentController from "../controllers/departmentController";
 import authenticateToken from "../middleware/authenticate";
+import checkMissingFields from "../middleware/checkMissingFields";
 
 const router = Router();
 
 router.post(
   "/create-department",
+  checkMissingFields(["name", "description"]),
   authenticateToken,
   departmentController.createDepartment
 );
-router.put("/update-department/:id", departmentController.updateDepartment);
+router.put(
+  "/update-department/:id",
+  checkMissingFields(["name", "description"]),
+  departmentController.updateDepartment
+);
 
 router.get("/get-departments", departmentController.getAllDepartments);
 

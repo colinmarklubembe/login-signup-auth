@@ -13,10 +13,6 @@ const updateProfile = async (name: string, email: string, id: string) => {
     throw { status: 404, message: "User does not exist" };
   }
 
-  if (!name) {
-    throw { status: 400, message: "Missing required fields" };
-  }
-
   // send update profile email to user
   const emailTokenData = {
     email: user.email,

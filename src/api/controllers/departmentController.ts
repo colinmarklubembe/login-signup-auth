@@ -30,11 +30,12 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
 const updateDepartment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, description } = req.body;
 
     const updatedDepartment = await departmentService.updateDepartment(
       id,
-      name
+      name,
+      description
     );
 
     res.status(200).json(updatedDepartment);

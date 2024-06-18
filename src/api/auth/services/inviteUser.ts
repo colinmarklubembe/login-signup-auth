@@ -14,16 +14,6 @@ const inviteUser = async (
   departmentName: string,
   organizationId: string
 ) => {
-  if (
-    !name ||
-    !email ||
-    !userType ||
-    !userOrganizationRoles ||
-    !departmentName
-  ) {
-    throw { status: 400, message: "Missing required fields" };
-  }
-
   let mappedUserType: UserType;
   try {
     mappedUserType = mapStringToUserType(userType);

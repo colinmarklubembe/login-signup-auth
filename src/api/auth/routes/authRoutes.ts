@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { limiter } from "../../../utils/limiter";
+import { limiter } from "../middleware/limiter";
 import signupController from "../controllers/signup";
 import verifyUserController from "../controllers/verifyUser";
 import loginController from "../controllers/login";
@@ -9,28 +9,67 @@ import forgotPasswordController from "../controllers/forgotPassword";
 import inviteUserController from "../controllers/inviteUser";
 import updateProfileController from "../controllers/updateProfile";
 import authenticateToken from "../../middleware/authenticate";
+import checkMissingFields from "../middleware/checkMissingFields";
 
 const router = Router();
 
-router.post("/signup", signupController.ownerSignup);
+router.post(
+  "/signup",
+  checkMissingFields(["name", "email", "password"]),
+  signupController.ownerSignup
+);
 
 router.get("/verify", verifyUserController.verifyUser);
 
-router.post("/login", limiter, loginController.login);
+router.post(
+  "/reverify",
+  checkMissingFields(["email"]),
+  verifyUserController.reverifyUser
+);
 
-router.put("/change-password/:id", changePasswordController.changePassword);
+router.post(
+  "/login",
+  limiter,
+  checkMissingFields(["email", "password"]),
+  loginController.login
+);
 
-router.put("/reset-password/:id", changePasswordController.resetPassword);
+router.put(
+  "/change-password/:id",
+  checkMissingFields(["oldPassword", "newPassword"]),
+  changePasswordController.changePassword
+);
 
-router.post("/forgot-password", forgotPasswordController.forgotPassword);
+router.put(
+  "/reset-password/:id",
+  checkMissingFields(["newPassword"]),
+  changePasswordController.resetPassword
+);
+
+router.post(
+  "/forgot-password",
+  checkMissingFields(["email"]),
+  forgotPasswordController.forgotPassword
+);
 
 router.post(
   "/inviter-user",
+  checkMissingFields([
+    "name",
+    "email",
+    "userType",
+    "userOrganizationRoles",
+    "departmentName",
+  ]),
   authenticateToken,
   inviteUserController.inviteUser
 );
 
-router.put("/update-profile/:id", updateProfileController.updateProfile);
+router.put(
+  "/update-profile/:id",
+  checkMissingFields(["name", "email"]),
+  updateProfileController.updateProfile
+);
 
 router.delete("/delete-user/:id", deleteUserController.deleteUser);
 

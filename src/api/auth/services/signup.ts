@@ -11,16 +11,6 @@ const createOwner = async (
   password: string,
   userType: UserType
 ) => {
-  if (!name) {
-    throw { status: 400, message: "Missing required field name" };
-  }
-  if (!email) {
-    throw { status: 400, message: "Missing required field email" };
-  }
-  if (!password) {
-    throw { status: 400, message: "Missing required field password" };
-  }
-
   // check if user already exists
   const checkUser = await prisma.user.findUnique({
     where: { email },

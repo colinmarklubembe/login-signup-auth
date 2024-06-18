@@ -11,13 +11,6 @@ const createProduct = async (req: AuthenticatedRequest, res: Response) => {
     const { name, unitPrice, description } = req.body;
     const { organizationId } = req.user!;
 
-    if (!name || !unitPrice || !description) {
-      throw {
-        status: 400,
-        message: "All fields are required for creating a product",
-      };
-    }
-
     const newProduct = await productService.createProduct(
       name,
       unitPrice,
