@@ -4,6 +4,7 @@ import { hashPassword } from "../../../utils/hashPassword";
 import generateRandomPassword from "../../../utils/generateRandonPassword";
 import sendEmails from "../../../utils/sendEmails";
 import jwt from "jsonwebtoken";
+import mapStringToUserType from "../../../utils/mapStringToUserType";
 
 const inviteUser = async (
   name: string,
@@ -23,8 +24,10 @@ const inviteUser = async (
     throw { status: 400, message: "Missing required fields" };
   }
 
-  // check if user type is valid
-  if (!Object.values(UserType).includes(userType)) {
+  let mappedUserType: UserType;
+  try {
+    mappedUserType = mapStringToUserType(userType);
+  } catch (error) {
     throw { status: 400, message: "Invalid user type" };
   }
 
@@ -79,7 +82,7 @@ const inviteUser = async (
         name,
         email,
         password: hashedPassword,
-        userType,
+        userType: mappedUserType,
         isVerified: true,
         createdAt: new Date().toISOString(),
         userOrganizationRoles: {
