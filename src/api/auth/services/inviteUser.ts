@@ -7,11 +7,11 @@ import jwt from "jsonwebtoken";
 import mapStringToUserType from "../../../utils/mapStringToUserType";
 
 const inviteUser = async (
+  departmentId: string,
   name: string,
   email: string,
   userType: UserType,
   userOrganizationRoles: string[],
-  departmentName: string,
   organizationId: string
 ) => {
   let mappedUserType: UserType;
@@ -44,9 +44,9 @@ const inviteUser = async (
       throw { status: 400, message: "One or more roles are invalid" };
     }
 
-    // get the deparmtnet id with the department name provided
-    const department = await prisma.department.findFirst({
-      where: { name: departmentName },
+    // check if the department exists
+    const department = await prisma.department.findUnique({
+      where: { id: departmentId },
     });
 
     if (!department) {

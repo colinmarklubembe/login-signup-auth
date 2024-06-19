@@ -21,7 +21,7 @@ const forgotPassword = async (email: string) => {
 
   // send email with password reset link
   const emailResponse: { status: number } =
-    await sendEmails.sendVerificationEmail(generateEmailToken);
+    await sendEmails.sendForgotPasswordEmail(generateEmailToken);
 
   if (emailResponse.status === 200) {
     throw {

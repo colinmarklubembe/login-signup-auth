@@ -29,9 +29,8 @@ const deleteUser = async (id: string) => {
         },
       }),
     ]);
-    throw { status: 200, message: "User and related data deleted" };
+    return { status: 200, message: "User and related data deleted" };
   } catch (error) {
-    console.error("Error deleting user and related data", error);
     throw { status: 500, message: "Error deleting user and related data" };
   }
 };
