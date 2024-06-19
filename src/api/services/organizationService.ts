@@ -80,31 +80,60 @@ const createOrganization = async (
     },
   });
 
-  // get all user organization roles
-  const userOrganizationRoles = await prisma.userOrganizationRole.findMany({
-    where: {
-      userId: user.id,
-    },
+  // Refetch the user's organization roles to include the newly created one
+  const updatedUser = await prisma.user.findUnique({
+    where: { id: user.id },
     include: {
-      role: true,
+      userOrganizationRoles: {
+        include: {
+          role: true, // Ensure roles are included
+          organization: true, // Include organization details
+        },
+      },
     },
   });
 
-  const roles = userOrganizationRoles.map(
-    (userOrganizationRole: any) => userOrganizationRole.role?.name || "Unknown"
+  // Fetch organization IDs of the user
+  const organizationIds = updatedUser.userOrganizationRoles.map(
+    (userOrgRole: any) => userOrgRole.organizationId
   );
+
+  const organizations = await prisma.organization.findMany({
+    where: {
+      id: {
+        in: organizationIds,
+      },
+    },
+  });
+
+  // Map organization IDs to names
+  const organizationMap = organizations.reduce((acc: any, org: any) => {
+    acc[org.id] = org.name;
+    return acc;
+  }, {});
+
+  // Create roles with organization names
+  const roles = updatedUser.userOrganizationRoles.map(
+    (userOrganizationRole: any) =>
+      `${organizationMap[userOrganizationRole.organizationId]} : ${
+        userOrganizationRole.role.name
+      }`
+  );
+
+  const organizationDetails = organizations.map((org: any) => ({
+    organizationId: org.id,
+    organizationName: org.name,
+  }));
 
   // create a new token of the user with the updated organizationId
   const tokenData = {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    userType: user.userType,
-    isVerified: user.isVerified,
+    id: updatedUser.id,
+    email: updatedUser.email,
+    name: updatedUser.name,
+    userType: updatedUser.userType,
+    isVerified: updatedUser.isVerified,
+    organizations: organizationDetails,
     organizationId: newOrganization.id,
-    organizations: user.userOrganizationRoles.map((userOrgRole: any) => ({
-      organizationId: userOrgRole.organizationId,
-    })),
     roles,
     createdAt: new Date().toISOString(), // Store the token creation date
   };
