@@ -38,8 +38,6 @@ const login = async (email: string, password: string) => {
     (userOrgRole: any) => userOrgRole.organizationId
   );
 
-  console.log(organizationIds);
-
   const organizations = await prisma.organization.findMany({
     where: {
       id: {
