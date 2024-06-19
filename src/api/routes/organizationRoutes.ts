@@ -7,25 +7,14 @@ const router = Router();
 
 router.post(
   "/create-organization",
-  checkMissingFields([
-    "name",
-    "address",
-    "phoneNumber",
-    "organizationEmail",
-  ]),
+  checkMissingFields(["name", "address", "phoneNumber", "organizationEmail"]),
   authenticateToken,
   organizationController.createOrganization
 );
 
 router.put(
   "/update-organization/:id",
-  checkMissingFields([
-    "name",
-    "description",
-    "address",
-    "phoneNumber",
-    "organizationEmail",
-  ]),
+  checkMissingFields(["name", "address", "phoneNumber", "organizationEmail"]),
   organizationController.updateOrganization
 );
 
