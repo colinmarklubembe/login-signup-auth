@@ -9,7 +9,6 @@ router.post(
   "/create-organization",
   checkMissingFields([
     "name",
-    "description",
     "address",
     "phoneNumber",
     "organizationEmail",
