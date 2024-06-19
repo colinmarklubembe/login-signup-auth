@@ -1,4 +1,3 @@
-import { validatePasswordStrength } from "./checkPasswordStrength";
 import { Resend } from "resend";
 import jwt from "jsonwebtoken";
 require("dotenv").config();
@@ -167,7 +166,57 @@ const sendInviteEmail = async (generateEmailToken: string) => {
         </div>
       `,
 
-    // make a call to the backend login api (http://localhost:4000/api/v1/users/login)
+    // make a call to the backend login api (http://localhost:4000/api/v1/auth/login)
+  });
+
+  // check if the email was sent successfully
+  if (!inviteResponse.data) {
+    console.log(inviteResponse.error);
+    return { status: 400 };
+  } else {
+    console.log(inviteResponse.data);
+    return {
+      status: 200,
+    };
+  }
+};
+
+const sendInviteEmailToExistingUser = async (generateEmailToken: string) => {
+  const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
+    email: string;
+    name: string;
+    department: string;
+    organization: string;
+  };
+  // Send the invitation email
+  const inviteResponse = await resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: decoded.email,
+    subject: "You're Invited to Join NOVA CRM",
+    html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          <h1 style="color: #333;">Invitation to Join NOVA CRM</h1>
+          <p>Hello ${decoded.name},</p>
+          <p>We're excited to invite you to join NOVA CRM under the organization <strong>${decoded.organization}</strong> and department <strong>${decoded.department}</strong>.</p>
+          <p>As an existing user, you can use your current login credentials to access your account. Click the button below to accept the invitation and get started:</p>
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="http://localhost:3000/login" 
+               style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
+               Accept Invitation and Login
+            </a>
+          </div>
+          <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
+          <p style="word-wrap: break-word;">
+            <a href="http://localhost:3000/login" style="color: #007BFF;">
+              http://localhost:3000/login
+            </a>
+          </p>
+          <p>If you have any questions or need assistance, please contact our support team.</p>
+          <p>Thank you,<br>The NOVA CRM Team</p>
+        </div>
+      `,
+
+    // make a call to the backend login api (http://localhost:4000/api/v1/auth/login)
   });
 
   // check if the email was sent successfully
@@ -187,4 +236,5 @@ export default {
   sendForgotPasswordEmail,
   sendInviteEmail,
   sendUpdatedProfileEmail,
+  sendInviteEmailToExistingUser,
 };
