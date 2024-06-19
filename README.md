@@ -33,6 +33,19 @@ This endpoint allows users to sign up for a new account.
 - `email` (string, required): The email address of the user.
 - `password` (string, required): The password for the new account.
 
+**Usage:**
+
+- Provide the user's name, email and password in the request body to to receive a verification email.
+- If there are any missing fields, the response will include a message and an array of the missing fields.
+
+```json
+{
+  "message": "Invalid email or password",
+  "missingFields": ["email", "password"],
+  "success": false
+}
+```
+
 **Response:**
 
 ```json
@@ -53,19 +66,42 @@ This endpoint allows users to log in and obtain an authentication token.
 - `email` (string): The email address of the user.
 - `password` (string): The password of the user.
 
+**Example:**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "********"
+}
+```
+
 **Response:**
 
 ```json
 {
   "message": "string",
   "success": true,
-  "token": "string"
+  "token": "string",
+  "user": "object"
+}
+```
+
+**Usage:**
+
+- Provide the user's email and password in the request body to obtain an authentication token.
+- If the login attempt is unsuccessful, the response will include a message and an array of missing fields.
+
+```json
+{
+  "message": "Invalid email or password",
+  "missingFields": ["email", "password"],
+  "success": false
 }
 ```
 
 ### 3. Invite User
 
-**Endpoint**: `POST /api/v1/users/invite-user`
+**Endpoint**: `POST /api/v1/auth/invite-user`
 
 This endpoint allows you to invite a user.
 
@@ -119,7 +155,7 @@ This endpoint allows you to invite a user.
 
 ### 4. Forgot Password Request
 
-**Endpoint**: `POST /api/v1/users/forgot-password`
+**Endpoint**: `POST /api/v1/auth/forgot-password`
 
 This endpoint is used to initiate the process of resetting a user's password.
 
@@ -138,7 +174,7 @@ This endpoint is used to initiate the process of resetting a user's password.
 
 ### 5. Change User Password
 
-**Endpoint**: `PUT /api/v1/users/change-password/:id`
+**Endpoint**: `PUT /api/v1/auth/change-password/:id`
 
 This endpoint allows the user to change their password.
 
@@ -166,7 +202,7 @@ This endpoint allows the user to change their password.
 
 ### 6. Update User Password
 
-**Endpoint**: `PUT /api/v1/users/reset-password/:id`
+**Endpoint**: `PUT /api/v1/auth/reset-password/:id`
 
 This endpoint is used to reset the password for a specific user.
 
@@ -182,14 +218,14 @@ This endpoint is used to reset the password for a specific user.
 
 ### 7. Delete User
 
-**Endpoint**: `DELETE /api/v1/users/delete-user/:id`
+**Endpoint**: `DELETE /api/v1/auth/delete-user/:id`
 
 This endpoint sends an HTTP DELETE request to delete a specific user identified by their unique ID.
 
 **Request:**
 
 - Method: DELETE
-- Endpoint: `{{localURL}}/api/v1/users/delete-user/:id`
+- Endpoint: `{{localURL}}/api/v1/auth/delete-user/:id`
 - No request body parameters are required for this endpoint.
 
 **Response:**
@@ -209,6 +245,18 @@ This endpoint allows you to create a new organization.
 **Request Body Parameters:**
 
 - `name` (string, required): The name of the organization.
+- `description` (string, required): Description of the organization.
+
+  - `address` (object, required): Address details of the organization.
+  - `addressLine1` (string, required): First line of the address.
+  - `addressLine2` (string, required): Second line of the address.
+  - `city` (string, required): City of the organization.
+  - `region` (string, required): Region of the organization.
+  - `postalCode` (string, required): Postal code of the organization.
+  - `country` (string, required): Country of the organization.
+
+- `phoneNumber` (string, required): Phone number of the organization.
+- `organizationEmail` (string, required): Email of the organization.
 
 **Response (Status: 201 - Created):**
 
@@ -218,8 +266,12 @@ This endpoint allows you to create a new organization.
   "success": true,
   "token": "string",
   "organization": {
+    "address": { "type": "object" },
     "id": "string",
     "name": "string",
+    "description": "string",
+    "phoneNumber": "string",
+    "organizationEmail": "string",
     "createdAt": "string",
     "updatedAt": "string"
   }
@@ -243,7 +295,19 @@ This endpoint allows updating an organization with the specified ID.
 
 ```json
 {
-  "name": "string"
+  "message": "string",
+  "success": true,
+  "token": "string",
+  "organization": {
+    "address": { "type": "object" },
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "phoneNumber": "string",
+    "organizationEmail": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
 }
 ```
 
@@ -279,7 +343,7 @@ This endpoint retrieves the details of a specific organization.
 **Request:**
 
 - Method: GET
-- Endpoint: `{{baseURL}}/api/v1/organizations/organization`
+- Endpoint: `/api/v1/organizations/organization`
 
 **Response:**
 
@@ -306,13 +370,14 @@ This endpoint retrieves the list of departments associated with a specific organ
 **Request:**
 
 - Method: GET
-- URL: `{{baseURL}}/api/v1/departments/get-departments-by-organization`
+- URL: `/api/v1/departments/get-departments-by-organization`
 - Headers:
   - Content-Type: application/json
 
 **Request Body Parameters (Optional):**
 
-- `name` (string, optional): The name of the department.
+- `name` (string, required): The name of the department.
+- `description` (string, optional): The description of the department.
 
 **Response:**
 
@@ -346,8 +411,6 @@ This endpoint retrieves the details of a specific department.
 {
   "departmentId": "string",
   "name": "string",
-  "manager": "string",
-  "location": "string",
-  "employees": ["string"]
+  "description": "string"
 }
 ```
