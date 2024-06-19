@@ -33,7 +33,7 @@ const login = async (email: string, password: string) => {
     throw { status: 400, message: "Invalid credentials" };
   }
 
-  // Fetch organization details
+  // Fetch organization IDs of the user
   const organizationIds = user.userOrganizationRoles.map(
     (userOrgRole: any) => userOrgRole.organizationId
   );
@@ -66,7 +66,7 @@ const login = async (email: string, password: string) => {
   }));
 
   const organizationId =
-    user.userOrganizationRoles.length > 0
+    user.userOrganizationRoles.length === 1
       ? user.userOrganizationRoles[0].organizationId
       : null;
 
@@ -85,7 +85,7 @@ const login = async (email: string, password: string) => {
 
   // Create token
   const loginToken = generateToken(tokenData);
-  return { loginToken, user };
+  return { loginToken, user, tokenData };
 };
 
 export default { login };

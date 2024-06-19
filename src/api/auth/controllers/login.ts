@@ -11,9 +11,9 @@ const login = async (req: Request, res: Response) => {
     res.setHeader("Authorization", `Bearer ${userAndToken.loginToken}`);
 
     res.status(200).json({
-      message: `Logged in successfully as ${email}`,
+      message: `Logged in successfully as ${userAndToken.tokenData.name}`,
       success: true,
-      user: userAndToken.user,
+      user: userAndToken.tokenData,
       token: userAndToken.loginToken,
     });
   } catch (error: any) {
