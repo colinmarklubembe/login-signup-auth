@@ -33,20 +33,39 @@ const login = async (email: string, password: string) => {
     throw { status: 400, message: "Invalid credentials" };
   }
 
-  // get all user organization roles
-  const userOrganizationRoles = await prisma.userOrganizationRole.findMany({
+  // Fetch organization details
+  const organizationIds = user.userOrganizationRoles.map(
+    (userOrgRole: any) => userOrgRole.organizationId
+  );
+
+  console.log(organizationIds);
+
+  const organizations = await prisma.organization.findMany({
     where: {
-      userId: user.id,
-    },
-    include: {
-      role: true,
+      id: {
+        in: organizationIds,
+      },
     },
   });
 
-  // Fetch roles
+  // Map organization IDs to names
+  const organizationMap = organizations.reduce((acc: any, org: any) => {
+    acc[org.id] = org.name;
+    return acc;
+  }, {});
+
+  // Create roles with organization names
   const roles = user.userOrganizationRoles.map(
-    (userOrganizationRole: any) => userOrganizationRole.role.name
+    (userOrganizationRole: any) =>
+      `${organizationMap[userOrganizationRole.organizationId]} : ${
+        userOrganizationRole.role.name
+      }`
   );
+
+  const organizationDetails = organizations.map((org: any) => ({
+    organizationId: org.id,
+    organizationName: org.name,
+  }));
 
   const organizationId =
     user.userOrganizationRoles.length > 0
@@ -60,9 +79,7 @@ const login = async (email: string, password: string) => {
     name: user.name,
     userType: user.userType,
     isVerified: user.isVerified,
-    organizations: user.userOrganizationRoles.map((userOrgRole: any) => ({
-      organizationId: userOrgRole.organizationId,
-    })),
+    organizations: organizationDetails,
     organizationId: organizationId,
     roles,
     createdAt: new Date().toISOString(), // temporarily store the token creation date
