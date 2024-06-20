@@ -123,4 +123,94 @@ const inviteUser = async (
   }
 };
 
-export default { inviteUser };
+const inviteExistingUser = async (
+  departmentId: string,
+  name: string,
+  email: string,
+  userType: UserType,
+  userOrganizationRoles: string[],
+  organizationId: string
+) => {
+  let mappedUserType: UserType;
+  try {
+    mappedUserType = mapStringToUserType(userType);
+  } catch (error) {
+    throw { status: 400, message: "Invalid user type" };
+  }
+
+  // check if the user exists
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+
+  if (!existingUser) {
+    throw { status: 404, message: "User not found!" };
+  }
+
+  // check if the department exists
+  const department = await prisma.department.findUnique({
+    where: { id: departmentId },
+  });
+
+  if (!department) {
+    throw { status: 400, message: "Department not found" };
+  }
+
+  // Find roles
+  const roleEntities = await prisma.role.findMany({
+    where: { name: { in: userOrganizationRoles } },
+  });
+
+  // Validate roles
+  if (roleEntities.length !== userOrganizationRoles.length) {
+    throw { status: 400, message: "One or more roles are invalid" };
+  }
+
+  // check if the department belongs to the organization
+  if (department.organizationId !== organizationId) {
+    throw { status: 400, message: "Department doesn't belong to organization" };
+  }
+
+  // get the name of the organization with the id of organizationId
+  const organization = await prisma.organization.findFirst({
+    where: { id: organizationId },
+  });
+
+  // add the user to the department with the departmentId
+  await prisma.userDepartment.create({
+    data: {
+      userId: existingUser.id,
+      departmentId: department.id,
+    },
+  });
+
+  // add the user organization roles
+  const existingUserOrganizationRoles =
+    await prisma.userOrganizationRole.createMany({
+      data: roleEntities.map((role: any) => ({
+        userId: existingUser.id,
+        organizationId: organizationId,
+        roleId: role.id,
+      })),
+    });
+
+  // update the user in the database
+  const updatedUser = await prisma.user.update({
+    where: { id: existingUser.id },
+    data: {
+      userOrganizationRoles: existingUserOrganizationRoles,
+    },
+  });
+
+  // Send invitation email
+  const emailTokenData = {
+    email: updatedUser.email,
+    name: updatedUser.name,
+    department: department.name,
+    organization: organization.name,
+  };
+
+  const generateEmailToken = jwt.sign(emailTokenData, process.env.JWT_SECRET!);
+
+  sendEmails.sendInviteEmailToExistingUser(generateEmailToken);
+};
+
+export default { inviteUser, inviteExistingUser };
