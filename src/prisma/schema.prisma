@@ -16,6 +16,7 @@ model User {
   verificationToken       String?
   forgotPasswordToken     String? 
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
+  userDepartmentRoles     UserDepartmentRole[]       @relation("UserDepartmentRoles")
   userType                UserType                   @default(USER)
   userDepartments         UserDepartment[]           @relation("UserDepartments")
   isActivated             Boolean                    @default(false)
@@ -44,6 +45,7 @@ model Department {
   organizationId          String                     @db.ObjectId
   organization            Organization               @relation("OrganizationDepartments", fields: [organizationId], references: [id])
   userDepartments         UserDepartment[]           @relation("UserDepartments")
+  users                   UserDepartmentRole[]       @relation("UserDepartmentRoles")
   createdAt               DateTime? 
   updatedAt               DateTime? 
 }
@@ -53,6 +55,7 @@ model Role {
   name                    String                     @unique
   permissions             RolePermission[]           @relation("RolePermissions")
   userOrganizationRoles   UserOrganizationRole[]     @relation("UserOrganizationRoles")
+  userDepartmentRoles     UserDepartmentRole[]       @relation("UserDepartmentRoles")
   createdAt               DateTime? 
   updatedAt               DateTime? 
 }
@@ -126,6 +129,19 @@ model UserOrganizationRole {
   role                    Role                       @relation("UserOrganizationRoles", fields: [roleId], references: [id])
 
   @@unique([userId, organizationId, roleId])
+}
+
+model UserDepartmentRole {
+  id                      String                     @id @default(auto()) @map("_id") @db.ObjectId
+  userId                  String                     @db.ObjectId
+  departmentId            String                     @db.ObjectId
+  roleId                  String                     @db.ObjectId
+
+  user                    User                       @relation("UserDepartmentRoles", fields: [userId], references: [id])
+  department              Department                 @relation("UserDepartmentRoles", fields: [departmentId], references: [id])
+  role                    Role                       @relation("UserDepartmentRoles", fields: [roleId], references: [id])
+
+  @@unique([userId, departmentId, roleId])
 }
 
 model UserDepartment {

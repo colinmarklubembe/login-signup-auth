@@ -87,7 +87,6 @@ const createOrganization = async (
       userOrganizationRoles: {
         include: {
           role: true, // Ensure roles are included
-          organization: true, // Include organization details
         },
       },
     },

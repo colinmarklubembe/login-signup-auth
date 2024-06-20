@@ -5,13 +5,14 @@ import generateRandomPassword from "../../../utils/generateRandonPassword";
 import sendEmails from "../../../utils/sendEmails";
 import jwt from "jsonwebtoken";
 import mapStringToUserType from "../../../utils/mapStringToUserType";
+import userService from "./userService";
 
 const inviteUser = async (
   departmentId: string,
   name: string,
   email: string,
   userType: UserType,
-  userOrganizationRoles: string[],
+  Roles: string[],
   organizationId: string
 ) => {
   let mappedUserType: UserType;
@@ -23,7 +24,7 @@ const inviteUser = async (
 
   try {
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await userService.findUserByEmail(email);
     if (existingUser) {
       // check if the department exists
       const department = await prisma.department.findUnique({
@@ -36,11 +37,11 @@ const inviteUser = async (
 
       // Find roles
       const roleEntities = await prisma.role.findMany({
-        where: { name: { in: userOrganizationRoles } },
+        where: { name: { in: Roles } },
       });
 
       // Validate roles
-      if (roleEntities.length !== userOrganizationRoles.length) {
+      if (roleEntities.length !== Roles.length) {
         throw { status: 400, message: "One or more roles are invalid" };
       }
 
@@ -53,35 +54,34 @@ const inviteUser = async (
       }
 
       // get the organization with the id of organizationId
-      const organization = await prisma.organization.findFirst({
+      const organization = await prisma.organization.findUnique({
         where: { id: organizationId },
       });
 
-      // add the user to the department with the departmentId
-      await prisma.userDepartment.create({
-        data: {
-          userId: existingUser.id,
-          departmentId: department.id,
-        },
-      });
+      const userId = existingUser.id;
+      const roleId = roleEntities[0].id;
 
-      // add the user organization roles
-      const existingUserOrganizationRoles =
-        await prisma.userOrganizationRole.createMany({
-          data: roleEntities.map((role: any) => ({
-            userId: existingUser.id,
-            organizationId: organizationId,
-            roleId: role.id,
-          })),
-        });
+      console.log({ userId: userId }, { roleId: roleId });
 
-      // update the user in the database
-      const updatedUser = await prisma.user.update({
-        where: { id: existingUser.id },
-        data: {
-          userOrganizationRoles: existingUserOrganizationRoles,
+      // add the user to the department
+      await userService.addUserToDepartment(userId, roleId);
+
+      // assign role to the user
+      const userDepartmentRole = await userService.assignRoleToUser(
+        userId,
+        roleId,
+        departmentId
+      );
+
+      // new data to update the user
+      const newData = {
+        userDepartmentRoles: {
+          connect: { id: userDepartmentRole.id },
         },
-      });
+      };
+
+      // get the updated user
+      const updatedUser = await userService.updateUser(userId, newData);
 
       // Send invitation email
       const emailTokenData = {
@@ -106,11 +106,11 @@ const inviteUser = async (
 
       // Find roles
       const roleEntities = await prisma.role.findMany({
-        where: { name: { in: userOrganizationRoles } },
+        where: { name: { in: Roles } },
       });
 
       // Validate roles
-      if (roleEntities.length !== userOrganizationRoles.length) {
+      if (roleEntities.length !== Roles.length) {
         throw { status: 400, message: "One or more roles are invalid" };
       }
 
@@ -136,40 +136,33 @@ const inviteUser = async (
         where: { id: organizationId },
       });
 
-      // Create the user along with user roles in a single transaction
-      const user = await prisma.user.create({
-        data: {
-          name,
-          email,
-          password: hashedPassword,
-          userType: mappedUserType,
-          isVerified: true,
-          createdAt: new Date().toISOString(),
-          userOrganizationRoles: {
-            create: roleEntities.map((role: any) => ({
-              organization: {
-                connect: { id: organizationId },
-              },
-              role: {
-                connect: { id: role.id },
-              },
-            })),
-          },
-        },
-        include: {
-          userOrganizationRoles: {
-            include: {
-              role: true,
-            },
-          },
-        },
-      });
+      // create data for the user
+      const data = {
+        name,
+        email,
+        password: hashedPassword,
+        userType: mappedUserType,
+        isVerified: true,
+        createdAt: new Date().toISOString(),
+      };
 
-      // add user to Department
-      const userDepartment = await prisma.userDepartment.create({
-        data: {
-          userId: user.id,
-          departmentId: department.id,
+      // Create the user along with user roles in a single transaction
+      const user = await userService.createUser(data);
+
+      // add user to Department with role
+      const roleId = roleEntities[0].id;
+      const userId = user.id;
+
+      const userDepartmentRole = await userService.addUserToDepartmentWithRole(
+        userId,
+        departmentId,
+        roleId
+      );
+
+      // get the updated user
+      const updatedUser = await userService.updateUser(userId, {
+        userDepartmentRole: {
+          connect: { id: userDepartmentRole.id },
         },
       });
 
@@ -187,6 +180,8 @@ const inviteUser = async (
       );
       // Send invitation email
       sendEmails.sendInviteEmail(generateEmailToken);
+
+      return updatedUser;
     }
   } catch (error) {
     console.error("Error", error);

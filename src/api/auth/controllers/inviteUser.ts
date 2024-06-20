@@ -7,22 +7,23 @@ interface AuthenticatedRequest extends Request {
 
 const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
   const { departmentId } = req.params;
-  const { name, email, userType, userOrganizationRoles } = req.body;
+  const { name, email, userType, Roles } = req.body;
 
   const { organizationId } = req.user!;
 
   try {
-    await inviteUserService.inviteUser(
+    const response = await inviteUserService.inviteUser(
       departmentId,
       name,
       email,
       userType,
-      userOrganizationRoles,
+      Roles,
       organizationId
     );
     res.status(200).json({
       message: "Invitation email sent successfully!",
       success: true,
+      user: response,
     });
   } catch (error: any) {
     res
