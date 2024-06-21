@@ -1,5 +1,5 @@
 import prisma from "../../prisma/client";
-import { generateToken } from "../../utils/generateToken";
+import generateToken from "../../utils/generateToken";
 
 const createOrganization = async (
   name: string,
@@ -117,7 +117,7 @@ const createOrganization = async (
   };
 
   // create a new token
-  const newToken = generateToken(tokenData);
+  const newToken = generateToken.generateToken(tokenData);
 
   return { newOrganization, newToken, tokenData };
 };
@@ -292,7 +292,7 @@ const selectOrganization = async (organizationName: string, email: string) => {
   };
 
   // generate new token
-  const newToken = generateToken(tokenData);
+  const newToken = generateToken.generateToken(tokenData);
 
   return { organization, newToken };
 };

@@ -1,4 +1,4 @@
-import { generateToken } from "./../../../utils/generateToken";
+import generateToken from "./../../../utils/generateToken";
 import prisma from "../../../prisma/client";
 import jwt from "jsonwebtoken";
 import sendEmails from "../../../utils/sendEmails";
@@ -72,7 +72,7 @@ const reverifyUser = async (email: string) => {
   };
 
   // Create token
-  const token = generateToken(tokenData);
+  const token = generateToken.generateToken(tokenData);
 
   // update the token in the database
   await prisma.user.update({

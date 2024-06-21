@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
 import { validatePasswordStrength } from "../../../utils/checkPasswordStrength";
 import { UserType } from "@prisma/client";
-import signupService from "../services/signup";
+import userService from "../services/userService";
+import { hashPassword } from "../../../utils/hashPassword";
+import generateToken from "../../../utils/generateToken";
+import sendEmails from "../../../utils/sendEmails";
+import jwt from "jsonwebtoken";
 
 const signup = async (req: Request, res: Response) => {
   try {
@@ -9,16 +13,69 @@ const signup = async (req: Request, res: Response) => {
 
     validatePasswordStrength(password);
 
-    const response: { status: number; message: string } =
-      await signupService.createUser(name, email, password, UserType.USER);
+    // check if user already exists
+    const checkUser = await userService.findUserByEmail(email);
 
-    res.status(response.status).json({
-      message: response.message,
-    });
+    if (checkUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    // Create the user data
+    const data = {
+      name,
+      email,
+      password: hashedPassword,
+      userType: UserType.USER,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Create the user
+    const user = await userService.createUser(data);
+
+    // create token data with timestamp
+    const tokenData = {
+      id: user.id,
+      email: user.email,
+      username: user.name,
+      createdAt: new Date().toISOString(), // temporarily store the timestamp of the token creation
+      userType: user.userType,
+    };
+
+    // create token
+    const token = generateToken.generateToken(tokenData);
+
+    // store the token in the database
+    const userId = user.id;
+    const newData = {
+      verificationToken: token,
+    };
+
+    await userService.updateUser(userId, newData);
+
+    const emailTokenData = {
+      email: user.email,
+      name: user.name,
+      token,
+    };
+
+    const generateEmailToken = generateToken.generateToken(emailTokenData);
+
+    // send email
+    const emailResponse: { status: number } =
+      await sendEmails.sendVerificationEmail(generateEmailToken);
+
+    if (emailResponse.status === 200) {
+      return res.status(200).json({
+        message:
+          "Verification email sent successfully! Please verify your email",
+      });
+    } else {
+      return res.status(400).json({ message: "Failed to send email!" });
+    }
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.json(error.message);
   }
 };
 

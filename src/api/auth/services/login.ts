@@ -1,6 +1,6 @@
 import prisma from "../../../prisma/client";
 import { comparePassword } from "../../../utils/comparePassword";
-import { generateToken } from "../../../utils/generateToken";
+import generateToken from "../../../utils/generateToken";
 
 const login = async (email: string, password: string) => {
   // Check if user exists
@@ -84,7 +84,7 @@ const login = async (email: string, password: string) => {
   };
 
   // Create token
-  const loginToken = generateToken(tokenData);
+  const loginToken = generateToken.generateToken(tokenData);
   return { loginToken, user, tokenData };
 };
 
