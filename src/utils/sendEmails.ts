@@ -33,10 +33,8 @@ const sendVerificationEmail = async (generateEmailToken: any) => {
 
   // check if the email was sent successfully
   if (!verificationResponse.data) {
-    console.log(verificationResponse.error);
     return { status: 400 };
   } else {
-    console.log(verificationResponse.data);
     return {
       status: 200,
     };
@@ -72,10 +70,8 @@ const sendUpdatedProfileEmail = async (generateEmailToken: string) => {
   });
   // check if the email was sent successfully
   if (!updatedResponse.data) {
-    console.log(updatedResponse.error);
     return { status: 400 };
   } else {
-    console.log(updatedResponse.data);
     return {
       status: 200,
     };
@@ -119,10 +115,8 @@ const sendForgotPasswordEmail = async (generateEmailToken: any) => {
 
   // check if the email was sent successfully
   if (!forgotPasswordResponse.data) {
-    console.log(forgotPasswordResponse.error);
     return { status: 400 };
   } else {
-    console.log(forgotPasswordResponse.data);
     return {
       status: 200,
     };
@@ -171,10 +165,8 @@ const sendInviteEmail = async (generateEmailToken: string) => {
 
   // check if the email was sent successfully
   if (!inviteResponse.data) {
-    console.log(inviteResponse.error);
     return { status: 400 };
   } else {
-    console.log(inviteResponse.data);
     return {
       status: 200,
     };
@@ -221,10 +213,8 @@ const sendInviteEmailToExistingUser = async (generateEmailToken: string) => {
 
   // check if the email was sent successfully
   if (!inviteResponse.data) {
-    console.log(inviteResponse.error);
     return { status: 400 };
   } else {
-    console.log(inviteResponse.data);
     return {
       status: 200,
     };

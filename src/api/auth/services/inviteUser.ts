@@ -49,8 +49,6 @@ const inviteUser = async (
 
       const userId = existingUser.id;
 
-      console.log({ userId: userId });
-
       // add the user to the department
       const userDepartment = await userService.addUserToDepartment(
         userId,
@@ -58,12 +56,10 @@ const inviteUser = async (
       );
 
       // add the user to the organization if the user is not already in the organization
-      const userOrganization = await prisma.userOrganization.findFirst({
-        where: {
-          userId,
-          organizationId,
-        },
-      });
+      const userOrganization = await userService.findUserOrganization(
+        userId,
+        organizationId
+      );
 
       if (!userOrganization) {
         return await userService.addUserToOrganization(userId, organizationId);

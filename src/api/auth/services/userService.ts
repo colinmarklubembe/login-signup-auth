@@ -106,6 +106,15 @@ const addUserToOrganization = async (
   });
 };
 
+const findUserOrganization = async (userId: string, organizationId: string) => {
+  return prisma.userOrganization.findFirst({
+    where: {
+      userId,
+      organizationId,
+    },
+  });
+};
+
 export default {
   findUserByEmail,
   createUser,
@@ -115,4 +124,5 @@ export default {
   addUserToOrganization,
   updateUser,
   findUserById,
+  findUserOrganization,
 };
