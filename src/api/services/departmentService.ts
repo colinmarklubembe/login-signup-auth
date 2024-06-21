@@ -218,6 +218,12 @@ const getUsersInDepartment = async (id: string) => {
   }
 };
 
+const findDepartmentById = async (departmentId: string) => {
+  return prisma.department.findUnique({
+    where: { id: departmentId },
+  });
+};
+
 export default {
   createDepartment,
   updateDepartment,
@@ -226,4 +232,5 @@ export default {
   getDepartmentById,
   getDepartmentsByOrganization,
   getUsersInDepartment,
+  findDepartmentById,
 };

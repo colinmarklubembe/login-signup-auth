@@ -1,7 +1,25 @@
 import prisma from "../../../prisma/client";
 
 const findUserByEmail = async (email: string) => {
-  return prisma.user.findUnique({ where: { email } });
+  return prisma.user.findUnique({
+    where: { email },
+    include: {
+      userOrganizations: {
+        include: {
+          organization: true,
+        },
+      },
+      userDepartments: {
+        include: {
+          department: {
+            include: {
+              organization: true,
+            },
+          },
+        },
+      },
+    },
+  });
 };
 
 const findUserById = async (userId: string) => {
@@ -115,6 +133,26 @@ const findUserOrganization = async (userId: string, organizationId: string) => {
   });
 };
 
+const deleteUserTransaction = async (userId: string) => {
+  return prisma.$transaction([
+    prisma.userOrganizations.deleteMany({
+      where: {
+        userId: userId,
+      },
+    }),
+    prisma.userDepartment.deleteMany({
+      where: {
+        userId: userId,
+      },
+    }),
+    prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    }),
+  ]);
+};
+
 export default {
   findUserByEmail,
   createUser,
@@ -125,4 +163,5 @@ export default {
   updateUser,
   findUserById,
   findUserOrganization,
+  deleteUserTransaction,
 };

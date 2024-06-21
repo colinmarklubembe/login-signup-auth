@@ -5,7 +5,6 @@ import userService from "../services/userService";
 import { hashPassword } from "../../../utils/hashPassword";
 import generateToken from "../../../utils/generateToken";
 import sendEmails from "../../../utils/sendEmails";
-import jwt from "jsonwebtoken";
 
 const signup = async (req: Request, res: Response) => {
   try {
@@ -13,7 +12,6 @@ const signup = async (req: Request, res: Response) => {
 
     validatePasswordStrength(password);
 
-    // check if user already exists
     const checkUser = await userService.findUserByEmail(email);
 
     if (checkUser) {
@@ -31,7 +29,6 @@ const signup = async (req: Request, res: Response) => {
       createdAt: new Date().toISOString(),
     };
 
-    // Create the user
     const user = await userService.createUser(data);
 
     // create token data with timestamp
@@ -43,10 +40,8 @@ const signup = async (req: Request, res: Response) => {
       userType: user.userType,
     };
 
-    // create token
     const token = generateToken.generateToken(tokenData);
 
-    // store the token in the database
     const userId = user.id;
     const newData = {
       verificationToken: token,
@@ -62,7 +57,6 @@ const signup = async (req: Request, res: Response) => {
 
     const generateEmailToken = generateToken.generateToken(emailTokenData);
 
-    // send email
     const emailResponse: { status: number } =
       await sendEmails.sendVerificationEmail(generateEmailToken);
 

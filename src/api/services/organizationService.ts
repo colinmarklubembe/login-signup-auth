@@ -331,6 +331,26 @@ const getUserOrganizations = async (email: string) => {
   return organizationNames;
 };
 
+const fetchOrganizationIds = async (user: any) => {
+  return user.userOrganizations.map((userOrg: any) => userOrg.organizationId);
+};
+
+const getUserOrganizationz = async (organizationIds: string[]) => {
+  return prisma.organization.findMany({
+    where: {
+      id: {
+        in: organizationIds,
+      },
+    },
+  });
+};
+
+const findOrganizationById = async (organizationId: string) => {
+  return prisma.organization.findUnique({
+    where: { id: organizationId },
+  });
+};
+
 export default {
   createOrganization,
   updateOrganization,
@@ -339,4 +359,7 @@ export default {
   deleteOrganization,
   selectOrganization,
   getUserOrganizations,
+  fetchOrganizationIds,
+  getUserOrganizationz,
+  findOrganizationById,
 };

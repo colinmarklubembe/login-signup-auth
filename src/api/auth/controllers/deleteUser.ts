@@ -1,23 +1,27 @@
 import { Request, Response } from "express";
-import deleteUserService from "../services/deleteUser";
+import userService from "../services/userService";
 
 const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const deleteUserResponse: { status: number; message: string } =
-      await deleteUserService.deleteUser(id);
+    // check if user exists
+    const user = await userService.findUserById(id);
 
-    if (deleteUserResponse.status === 200) {
-      return res.status(200).json({
-        message: "User deleted successfully!",
-        success: true,
-      });
+    if (!user) {
+      return res.status(404).json({ message: "User does not exist" });
     }
+
+    const userId = user.id;
+
+    const deletedUser = await userService.deleteUserTransaction(userId);
+
+    res.status(200).json({
+      message: "User deleted successfully!",
+      success: true,
+    });
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.json({ message: error.message });
   }
 };
 

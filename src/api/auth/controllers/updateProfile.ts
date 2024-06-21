@@ -1,20 +1,51 @@
 import { Request, Response } from "express";
-import updateProfileService from "../services/updateProfile";
+import generateToken from "../../../utils/generateToken";
+import sendEmails from "../../../utils/sendEmails";
+import userService from "../services/userService";
 
 const updateProfile = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, email } = req.body;
 
   try {
-    await updateProfileService.updateProfile(name, email, id);
-    res.status(200).json({
-      message: "Profile updated successfully!",
-      success: true,
-    });
+    const user = await userService.findUserById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userId = user.id;
+
+    const newData = {
+      name,
+      email,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updatedUser = await userService.updateUser(userId, newData);
+
+    // send update profile email to user
+    const emailTokenData = {
+      email: user.email,
+      name: user.name,
+    };
+
+    const generateEmailToken = generateToken.generateEmailToken(emailTokenData);
+
+    // Send invitation email
+    const response = await sendEmails.sendUpdatedProfileEmail(
+      generateEmailToken
+    );
+
+    if (response.status === 200) {
+      return res.status(200).json({
+        message: "Profile updated successfully!",
+        success: true,
+        user: updatedUser,
+      });
+    }
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.json({ message: error.message });
   }
 };
 
