@@ -11,7 +11,7 @@ const inviteUser = async (
   departmentId: string,
   name: string,
   email: string,
-  userType: UserType,
+  userType: string,
   organizationId: string
 ) => {
   let mappedUserType: UserType;
