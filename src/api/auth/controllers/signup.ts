@@ -3,7 +3,7 @@ import { validatePasswordStrength } from "../../../utils/checkPasswordStrength";
 import { UserType } from "@prisma/client";
 import signupService from "../services/signup";
 
-const ownerSignup = async (req: Request, res: Response) => {
+const signup = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
 
@@ -22,4 +22,4 @@ const ownerSignup = async (req: Request, res: Response) => {
   }
 };
 
-export default { ownerSignup };
+export default { signup };

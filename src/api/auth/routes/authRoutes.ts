@@ -16,7 +16,7 @@ const router = Router();
 router.post(
   "/signup",
   checkMissingFields(["name", "email", "password"]),
-  signupController.ownerSignup
+  signupController.signup
 );
 
 router.get("/verify", verifyUserController.verifyUser);
