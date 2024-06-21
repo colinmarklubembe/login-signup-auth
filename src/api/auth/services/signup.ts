@@ -5,7 +5,7 @@ import { hashPassword } from "../../../utils/hashPassword";
 import sendEmails from "../../../utils/sendEmails";
 import jwt from "jsonwebtoken";
 
-const createOwner = async (
+const createUser = async (
   name: string,
   email: string,
   password: string,
@@ -75,4 +75,4 @@ const createOwner = async (
   }
 };
 
-export default { createOwner };
+export default { createUser };
