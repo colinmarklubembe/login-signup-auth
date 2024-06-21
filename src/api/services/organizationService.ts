@@ -68,7 +68,7 @@ const createOrganization = async (
     },
   });
 
-  // Refetch the user's organization roles to include the newly created one
+  // Refetch the user's organizations to include the newly created one
   const updatedUser = await prisma.user.findUnique({
     where: { id: user.id },
     include: {
