@@ -57,11 +57,17 @@ const inviteUser = async (
         departmentId
       );
 
-      // add the user to the organization
-      const userOrganization = await userService.addUserToOrganization(
-        userId,
-        organizationId
-      );
+      // add the user to the organization if the user is not already in the organization
+      const userOrganization = await prisma.userOrganization.findFirst({
+        where: {
+          userId,
+          organizationId,
+        },
+      });
+
+      if (!userOrganization) {
+        return await userService.addUserToOrganization(userId, organizationId);
+      }
 
       // new data to update the user
       const newData = {

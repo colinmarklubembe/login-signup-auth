@@ -14,7 +14,7 @@ const findUserById = async (userId: string) => {
 const createUser = async (data: any) => {
   return prisma.user.create({
     data,
-    include: { userOrganizations: { include: { role: true } } },
+    include: { userOrganizations: { include: { organization: true } } },
   });
 };
 
