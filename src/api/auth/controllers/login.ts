@@ -15,6 +15,11 @@ const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "User does not exist" });
     }
 
+    //check if user is active
+    if (!user.isActivated) {
+      return res.status(400).json({ message: "Please verify to continue." });
+    }
+
     // Check if user is verified
     if (!user.isVerified) {
       return res.status(400).json({ message: "User is not verified" });

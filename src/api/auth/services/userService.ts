@@ -135,7 +135,7 @@ const findUserOrganization = async (userId: string, organizationId: string) => {
 
 const deleteUserTransaction = async (userId: string) => {
   return prisma.$transaction([
-    prisma.userOrganizations.deleteMany({
+    prisma.userOrganization.deleteMany({
       where: {
         userId: userId,
       },
