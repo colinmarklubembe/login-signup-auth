@@ -10,7 +10,7 @@ const ownerSignup = async (req: Request, res: Response) => {
     validatePasswordStrength(password);
 
     const response: { status: number; message: string } =
-      await signupService.createOwner(name, email, password, UserType.OWNER);
+      await signupService.createOwner(name, email, password, UserType.USER);
 
     res.status(response.status).json({
       message: response.message,
