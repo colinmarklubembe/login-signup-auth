@@ -9,7 +9,17 @@ const login = async (email: string, password: string) => {
     include: {
       userOrganizationRoles: {
         include: {
+          organization: true,
+        },
+      },
+      userDepartmentRoles: {
+        include: {
           role: true,
+          department: {
+            include: {
+              organization: true,
+            },
+          },
         },
       },
     },
@@ -53,12 +63,12 @@ const login = async (email: string, password: string) => {
   }, {});
 
   // Create roles with organization names
-  const roles = user.userOrganizationRoles.map(
-    (userOrganizationRole: any) =>
-      `${organizationMap[userOrganizationRole.organizationId]} : ${
-        userOrganizationRole.role.name
-      }`
-  );
+  const roles = user.userDepartmentRoles.map((userDepartmentRole: any) => {
+    const department = userDepartmentRole.department;
+    const organizationName = department.organization.name;
+
+    return `${organizationName} { ${department.name} : ${userDepartmentRole.role.name} }`;
+  });
 
   const organizationDetails = organizations.map((org: any) => ({
     organizationId: org.id,

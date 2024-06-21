@@ -4,6 +4,13 @@ const findUserByEmail = async (email: string) => {
   return prisma.user.findUnique({ where: { email } });
 };
 
+const findUserById = async (userId: string) => {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    include: { userOrganizationRoles: { include: { role: true } } },
+  });
+};
+
 const createUser = async (data: any) => {
   return prisma.user.create({
     data,
@@ -40,7 +47,9 @@ const addUserToDepartmentWithRole = async (
 const updateUser = async (userId: string, newData: any) => {
   return prisma.user.update({
     where: { id: userId },
-    data: newData,
+    data: {
+      ...newData,
+    },
   });
 };
 
@@ -84,11 +93,39 @@ const assignRoleToUser = async (
   });
 };
 
+const addUserToOrganization = async (
+  userId: string,
+  organizationId: string,
+  roleId: string
+) => {
+  return prisma.userOrganizationRole.create({
+    data: {
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      organization: {
+        connect: {
+          id: organizationId,
+        },
+      },
+      role: {
+        connect: {
+          id: roleId,
+        },
+      },
+    },
+  });
+};
+
 export default {
   findUserByEmail,
   createUser,
   addUserToDepartment,
   assignRoleToUser,
   addUserToDepartmentWithRole,
+  addUserToOrganization,
   updateUser,
+  findUserById,
 };

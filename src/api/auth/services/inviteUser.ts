@@ -159,10 +159,20 @@ const inviteUser = async (
         roleId
       );
 
+      // add the user to the organization
+      const newUserOrganizationRole = await userService.addUserToOrganization(
+        userId,
+        organizationId,
+        roleId
+      );
+
       // get the updated user
       const updatedUser = await userService.updateUser(userId, {
-        userDepartmentRole: {
+        userDepartmentRoles: {
           connect: { id: userDepartmentRole.id },
+        },
+        userOrganizationRoles: {
+          connect: { id: newUserOrganizationRole.id },
         },
       });
 
