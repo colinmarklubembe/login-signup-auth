@@ -119,7 +119,7 @@ const createOrganization = async (
   // create a new token
   const newToken = generateToken(tokenData);
 
-  return { newOrganization, newToken };
+  return { newOrganization, newToken, tokenData };
 };
 
 const updateOrganization = async (

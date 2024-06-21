@@ -14,7 +14,6 @@ const login = async (email: string, password: string) => {
       },
       userDepartments: {
         include: {
-          role: true,
           department: {
             include: {
               organization: true,
@@ -47,7 +46,6 @@ const login = async (email: string, password: string) => {
   const organizationIds = user.userOrganizations.map(
     (userOrg: any) => userOrg.organizationId
   );
-  console.log(organizationIds);
 
   const organizations = await prisma.organization.findMany({
     where: {
@@ -69,8 +67,8 @@ const login = async (email: string, password: string) => {
   }));
 
   const organizationId =
-    user.userOrganizationRoles.length === 1
-      ? user.userOrganizationRoles[0].organizationId
+    user.userOrganizations.length === 1
+      ? user.userOrganizations[0].organizationId
       : null;
 
   // Create token data

@@ -26,6 +26,7 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
     res.status(201).json({
       message: "Organization created successfully",
       success: true,
+      user: response.tokenData,
       token: response.newToken,
       organization: response.newOrganization,
     });
