@@ -60,23 +60,11 @@ const createOrganization = async (
     },
   });
 
-  // fetch the role id of the owner
-  const ownerRole = await prisma.role.findFirst({
-    where: {
-      name: "OWNER",
-    },
-  });
-
-  if (!ownerRole) {
-    throw { status: 500, message: "Role not found" };
-  }
-
   // create UserOrganizationRole record
-  await prisma.userOrganizationRole.create({
+  await prisma.userOrganization.create({
     data: {
       user: { connect: { id: user.id } },
       organization: { connect: { id: newOrganization.id } },
-      role: { connect: { id: ownerRole.id } },
     },
   });
 
@@ -84,17 +72,17 @@ const createOrganization = async (
   const updatedUser = await prisma.user.findUnique({
     where: { id: user.id },
     include: {
-      userOrganizationRoles: {
+      userOrganizations: {
         include: {
-          role: true, // Ensure roles are included
+          organization: true,
         },
       },
     },
   });
 
   // Fetch organization IDs of the user
-  const organizationIds = updatedUser.userOrganizationRoles.map(
-    (userOrgRole: any) => userOrgRole.organizationId
+  const organizationIds = updatedUser.userOrganizations.map(
+    (userOrg: any) => userOrg.organizationId
   );
 
   const organizations = await prisma.organization.findMany({
@@ -111,14 +99,6 @@ const createOrganization = async (
     return acc;
   }, {});
 
-  // Create roles with organization names
-  const roles = updatedUser.userOrganizationRoles.map(
-    (userOrganizationRole: any) =>
-      `${organizationMap[userOrganizationRole.organizationId]} : ${
-        userOrganizationRole.role.name
-      }`
-  );
-
   const organizationDetails = organizations.map((org: any) => ({
     organizationId: org.id,
     organizationName: org.name,
@@ -133,7 +113,6 @@ const createOrganization = async (
     isVerified: updatedUser.isVerified,
     organizations: organizationDetails,
     organizationId: newOrganization.id,
-    roles,
     createdAt: new Date().toISOString(), // Store the token creation date
   };
 

@@ -7,12 +7,12 @@ const login = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({
     where: { email },
     include: {
-      userOrganizationRoles: {
+      userOrganizations: {
         include: {
           organization: true,
         },
       },
-      userDepartmentRoles: {
+      userDepartments: {
         include: {
           role: true,
           department: {
@@ -44,9 +44,10 @@ const login = async (email: string, password: string) => {
   }
 
   // Fetch organization IDs of the user
-  const organizationIds = user.userOrganizationRoles.map(
-    (userOrgRole: any) => userOrgRole.organizationId
+  const organizationIds = user.userOrganizations.map(
+    (userOrg: any) => userOrg.organizationId
   );
+  console.log(organizationIds);
 
   const organizations = await prisma.organization.findMany({
     where: {
@@ -61,14 +62,6 @@ const login = async (email: string, password: string) => {
     acc[org.id] = org.name;
     return acc;
   }, {});
-
-  // Create roles with organization names
-  const roles = user.userDepartmentRoles.map((userDepartmentRole: any) => {
-    const department = userDepartmentRole.department;
-    const organizationName = department.organization.name;
-
-    return `${organizationName} { ${department.name} : ${userDepartmentRole.role.name} }`;
-  });
 
   const organizationDetails = organizations.map((org: any) => ({
     organizationId: org.id,
@@ -89,7 +82,6 @@ const login = async (email: string, password: string) => {
     isVerified: user.isVerified,
     organizations: organizationDetails,
     organizationId: organizationId,
-    roles,
     createdAt: new Date().toISOString(), // temporarily store the token creation date
   };
 

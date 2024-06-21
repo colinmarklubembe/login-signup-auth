@@ -12,7 +12,6 @@ const inviteUser = async (
   name: string,
   email: string,
   userType: UserType,
-  Roles: string[],
   organizationId: string
 ) => {
   let mappedUserType: UserType;
@@ -35,16 +34,6 @@ const inviteUser = async (
         throw { status: 400, message: "Department not found" };
       }
 
-      // Find roles
-      const roleEntities = await prisma.role.findMany({
-        where: { name: { in: Roles } },
-      });
-
-      // Validate roles
-      if (roleEntities.length !== Roles.length) {
-        throw { status: 400, message: "One or more roles are invalid" };
-      }
-
       // check if the department belongs to the organization
       if (department.organizationId !== organizationId) {
         throw {
@@ -59,24 +48,28 @@ const inviteUser = async (
       });
 
       const userId = existingUser.id;
-      const roleId = roleEntities[0].id;
 
-      console.log({ userId: userId }, { roleId: roleId });
+      console.log({ userId: userId });
 
       // add the user to the department
-      await userService.addUserToDepartment(userId, roleId);
-
-      // assign role to the user
-      const userDepartmentRole = await userService.assignRoleToUser(
+      const userDepartment = await userService.addUserToDepartment(
         userId,
-        roleId,
         departmentId
+      );
+
+      // add the user to the organization
+      const userOrganization = await userService.addUserToOrganization(
+        userId,
+        organizationId
       );
 
       // new data to update the user
       const newData = {
         userDepartmentRoles: {
-          connect: { id: userDepartmentRole.id },
+          connect: { id: userDepartment.id },
+        },
+        userOrganizationRoles: {
+          connect: { id: userOrganization.id },
         },
       };
 
@@ -103,16 +96,6 @@ const inviteUser = async (
 
       const defaultPassword = password;
       const hashedPassword = await hashPassword(password);
-
-      // Find roles
-      const roleEntities = await prisma.role.findMany({
-        where: { name: { in: Roles } },
-      });
-
-      // Validate roles
-      if (roleEntities.length !== Roles.length) {
-        throw { status: 400, message: "One or more roles are invalid" };
-      }
 
       // check if the department exists
       const department = await prisma.department.findUnique({
@@ -149,27 +132,24 @@ const inviteUser = async (
       // Create the user along with user roles in a single transaction
       const user = await userService.createUser(data);
 
-      // add user to Department with role
-      const roleId = roleEntities[0].id;
+      // add user to Department
       const userId = user.id;
 
-      const userDepartmentRole = await userService.addUserToDepartmentWithRole(
+      const userDepartment = await userService.addUserToDepartment(
         userId,
-        departmentId,
-        roleId
+        departmentId
       );
 
       // add the user to the organization
       const newUserOrganizationRole = await userService.addUserToOrganization(
         userId,
-        organizationId,
-        roleId
+        organizationId
       );
 
       // get the updated user
       const updatedUser = await userService.updateUser(userId, {
         userDepartmentRoles: {
-          connect: { id: userDepartmentRole.id },
+          connect: { id: userDepartment.id },
         },
         userOrganizationRoles: {
           connect: { id: newUserOrganizationRole.id },

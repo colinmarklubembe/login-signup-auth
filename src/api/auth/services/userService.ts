@@ -20,10 +20,9 @@ const createUser = async (data: any) => {
 
 const addUserToDepartmentWithRole = async (
   userId: string,
-  departmentId: string,
-  roleId: string
+  departmentId: string
 ) => {
-  return prisma.userDepartmentRole.create({
+  return prisma.userDepartment.create({
     data: {
       user: {
         connect: {
@@ -33,11 +32,6 @@ const addUserToDepartmentWithRole = async (
       department: {
         connect: {
           id: departmentId,
-        },
-      },
-      role: {
-        connect: {
-          id: roleId,
         },
       },
     },
@@ -54,7 +48,7 @@ const updateUser = async (userId: string, newData: any) => {
 };
 
 const addUserToDepartment = async (userId: string, departmentId: string) => {
-  return prisma.userDepartmentRole.create({
+  return prisma.userDepartment.create({
     data: {
       user: {
         connect: {
@@ -66,7 +60,6 @@ const addUserToDepartment = async (userId: string, departmentId: string) => {
           id: departmentId,
         },
       },
-      role: null,
     },
   });
 };
@@ -76,7 +69,7 @@ const assignRoleToUser = async (
   roleId: string,
   departmentId: string
 ) => {
-  return prisma.userDepartmentRole.update({
+  return prisma.userDepartment.update({
     where: {
       userId_departmentId: {
         userId,
@@ -95,10 +88,9 @@ const assignRoleToUser = async (
 
 const addUserToOrganization = async (
   userId: string,
-  organizationId: string,
-  roleId: string
+  organizationId: string
 ) => {
-  return prisma.userOrganizationRole.create({
+  return prisma.userOrganization.create({
     data: {
       user: {
         connect: {
@@ -108,11 +100,6 @@ const addUserToOrganization = async (
       organization: {
         connect: {
           id: organizationId,
-        },
-      },
-      role: {
-        connect: {
-          id: roleId,
         },
       },
     },

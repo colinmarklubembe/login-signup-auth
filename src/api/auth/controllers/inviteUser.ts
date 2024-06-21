@@ -7,7 +7,7 @@ interface AuthenticatedRequest extends Request {
 
 const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
   const { departmentId } = req.params;
-  const { name, email, userType, Roles } = req.body;
+  const { name, email, userType } = req.body;
 
   const { organizationId } = req.user!;
 
@@ -17,7 +17,6 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       name,
       email,
       userType,
-      Roles,
       organizationId
     );
     res.status(200).json({

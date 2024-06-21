@@ -8,7 +8,8 @@
     "dev": "nodemon src/app.ts",
     "start": "node dist/app.js",
     "seed": "ts-node src/prisma/seed.ts",
-    "prisma:generate": "npx prisma generate --schema ./src/prisma/schema.prisma"
+    "prisma:generate": "npx prisma generate --schema ./src/prisma/schema.prisma",
+    "prisma:push": "npx prisma db push --schema ./src/prisma/schema.prisma"
   },
   "author": "",
   "license": "ISC",
