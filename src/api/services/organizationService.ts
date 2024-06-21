@@ -15,7 +15,7 @@ const createOrganization = async (
       email,
     },
     include: {
-      userOrganizationRoles: {
+      userOrganizations: {
         include: {
           role: true, // Ensure roles are included
         },
@@ -60,7 +60,7 @@ const createOrganization = async (
     },
   });
 
-  // create UserOrganizationRole record
+  // create UserOrganization record
   await prisma.userOrganization.create({
     data: {
       user: { connect: { id: user.id } },
@@ -232,9 +232,9 @@ const selectOrganization = async (organizationName: string, email: string) => {
       email,
     },
     include: {
-      userOrganizationRoles: {
+      userOrganizations: {
         include: {
-          role: true, // Ensure roles are included
+          organization: true,
         },
       },
     },
@@ -245,8 +245,12 @@ const selectOrganization = async (organizationName: string, email: string) => {
   }
 
   // Check if the user belongs to the selected organization
-  const userOrganization = user.userOrganizationRoles.find(
-    (userOrgRole: any) => userOrgRole.organizationId === organizationId
+  const userOrganization = user.userOrganizations.find(
+    (userOrg: any) => userOrg.organizationId === organizationId
+  );
+
+  const organizationIds = user.userOrganizations.map(
+    (userOrg: any) => userOrg.organizationId
   );
 
   if (!userOrganization) {
@@ -256,9 +260,24 @@ const selectOrganization = async (organizationName: string, email: string) => {
     };
   }
 
-  const roles = user.userOrganizationRoles.map(
-    (userOrganizationRole: any) => userOrganizationRole.role?.name || "Unknown"
-  );
+  const organizations = await prisma.organization.findMany({
+    where: {
+      id: {
+        in: organizationIds,
+      },
+    },
+  });
+
+  // Map organization IDs to names
+  const organizationMap = organizations.reduce((acc: any, org: any) => {
+    acc[org.id] = org.name;
+    return acc;
+  }, {});
+
+  const organizationDetails = organizations.map((org: any) => ({
+    organizationId: org.id,
+    organizationName: org.name,
+  }));
 
   // create a new token of the user with the updated organizationId
   const tokenData = {
@@ -268,10 +287,7 @@ const selectOrganization = async (organizationName: string, email: string) => {
     userType: user.userType,
     isVerified: user.isVerified,
     organizationId: organizationId,
-    organizations: user.userOrganizationRoles.map((userOrgRole: any) => ({
-      organizationId: userOrgRole.organizationId,
-    })),
-    roles,
+    organizations: organizationDetails,
     createdAt: new Date().toISOString(), // Store the token creation date
   };
 
@@ -287,7 +303,7 @@ const getUserOrganizations = async (email: string) => {
       email,
     },
     include: {
-      userOrganizationRoles: true,
+      userOrganizations: true,
     },
   });
 
@@ -295,8 +311,8 @@ const getUserOrganizations = async (email: string) => {
     throw { status: 404, message: "User not found" };
   }
 
-  const organizations = user.userOrganizationRoles.map((userOrgRole: any) => ({
-    organizationId: userOrgRole.organizationId,
+  const organizations = user.userOrganizations.map((userOrg: any) => ({
+    organizationId: userOrg.organizationId,
   }));
 
   // check the organization table for the organization name matching the organizationId

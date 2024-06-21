@@ -13,7 +13,7 @@ const deleteUser = async (id: string) => {
 
     // start a transaction
     await prisma.$transaction([
-      prisma.userOrganizationRole.deleteMany({
+      prisma.userOrganizations.deleteMany({
         where: {
           userId: user.id,
         },

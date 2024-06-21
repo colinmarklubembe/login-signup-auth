@@ -65,10 +65,10 @@ const inviteUser = async (
 
       // new data to update the user
       const newData = {
-        userDepartmentRoles: {
+        userDepartments: {
           connect: { id: userDepartment.id },
         },
-        userOrganizationRoles: {
+        userOrganizations: {
           connect: { id: userOrganization.id },
         },
       };
@@ -141,18 +141,18 @@ const inviteUser = async (
       );
 
       // add the user to the organization
-      const newUserOrganizationRole = await userService.addUserToOrganization(
+      const newUserOrganization = await userService.addUserToOrganization(
         userId,
         organizationId
       );
 
       // get the updated user
       const updatedUser = await userService.updateUser(userId, {
-        userDepartmentRoles: {
+        userDepartments: {
           connect: { id: userDepartment.id },
         },
-        userOrganizationRoles: {
-          connect: { id: newUserOrganizationRole.id },
+        userOrganizations: {
+          connect: { id: newUserOrganization.id },
         },
       });
 

@@ -25,7 +25,7 @@ const createDepartment = async (
     }
 
     // check if user belongs to the organization
-    const userOrganization = await prisma.userOrganizationRole.findFirst({
+    const userOrganization = await prisma.userOrganization.findFirst({
       where: {
         userId: user.id,
         organizationId,

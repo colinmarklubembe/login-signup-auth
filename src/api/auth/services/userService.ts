@@ -7,14 +7,14 @@ const findUserByEmail = async (email: string) => {
 const findUserById = async (userId: string) => {
   return prisma.user.findUnique({
     where: { id: userId },
-    include: { userOrganizationRoles: { include: { role: true } } },
+    include: { userOrganizations: { include: { role: true } } },
   });
 };
 
 const createUser = async (data: any) => {
   return prisma.user.create({
     data,
-    include: { userOrganizationRoles: { include: { role: true } } },
+    include: { userOrganizations: { include: { role: true } } },
   });
 };
 
