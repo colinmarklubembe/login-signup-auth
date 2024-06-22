@@ -101,7 +101,7 @@ This endpoint allows users to log in and obtain an authentication token.
 
 ### 3. Invite User
 
-**Endpoint**: `POST /api/v1/auth/invite-user`
+**Endpoint**: `POST /api/v1/auth/invite-user/:id`
 
 This endpoint allows you to invite a user.
 
@@ -110,45 +110,73 @@ This endpoint allows you to invite a user.
 - `name` (string, required): The name of the user to be invited.
 - `email` (string, required): The email address of the user to be invited.
 - `userType` (string, required): The type of user to be invited.
-- `userOrganizationRoles` (array of strings, required): The roles assigned to the user within the organization.
-- `departmentName` (string, required): The name of the department to which the user belongs.
 
 **Response (200 - OK):**
 
 ```json
 {
-  "message": "string",
-  "success": true,
+  "message": {
+    "type": "string"
+  },
+  "success": {
+    "type": "boolean"
+  },
   "user": {
-    "id": "string",
-    "email": "string",
-    "password": "string",
-    "name": "string",
-    "isVerified": true,
-    "verificationToken": "string or null",
-    "forgotPasswordToken": "string or null",
-    "userType": "string",
-    "createdAt": "string",
-    "updatedAt": "string or null",
-    "userOrganizationRoles": [
-      {
-        "id": "string",
-        "userId": "string",
-        "organizationId": "string",
-        "roleId": "string",
-        "role": {
-          "id": "string",
-          "name": "string",
-          "createdAt": "string or null",
-          "updatedAt": "string or null"
+    "id": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "isVerified": {
+      "type": "boolean"
+    },
+    "verificationToken": {
+      "type": ["string", "null"]
+    },
+    "forgotPasswordToken": {
+      "type": ["string", "null"]
+    },
+    "userType": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": ["string", "null"]
+    },
+    "userOrganizations": {
+      "type": "array",
+      "items": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "organizationId": {
+          "type": "string"
         }
       }
-    ]
+    }
   },
   "userDepartment": {
-    "id": "string",
-    "userId": "string",
-    "departmentId": "string"
+    "id": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "departmentId": {
+      "type": "string"
+    }
   }
 }
 ```
@@ -200,7 +228,7 @@ This endpoint allows the user to change their password.
 }
 ```
 
-### 6. Update User Password
+### 6. Reset User Password
 
 **Endpoint**: `PUT /api/v1/auth/reset-password/:id`
 
@@ -225,13 +253,17 @@ This endpoint sends an HTTP DELETE request to delete a specific user identified 
 **Request:**
 
 - Method: DELETE
-- Endpoint: `{{localURL}}/api/v1/auth/delete-user/:id`
+- Endpoint: `/api/v1/auth/delete-user/:id`
 - No request body parameters are required for this endpoint.
 
 **Response:**
 
 ```json
-{}
+{
+  "message": {
+    "type": "string"
+  }
+}
 ```
 
 ## B. ORGANIZATION
