@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import prisma from "../../prisma/client";
 import departmentService from "../services/departmentService";
+import userService from "../../api/auth/services/userService";
+import organizationService from "../services/organizationService";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string; organizationId: string };
@@ -11,19 +12,76 @@ const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
     const { name, description } = req.body;
     const { email, organizationId } = req.user!;
 
-    // Create the department
-    const newDepartment = await departmentService.createDepartment(
+    // Check if user exists
+    const user = await userService.findUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.userType !== "OWNER") {
+      return res
+        .status(403)
+        .json({ message: " User is not authorized to create a department" });
+    }
+
+    const userId = user.id;
+
+    // check if user belongs to the organization
+    const userOrganization = await userService.findUserOrganization(
+      userId,
+      organizationId
+    );
+
+    if (!userOrganization) {
+      return res
+        .status(403)
+        .json({ message: "User does not belong to the Organization" });
+    }
+
+    // Check if the organization exists
+    const organization = await organizationService.findOrganizationById(
+      organizationId
+    );
+
+    if (!organization) {
+      return res.status(404).json({ message: "Organization not found" });
+    }
+
+    // check if the organization has a department with the same name
+    const checkDepartment = await departmentService.findOrganizationDepartment(
+      name,
+      organizationId
+    );
+
+    if (checkDepartment) {
+      return res
+        .status(409)
+        .json({ message: "Department with the same name already exists" });
+    }
+
+    const data = {
       name,
       description,
       organizationId,
-      email
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Create the department
+    const newDepartment = await departmentService.createDepartment(data);
+
+    const departmentId = newDepartment.id;
+
+    // add the user to the department
+    const userDepartment = await userService.addUserToDepartment(
+      userId,
+      departmentId
     );
 
     res.status(201).json({ message: "Department created", newDepartment });
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.json({ message: error.message });
   }
 };
 
@@ -32,17 +90,30 @@ const updateDepartment = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, description } = req.body;
 
-    const updatedDepartment = await departmentService.updateDepartment(
-      id,
+    const departmentId = id;
+    // Check if the department exists
+    const department = await departmentService.findDepartmentById(departmentId);
+
+    if (!department) {
+      return res.status(404).json({ message: "Department not found" });
+    }
+
+    const newData = {
       name,
-      description
+      description,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updatedDepartment = await departmentService.updateDepartment(
+      departmentId,
+      newData
     );
 
-    res.status(200).json(updatedDepartment);
-  } catch (error: any) {
     res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+      .status(200)
+      .json({ message: "Department updated Successfully!", updatedDepartment });
+  } catch (error: any) {
+    res.json({ message: error.message });
   }
 };
 
@@ -50,44 +121,53 @@ const deleteDepartment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const deletedDepartment = departmentService.deleteDepartment(id);
-    res.status(200).json(deletedDepartment);
-  } catch (error: any) {
+    const departmentId = id;
+
+    // Check if the department exists
+    const department = await departmentService.findDepartmentById(departmentId);
+
+    if (!department) {
+      return res.status(404).json({ message: "Department not found" });
+    }
+
+    const deletedDepartment =
+      departmentService.deleteDepartmentTransaction(departmentId);
+
     res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+      .status(200)
+      .json({ message: "Deleted successfully", deletedDepartment });
+  } catch (error: any) {
+    res.json({ message: error.message });
   }
 };
 
 const getAllDepartments = async (req: Request, res: Response) => {
   try {
     const departments = await departmentService.getAllDepartments();
+
     res.status(200).json(departments);
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.json({ message: error.message });
   }
 };
 
 const getDepartmentById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const departmentId = id;
 
-    const department = await departmentService.getDepartmentById(id);
+    const department = await departmentService.findDepartmentById(departmentId);
 
     if (!department) {
       return res.status(404).json({ error: "Department does not exist" });
     }
 
     // get users in the department
-    const users = await departmentService.getUsersInDepartment(id);
+    const users = await departmentService.getUsersInDepartment(departmentId);
 
     res.status(200).json({ department, users });
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.json({ message: error.message });
   }
 };
 
@@ -97,6 +177,15 @@ const getDepartmentsByOrganization = async (
 ) => {
   try {
     const { organizationId } = req.user!;
+
+    // Check if the organization exists
+    const organization = await organizationService.findOrganizationById(
+      organizationId
+    );
+
+    if (!organization) {
+      return res.status(404).json({ message: "Organization not found" });
+    }
 
     const departments = await departmentService.getDepartmentsByOrganization(
       organizationId
@@ -114,9 +203,7 @@ const getDepartmentsByOrganization = async (
     );
     res.status(200).json(departments);
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.json({ message: error.message });
   }
 };
 
