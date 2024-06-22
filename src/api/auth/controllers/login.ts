@@ -85,9 +85,7 @@ const login = async (req: Request, res: Response) => {
       token: loginToken,
     });
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.json({ message: error.message });
   }
 };
 
