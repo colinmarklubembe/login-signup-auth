@@ -20,16 +20,16 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
       email
     );
 
-    // Set the token in the Authorization header
-    res.setHeader("Authorization", `Bearer ${response.newToken}`);
-
-    res.status(201).json({
-      message: "Organization created successfully",
-      success: true,
-      user: response.tokenData,
-      token: response.newToken,
-      organization: response.newOrganization,
-    });
+    res
+      .status(201)
+      .setHeader("Authorization", `Bearer ${response.newToken}`)
+      .json({
+        message: "Organization created successfully",
+        success: true,
+        user: response.tokenData,
+        token: response.newToken,
+        organization: response.newOrganization,
+      });
   } catch (error: any) {
     console.error("Error creating organization", error);
     res
