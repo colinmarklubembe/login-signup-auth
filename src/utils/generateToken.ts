@@ -7,7 +7,9 @@ const generateToken = (tokenData: any) => {
 };
 
 const generateEmailToken = (emailTokenData: any) => {
-  return jwt.sign(emailTokenData, process.env.JWT_SECRET!);
+  return jwt.sign(emailTokenData, process.env.JWT_SECRET!, {
+    expiresIn: "1h",
+  });
 };
 
 export default { generateToken, generateEmailToken };
