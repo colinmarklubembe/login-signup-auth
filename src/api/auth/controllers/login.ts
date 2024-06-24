@@ -66,6 +66,14 @@ const login = async (req: Request, res: Response) => {
         ? user.userOrganizations[0].organizationId
         : null;
 
+    // update the user's organizationId
+    const userId = user.id;
+    const newData = {
+      organizationId: organizationId,
+    };
+
+    await userService.updateUser(userId, newData);
+
     // Create token data
     const tokenData = {
       id: user.id,
@@ -73,10 +81,11 @@ const login = async (req: Request, res: Response) => {
       name: user.name,
       userType: user.userType,
       isVerified: user.isVerified,
-      organizations: organizationDetails,
-      organizationId: organizationId,
       createdAt: new Date().toISOString(), // temporarily store the token creation date
     };
+
+    // get the updated user
+    const updatedUser = await userService.findUserById(user.id);
 
     // Create token
     const loginToken = generateToken.generateToken(tokenData);
@@ -87,7 +96,7 @@ const login = async (req: Request, res: Response) => {
       .json({
         message: `Logged in successfully as ${tokenData.name}`,
         success: true,
-        user: tokenData,
+        user: updatedUser,
         token: loginToken,
       });
   } catch (error: any) {

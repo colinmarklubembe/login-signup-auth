@@ -21,6 +21,7 @@ model User {
   userType                UserType                   @default(USER)
   userDepartments         UserDepartment[]           @relation("UserDepartments")
   isActivated             Boolean                    @default(false)
+  organizationId          String?                    
   createdAt               DateTime?        
   updatedAt               DateTime?       
 }
