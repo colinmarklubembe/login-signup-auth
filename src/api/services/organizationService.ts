@@ -141,7 +141,7 @@ const findOrganizationById = async (organizationId: string) => {
 };
 
 const findOrganizationByName = async (name: string) => {
-  return prisma.organization.findUnique({
+  return prisma.organization.findFirst({
     where: { name },
   });
 };

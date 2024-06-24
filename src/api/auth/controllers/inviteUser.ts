@@ -10,14 +10,14 @@ import organizationService from "../../services/organizationService";
 import generateToken from "../../../utils/generateToken";
 
 interface AuthenticatedRequest extends Request {
-  user?: { organizationId: string };
+  organization?: { organizationId: string };
 }
 
 const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
   const { departmentId } = req.params;
   const { name, email, userType } = req.body;
 
-  const { organizationId } = req.user!;
+  const { organizationId } = req.organization!;
 
   try {
     let mappedUserType: UserType;

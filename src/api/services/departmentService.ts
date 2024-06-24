@@ -61,6 +61,9 @@ const getUsersInDepartment = async (departmentId: string) => {
     where: {
       departmentId,
     },
+    include: {
+      user: true,
+    },
   });
 };
 

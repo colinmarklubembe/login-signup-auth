@@ -55,7 +55,7 @@ router.post(
 router.post(
   "/invite-user/:departmentId",
   checkMissingFields(["name", "email", "userType"]),
-  authenticate.authenticateToken,
+  authenticate.checkOrganizationId,
   inviteUserController.inviteUser
 );
 
