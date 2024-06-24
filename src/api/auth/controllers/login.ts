@@ -75,15 +75,16 @@ const login = async (req: Request, res: Response) => {
 
     // Create token
     const loginToken = generateToken.generateToken(tokenData);
-    // Set the token in the Authorization header
-    res.setHeader("Authorization", `Bearer ${loginToken}`);
 
-    res.status(200).json({
-      message: `Logged in successfully as ${tokenData.name}`,
-      success: true,
-      user: tokenData,
-      token: loginToken,
-    });
+    res
+      .status(200)
+      .setHeader("Authorization", `Bearer ${loginToken}`)
+      .json({
+        message: `Logged in successfully as ${tokenData.name}`,
+        success: true,
+        user: tokenData,
+        token: loginToken,
+      });
   } catch (error: any) {
     res.json({ message: error.message });
   }
