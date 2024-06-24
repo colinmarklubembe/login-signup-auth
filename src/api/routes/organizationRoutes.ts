@@ -1,6 +1,6 @@
 import { Router } from "express";
 import organizationController from "../controllers/organizationController";
-import authenticateToken from "../middleware/authenticate";
+import authenticate from "../middleware/authenticate";
 import checkMissingFields from "../middleware/checkMissingFields";
 
 const router = Router();
@@ -8,7 +8,7 @@ const router = Router();
 router.post(
   "/create-organization",
   checkMissingFields(["name", "address", "phoneNumber", "organizationEmail"]),
-  authenticateToken,
+  authenticate.authenticateToken,
   organizationController.createOrganization
 );
 
@@ -20,7 +20,7 @@ router.put(
 
 router.get(
   "/organization",
-  authenticateToken,
+  authenticate.checkOrganizationId,
   organizationController.getOrganizationById
 );
 
@@ -28,20 +28,19 @@ router.get("/organizations", organizationController.getAllOrganizations);
 
 router.delete(
   "/delete-organization/:id",
-  authenticateToken,
+  authenticate.authenticateToken,
   organizationController.deleteOrganization
 );
 
 router.post(
   "/select-organization",
   checkMissingFields(["organizationName"]),
-  authenticateToken,
   organizationController.selectOrganization
 );
 
 router.get(
   "/user-organizations",
-  authenticateToken,
+  authenticate.authenticateToken,
   organizationController.getUserOrganizations
 );
 

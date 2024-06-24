@@ -1,6 +1,6 @@
 import { Router } from "express";
 import contactController from "../controllers/contactController";
-import authenticateToken from "../middleware/authenticate";
+import authenticate from "../middleware/authenticate";
 import checkMissingFields from "../middleware/checkMissingFields";
 
 const router = Router();
@@ -17,7 +17,7 @@ router.post(
     "businessType",
     "description",
   ]),
-  authenticateToken,
+  authenticate.authenticateToken,
   contactController.createContact
 );
 router.put("/update-contact/:id", contactController.updateContact);

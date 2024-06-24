@@ -165,7 +165,9 @@ const getDepartmentById = async (req: Request, res: Response) => {
     // get users in the department
     const users = await departmentService.getUsersInDepartment(departmentId);
 
-    res.status(200).json({ department, users });
+    res
+      .status(200)
+      .json({ success: true, department: department, users: users });
   } catch (error: any) {
     res.json({ message: error.message });
   }

@@ -8,7 +8,7 @@ import deleteUserController from "../controllers/deleteUser";
 import forgotPasswordController from "../controllers/forgotPassword";
 import inviteUserController from "../controllers/inviteUser";
 import updateProfileController from "../controllers/updateProfile";
-import authenticateToken from "../../middleware/authenticate";
+import authenticate from "../../middleware/authenticate";
 import checkMissingFields from "../middleware/checkMissingFields";
 
 const router = Router();
@@ -55,7 +55,7 @@ router.post(
 router.post(
   "/invite-user/:departmentId",
   checkMissingFields(["name", "email", "userType"]),
-  authenticateToken,
+  authenticate.authenticateToken,
   inviteUserController.inviteUser
 );
 

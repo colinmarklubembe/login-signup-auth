@@ -1,6 +1,6 @@
 import { Router } from "express";
 import departmentController from "../controllers/departmentController";
-import authenticateToken from "../middleware/authenticate";
+import authenticate from "../middleware/authenticate";
 import checkMissingFields from "../middleware/checkMissingFields";
 
 const router = Router();
@@ -8,7 +8,7 @@ const router = Router();
 router.post(
   "/create-department",
   checkMissingFields(["name", "description"]),
-  authenticateToken,
+  authenticate.authenticateToken,
   departmentController.createDepartment
 );
 router.put(
@@ -25,7 +25,7 @@ router.delete("/delete-department/:id", departmentController.deleteDepartment);
 
 router.get(
   "/get-departments-by-organization",
-  authenticateToken,
+  authenticate.authenticateToken,
   departmentController.getDepartmentsByOrganization
 );
 

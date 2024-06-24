@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 interface AuthenticatedRequest extends Request {
-  user?: { email: string; organizationId: string };
+  user?: { email: string };
+  organization?: { organizationId: string };
 }
 
 const authenticateToken = (
@@ -23,4 +24,21 @@ const authenticateToken = (
   });
 };
 
-export default authenticateToken;
+const checkOrganizationId = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const organizationId = req.headers["organization-id"];
+
+  if (!organizationId) {
+    return res
+      .status(404)
+      .json({ error: "Organization ID is missing from the headers" });
+  }
+
+  req.organization = { organizationId: organizationId as string };
+  next();
+};
+
+export default { authenticateToken, checkOrganizationId };

@@ -1,160 +1,23 @@
+import { UserDepartment } from "./../../../node_modules/.prisma/client/index.d";
 import prisma from "../../prisma/client";
 import generateToken from "../../utils/generateToken";
+import userService from "../auth/services/userService";
+import { UserType } from "@prisma/client";
+import { get } from "http";
 
-const createOrganization = async (
-  name: string,
-  description: string,
-  address: string,
-  phoneNumber: string,
-  organizationEmail: string,
-  email: string
-) => {
-  // check if email exists in the database
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-    include: {
-      userOrganizations: {
-        include: {
-          organization: true,
-        },
-      },
-    },
+const createOrganization = async (data: any) => {
+  return prisma.organization.create({
+    data,
   });
-
-  if (!user) {
-    throw { status: 404, message: "User not found" };
-  }
-
-  // check if the user type is an owner
-  if (user.userType !== "OWNER") {
-    throw {
-      status: 403,
-      message: "User is not authorized to create an organization",
-    };
-  }
-
-  // check if user already has an organization with the same name
-  const organization = await prisma.organization.findFirst({
-    where: {
-      name,
-    },
-  });
-
-  if (organization) {
-    throw {
-      status: 400,
-      message: "Organization with the same name already exists",
-    };
-  }
-  const newOrganization = await prisma.organization.create({
-    data: {
-      name,
-      description,
-      address,
-      phoneNumber,
-      organizationEmail,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  });
-
-  // create UserOrganization record
-  await prisma.userOrganization.create({
-    data: {
-      user: { connect: { id: user.id } },
-      organization: { connect: { id: newOrganization.id } },
-    },
-  });
-
-  // Refetch the user's organizations to include the newly created one
-  const updatedUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    include: {
-      userOrganizations: {
-        include: {
-          organization: true,
-        },
-      },
-    },
-  });
-
-  // Fetch organization IDs of the user
-  const organizationIds = updatedUser.userOrganizations.map(
-    (userOrg: any) => userOrg.organizationId
-  );
-
-  const organizations = await prisma.organization.findMany({
-    where: {
-      id: {
-        in: organizationIds,
-      },
-    },
-  });
-
-  // Map organization IDs to names
-  const organizationMap = organizations.reduce((acc: any, org: any) => {
-    acc[org.id] = org.name;
-    return acc;
-  }, {});
-
-  const organizationDetails = organizations.map((org: any) => ({
-    organizationId: org.id,
-    organizationName: org.name,
-  }));
-
-  // create a new token of the user with the updated organizationId
-  const tokenData = {
-    id: updatedUser.id,
-    email: updatedUser.email,
-    name: updatedUser.name,
-    userType: updatedUser.userType,
-    isVerified: updatedUser.isVerified,
-    organizations: organizationDetails,
-    organizationId: newOrganization.id,
-    createdAt: new Date().toISOString(), // Store the token creation date
-  };
-
-  // create a new token
-  const newToken = generateToken.generateToken(tokenData);
-
-  return { newOrganization, newToken, tokenData };
 };
 
-const updateOrganization = async (
-  id: string,
-  name: string,
-  description: string,
-  address: string,
-  phoneNumber: string,
-  organizationEmail: string
-) => {
-  // check if the organization exists in the database
-  const organization = await prisma.organization.findUnique({
-    where: {
-      id,
-    },
-  });
-
-  if (!organization) {
-    throw { status: 404, message: "Organization does not exist" };
-  }
-
-  if (!name) {
-    throw { status: 400, message: "Organization name is required" };
-  }
+const updateOrganization = async (organizationId: string, newData: any) => {
   return prisma.organization.update({
     where: {
-      id,
+      id: organizationId,
     },
     data: {
-      name,
-      description,
-      address,
-      phoneNumber,
-      organizationEmail,
-      updatedAt: new Date().toISOString(),
+      ...newData,
     },
   });
 };
@@ -171,130 +34,56 @@ const getAllOrganizations = async () => {
   return prisma.organization.findMany();
 };
 
-const deleteOrganization = async (id: string, email: string) => {
-  // check if email exists in the database
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
-
-  if (!user) {
-    throw { status: 404, message: "User not found" };
-  }
-
-  // check if the user type is an owner
-  if (user.userType !== "OWNER") {
-    throw {
-      status: 403,
-      message: "User is not authorized to delete an organization",
-    };
-  }
-
-  // Check if the organization exists
-  const organization = await prisma.organization.findUnique({
-    where: {
-      id,
-    },
-  });
-
-  if (!organization) {
-    throw { status: 404, message: "Organization not found" };
-  }
-
-  // Perform deletion
-  const deletedOrganization = await prisma.organization.delete({
-    where: {
-      id,
-    },
-  });
-
-  return deletedOrganization;
-};
-
-const selectOrganization = async (organizationName: string, email: string) => {
-  // Get the organization ID based on organizationName
-  const organization = await prisma.organization.findFirst({
+const getOrganizationByName = async (organizationName: string) => {
+  return prisma.organization.findFirst({
     where: {
       name: organizationName,
     },
   });
+};
 
-  if (!organization) {
-    throw { status: 404, message: "Organization not found" };
-  }
-
-  const organizationId = organization.id;
-
-  // check if email exists in the database
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-    include: {
-      userOrganizations: {
-        include: {
-          organization: true,
+const deleteOrganizationTransaction = async (
+  organizationId: string,
+  departmentIds: string[]
+) => {
+  return prisma.$transaction([
+    prisma.userDepartment.deleteMany({
+      where: {
+        departmentId: {
+          in: departmentIds,
         },
       },
-    },
-  });
+    }),
 
-  if (!user) {
-    throw { status: 404, message: "User not found" };
-  }
+    prisma.department.deleteMany({
+      where: {
+        id: {
+          in: departmentIds,
+        },
+      },
+    }),
 
-  // Check if the user belongs to the selected organization
-  const userOrganization = user.userOrganizations.find(
-    (userOrg: any) => userOrg.organizationId === organizationId
-  );
+    prisma.userOrganization.deleteMany({
+      where: {
+        organizationId,
+      },
+    }),
+    prisma.organization.delete({
+      where: {
+        id: organizationId,
+      },
+    }),
+  ]);
+};
 
-  const organizationIds = user.userOrganizations.map(
-    (userOrg: any) => userOrg.organizationId
-  );
-
-  if (!userOrganization) {
-    throw {
-      status: 403,
-      message: "User does not belong to the selected organization",
-    };
-  }
-
-  const organizations = await prisma.organization.findMany({
+const findManyOrganizations = async (organizationIds: string[]) => {
+  return prisma.organization.findMany({
     where: {
       id: {
         in: organizationIds,
       },
     },
   });
-
-  // Map organization IDs to names
-  const organizationMap = organizations.reduce((acc: any, org: any) => {
-    acc[org.id] = org.name;
-    return acc;
-  }, {});
-
-  const organizationDetails = organizations.map((org: any) => ({
-    organizationId: org.id,
-    organizationName: org.name,
-  }));
-
-  // create a new token of the user with the updated organizationId
-  const tokenData = {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    userType: user.userType,
-    isVerified: user.isVerified,
-    organizationId: organizationId,
-    organizations: organizationDetails,
-    createdAt: new Date().toISOString(), // Store the token creation date
-  };
-
-  // generate new token
-  const newToken = generateToken.generateToken(tokenData);
-
-  return { organization, newToken };
 };
 
 const getUserOrganizations = async (email: string) => {
@@ -351,15 +140,23 @@ const findOrganizationById = async (organizationId: string) => {
   });
 };
 
+const findOrganizationByName = async (name: string) => {
+  return prisma.organization.findUnique({
+    where: { name },
+  });
+};
+
 export default {
   createOrganization,
   updateOrganization,
   getOrganizationById,
   getAllOrganizations,
-  deleteOrganization,
-  selectOrganization,
+  deleteOrganizationTransaction,
   getUserOrganizations,
   fetchOrganizationIds,
   getUserOrganizationz,
   findOrganizationById,
+  findOrganizationByName,
+  findManyOrganizations,
+  getOrganizationByName,
 };
