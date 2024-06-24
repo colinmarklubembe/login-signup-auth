@@ -17,7 +17,12 @@ const login = async (req: Request, res: Response) => {
 
     //check if user is active
     if (!user.isActivated) {
-      return res.status(400).json({ message: "Please verify to continue." });
+      const userId = user.id;
+      const newData = {
+        isActivated: true,
+      };
+
+      const activateUser = await userService.updateUser(userId, newData);
     }
 
     // Check if user is verified
