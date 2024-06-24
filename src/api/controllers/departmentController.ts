@@ -4,13 +4,15 @@ import userService from "../../api/auth/services/userService";
 import organizationService from "../services/organizationService";
 
 interface AuthenticatedRequest extends Request {
-  user?: { email: string; organizationId: string };
+  user?: { email: string };
+  organization?: { organizationId: string };
 }
 
 const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name, description } = req.body;
-    const { email, organizationId } = req.user!;
+    const { email } = req.user!;
+    const { organizationId } = req.organization!;
 
     // Check if user exists
     const user = await userService.findUserByEmail(email);
@@ -178,7 +180,7 @@ const getDepartmentsByOrganization = async (
   res: Response
 ) => {
   try {
-    const { organizationId } = req.user!;
+    const { organizationId } = req.organization!;
 
     // Check if the organization exists
     const organization = await organizationService.findOrganizationById(

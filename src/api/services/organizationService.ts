@@ -86,40 +86,6 @@ const findManyOrganizations = async (organizationIds: string[]) => {
   });
 };
 
-const getUserOrganizations = async (email: string) => {
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-    include: {
-      userOrganizations: true,
-    },
-  });
-
-  if (!user) {
-    throw { status: 404, message: "User not found" };
-  }
-
-  const organizations = user.userOrganizations.map((userOrg: any) => ({
-    organizationId: userOrg.organizationId,
-  }));
-
-  // check the organization table for the organization name matching the organizationId
-  const organizationNames = await Promise.all(
-    organizations.map(async (org: any) => {
-      const organization = await prisma.organization.findUnique({
-        where: {
-          id: org.organizationId,
-        },
-      });
-
-      return organization;
-    })
-  );
-
-  return organizationNames;
-};
-
 const fetchOrganizationIds = async (user: any) => {
   return user.userOrganizations.map((userOrg: any) => userOrg.organizationId);
 };
@@ -151,12 +117,11 @@ export default {
   updateOrganization,
   getOrganizationById,
   getAllOrganizations,
-  deleteOrganizationTransaction,
-  getUserOrganizations,
   fetchOrganizationIds,
   getUserOrganizationz,
   findOrganizationById,
   findOrganizationByName,
   findManyOrganizations,
   getOrganizationByName,
+  deleteOrganizationTransaction,
 };

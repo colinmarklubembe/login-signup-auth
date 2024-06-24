@@ -9,6 +9,7 @@ router.post(
   "/create-department",
   checkMissingFields(["name", "description"]),
   authenticate.authenticateToken,
+  authenticate.checkOrganizationId,
   departmentController.createDepartment
 );
 router.put(
@@ -25,7 +26,7 @@ router.delete("/delete-department/:id", departmentController.deleteDepartment);
 
 router.get(
   "/get-departments-by-organization",
-  authenticate.authenticateToken,
+  authenticate.checkOrganizationId,
   departmentController.getDepartmentsByOrganization
 );
 

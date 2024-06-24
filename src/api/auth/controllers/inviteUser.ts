@@ -22,11 +22,7 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
   try {
     let mappedUserType: UserType;
 
-    try {
-      mappedUserType = mapStringToUserType(userType);
-    } catch (error) {
-      throw { status: 400, message: "Invalid user type" };
-    }
+    mappedUserType = mapStringToUserType(userType);
 
     // Check if user already exists
     const existingUser = await userService.findUserByEmail(email);
