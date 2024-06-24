@@ -237,7 +237,7 @@ const getUserOrganizations = async (
     }));
 
     // check the organization table for the organization name matching the organizationId
-    const organizationNames = await Promise.all(
+    const returnedOrganizations = await Promise.all(
       organizations.map(async (org: any) => {
         const organizationId = org.organizationId;
         const organization = await organizationService.getOrganizationById(
@@ -250,8 +250,7 @@ const getUserOrganizations = async (
 
     res.status(200).json({
       success: true,
-      organizations: organizations,
-      organizationNames: organizationNames,
+      organizations: returnedOrganizations,
     });
   } catch (error: any) {
     res.json({
