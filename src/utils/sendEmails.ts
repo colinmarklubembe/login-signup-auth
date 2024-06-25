@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendVerificationEmail = async (emailData: any) => {
   const verificationResponse = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: "noreply@novasuite.app",
     to: emailData.email,
     subject: "Account Verification",
     html: `
@@ -26,17 +26,18 @@ const sendVerificationEmail = async (emailData: any) => {
 
   // check if the email was sent successfully
   if (!verificationResponse.data) {
-    return { status: 400 };
+    return { status: 403, message: verificationResponse.error };
   } else {
     return {
       status: 200,
+      message: "Verification email sent successfully",
     };
   }
 };
 
 const sendUpdatedProfileEmail = async (emailData: any) => {
   const updatedResponse = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: "noreply@novasuite.app",
     to: emailData.email,
     subject: "Your Profile Has Been Updated",
     html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
@@ -59,17 +60,18 @@ const sendUpdatedProfileEmail = async (emailData: any) => {
   });
   // check if the email was sent successfully
   if (!updatedResponse.data) {
-    return { status: 400 };
+    return { status: 403, message: updatedResponse.error };
   } else {
     return {
       status: 200,
+      message: "Email sent!",
     };
   }
 };
 
 const sendForgotPasswordEmail = async (emailData: any) => {
   const forgotPasswordResponse = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: "noreply@novasuite.app",
     to: emailData.email,
     subject: "Reset Your Password",
     html: `
@@ -110,7 +112,7 @@ const sendForgotPasswordEmail = async (emailData: any) => {
 const sendInviteEmail = async (emailData: any) => {
   // Send the invitation email
   const inviteResponse = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: "noreply@novasuite.app",
     to: emailData.email,
     subject: "You're Invited to Join NOVA CRM",
     html: `
@@ -142,10 +144,11 @@ const sendInviteEmail = async (emailData: any) => {
 
   // check if the email was sent successfully
   if (!inviteResponse.data) {
-    return { status: 400 };
+    return { status: 400, message: inviteResponse.error };
   } else {
     return {
       status: 200,
+      message: "Email Sent!",
     };
   }
 };
@@ -184,10 +187,11 @@ const sendInviteEmailToExistingUser = async (emailData: any) => {
 
   // check if the email was sent successfully
   if (!inviteResponse.data) {
-    return { status: 400 };
+    return { status: 400, message: inviteResponse.error };
   } else {
     return {
       status: 200,
+      message: "Email Sent!",
     };
   }
 };

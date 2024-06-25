@@ -5,6 +5,7 @@ import userService from "../services/userService";
 import { hashPassword } from "../../../utils/hashPassword";
 import generateToken from "../../../utils/generateToken";
 import sendEmails from "../../../utils/sendEmails";
+import systemLog from "../../../utils/systemLog";
 
 const signup = async (req: Request, res: Response) => {
   try {
@@ -55,8 +56,10 @@ const signup = async (req: Request, res: Response) => {
       token,
     };
 
-    const emailResponse: { status: number } =
+    const emailResponse: { status: number; message: any } =
       await sendEmails.sendVerificationEmail(emailData);
+
+    systemLog.returnConsoleLog(emailResponse.message);
 
     return res.status(200).json({
       message: "User created successfully",

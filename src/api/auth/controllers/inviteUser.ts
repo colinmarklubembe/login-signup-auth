@@ -7,6 +7,7 @@ import mapStringToUserType from "../../../utils/mapStringToUserType";
 import userService from "../../auth/services/userService";
 import departmentService from "../../services/departmentService";
 import organizationService from "../../services/organizationService";
+import systemLog from "../../../utils/systemLog";
 
 interface AuthenticatedRequest extends Request {
   organization?: { organizationId: string };
@@ -170,6 +171,8 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
 
       // Send invitation email
       const response = await sendEmails.sendInviteEmail(emailData);
+
+      systemLog.returnConsoleLog(response.message);
 
       return res.status(200).json({
         message: "Invitation email sent successfully!",
