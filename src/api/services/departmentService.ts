@@ -53,6 +53,9 @@ const getDepartmentsByOrganization = async (organizationId: string) => {
     where: {
       organizationId,
     },
+    include: {
+      userDepartments: true,
+    },
   });
 };
 
