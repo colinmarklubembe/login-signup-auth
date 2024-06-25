@@ -156,7 +156,12 @@ const deleteUserTransaction = async (userId: string) => {
   ]);
 };
 
+const getAllUsers = async () => {
+  return prisma.user.findMany();
+};
+
 export default {
+  getAllUsers,
   findUserByEmail,
   createUser,
   addUserToDepartment,

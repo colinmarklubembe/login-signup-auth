@@ -90,15 +90,11 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
         emailData
       );
 
-      if (response.status === 200) {
-        return res.status(200).json({
-          message: "Invitation email sent successfully!",
-          success: true,
-          user: updatedUser,
-        });
-      } else {
-        return res.status(400).json({ message: "Failed to send email" });
-      }
+      return res.status(200).json({
+        message: "Invitation email sent successfully!",
+        success: true,
+        user: updatedUser,
+      });
     } else {
       // generate random password
       const password = generateRandomPassword();
@@ -175,15 +171,11 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       // Send invitation email
       const response = await sendEmails.sendInviteEmail(emailData);
 
-      if (response.status === 200) {
-        return res.status(200).json({
-          message: "Invitation email sent successfully!",
-          success: true,
-          user: updatedUser,
-        });
-      } else {
-        return res.status(400).json({ message: "Failed to send email" });
-      }
+      return res.status(200).json({
+        message: "Invitation email sent successfully!",
+        success: true,
+        user: updatedUser,
+      });
     }
   } catch (error: any) {
     res.status(500).json({ message: error.message });
