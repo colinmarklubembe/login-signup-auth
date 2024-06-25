@@ -25,17 +25,13 @@ const updateProfile = async (req: Request, res: Response) => {
     const updatedUser = await userService.updateUser(userId, newData);
 
     // send update profile email to user
-    const emailTokenData = {
+    const emailData = {
       email: user.email,
       name: user.name,
     };
 
-    const generateEmailToken = generateToken.generateEmailToken(emailTokenData);
-
     // Send invitation email
-    const response = await sendEmails.sendUpdatedProfileEmail(
-      generateEmailToken
-    );
+    const response = await sendEmails.sendUpdatedProfileEmail(emailData);
 
     if (response.status === 200) {
       return res.status(200).json({

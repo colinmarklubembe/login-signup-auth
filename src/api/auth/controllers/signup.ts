@@ -49,16 +49,14 @@ const signup = async (req: Request, res: Response) => {
 
     await userService.updateUser(userId, newData);
 
-    const emailTokenData = {
+    const emailData = {
       email: user.email,
       name: user.name,
       token,
     };
 
-    const generateEmailToken = generateToken.generateToken(emailTokenData);
-
     const emailResponse: { status: number } =
-      await sendEmails.sendVerificationEmail(generateEmailToken);
+      await sendEmails.sendVerificationEmail(emailData);
 
     if (emailResponse.status === 200) {
       return res.status(200).json({
@@ -69,7 +67,7 @@ const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Failed to send email!" });
     }
   } catch (error: any) {
-    res.json(error.message);
+    res.status(500).json(error.message);
   }
 };
 

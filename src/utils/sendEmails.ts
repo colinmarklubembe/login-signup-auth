@@ -1,32 +1,25 @@
 import { Resend } from "resend";
-import jwt from "jsonwebtoken";
 require("dotenv").config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const sendVerificationEmail = async (generateEmailToken: any) => {
-  const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
-    email: string;
-    name: string;
-    token: string;
-  };
-
+const sendVerificationEmail = async (emailData: any) => {
   const verificationResponse = await resend.emails.send({
     from: "onboarding@resend.dev",
-    to: decoded.email,
+    to: emailData.email,
     subject: "Account Verification",
     html: `
         <h1>Welcome to NOVA CRM!</h1>
-        <p>Thank you for signing up, ${decoded.name}. We're excited to have you on board.</p>
+        <p>Thank you for signing up, ${emailData.name}. We're excited to have you on board.</p>
         <p>To get started, please verify your email address by clicking the button below:</p>
         <div style="text-align: center;">
-          <a href="http://localhost:4000/api/v1/auth/verify?token=${decoded.token}" 
+          <a href="http://localhost:4000/api/v1/auth/verify?token=${emailData.token}" 
              style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: blue; text-decoration: none; border-radius: 5px;">
              Verify Your Account
           </a>
         </div>
         <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
-        <p>http://localhost:4000/api/v1/auth/verify?token=${decoded.token}</p>
+        <p>http://localhost:4000/api/v1/auth/verify?token=${emailData.token}</p>
         <p>Best regards,<br>The Team</p>
       `,
   });
@@ -41,22 +34,18 @@ const sendVerificationEmail = async (generateEmailToken: any) => {
   }
 };
 
-const sendUpdatedProfileEmail = async (generateEmailToken: string) => {
-  const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
-    email: string;
-    name: string;
-  };
+const sendUpdatedProfileEmail = async (emailData: any) => {
   const updatedResponse = await resend.emails.send({
     from: "onboarding@resend.dev",
-    to: decoded.email,
+    to: emailData.email,
     subject: "Your Profile Has Been Updated",
     html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <h2>Profile Update Notification</h2>
-          <p>Dear ${decoded.name},</p>
+          <p>Dear ${emailData.name},</p>
           <p>We wanted to let you know that your profile has been successfully updated. Here are the details:</p>
           <ul>
-            <li><strong>Name:</strong> ${decoded.name}</li>
-            <li><strong>Email:</strong> ${decoded.email}</li>
+            <li><strong>Name:</strong> ${emailData.name}</li>
+            <li><strong>Email:</strong> ${emailData.email}</li>
           </ul>
           <p>You can view and manage your profile using the following link:</p>
           <p><a href="#" style="color: #1a73e8;">View Profile</a></p>
@@ -78,20 +67,15 @@ const sendUpdatedProfileEmail = async (generateEmailToken: string) => {
   }
 };
 
-const sendForgotPasswordEmail = async (generateEmailToken: any) => {
-  const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
-    id: string;
-    email: string;
-    name: string;
-  };
+const sendForgotPasswordEmail = async (emailData: any) => {
   const forgotPasswordResponse = await resend.emails.send({
     from: "onboarding@resend.dev",
-    to: decoded.email,
+    to: emailData.email,
     subject: "Reset Your Password",
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h1 style="color: #333;">Password Reset Request</h1>
-        <p>Hello ${decoded.name},</p>
+        <p>Hello ${emailData.name},</p>
         <p>We received a request to reset your password for your NOVA CRM account associated with this email address. If you made this request, please click the button below to reset your password:</p>
         <div style="text-align: center; margin: 20px 0;">
           <a href="http://localhost:3000/reset-password" 
@@ -123,25 +107,18 @@ const sendForgotPasswordEmail = async (generateEmailToken: any) => {
   }
 };
 
-const sendInviteEmail = async (generateEmailToken: string) => {
-  const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
-    email: string;
-    name: string;
-    password: string;
-    department: string;
-    organization: string;
-  };
+const sendInviteEmail = async (emailData: any) => {
   // Send the invitation email
   const inviteResponse = await resend.emails.send({
     from: "onboarding@resend.dev",
-    to: decoded.email,
+    to: emailData.email,
     subject: "You're Invited to Join NOVA CRM",
     html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <h1 style="color: #333;">Invitation to Join NOVA CRM</h1>
-          <p>Hello ${decoded.name},</p>
-          <p>You have been invited to join NOVA CRM under the organization <strong>${decoded.organization}</strong> belonging to the department <strong>${decoded.department}</strong>. We're excited to have you on board.</p>
-          <p>Your default password for the first login is: <strong>${decoded.password}</strong></p>
+          <p>Hello ${emailData.name},</p>
+          <p>You have been invited to join NOVA CRM under the organization <strong>${emailData.organization}</strong> belonging to the department <strong>${emailData.department}</strong>. We're excited to have you on board.</p>
+          <p>Your default password for the first login is: <strong>${emailData.password}</strong></p>
           <p>You will login using the current email to which this invite was sent.</p>
           <p>Please click the button below to accept the invitation and get started:</p>
           <div style="text-align: center; margin: 20px 0;">
@@ -173,23 +150,17 @@ const sendInviteEmail = async (generateEmailToken: string) => {
   }
 };
 
-const sendInviteEmailToExistingUser = async (generateEmailToken: string) => {
-  const decoded = jwt.verify(generateEmailToken, process.env.JWT_SECRET!) as {
-    email: string;
-    name: string;
-    department: string;
-    organization: string;
-  };
+const sendInviteEmailToExistingUser = async (emailData: any) => {
   // Send the invitation email
   const inviteResponse = await resend.emails.send({
     from: "onboarding@resend.dev",
-    to: decoded.email,
+    to: emailData.email,
     subject: "You're Invited to Join NOVA CRM",
     html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <h1 style="color: #333;">Invitation to Join NOVA CRM</h1>
-          <p>Hello ${decoded.name},</p>
-          <p>We're excited to invite you to join NOVA CRM under the organization <strong>${decoded.organization}</strong> and department <strong>${decoded.department}</strong>.</p>
+          <p>Hello ${emailData.name},</p>
+          <p>We're excited to invite you to join NOVA CRM under the organization <strong>${emailData.organization}</strong> and department <strong>${emailData.department}</strong>.</p>
           <p>As an existing user, you can use your current login credentials to access your account. Click the button below to accept the invitation and get started:</p>
           <div style="text-align: center; margin: 20px 0;">
             <a href="http://localhost:3000/login" 

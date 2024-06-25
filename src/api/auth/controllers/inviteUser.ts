@@ -80,18 +80,15 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       const updatedUser = await userService.updateUser(userId, newData);
 
       // Send invitation email
-      const emailTokenData = {
+      const emailData = {
         email: updatedUser.email,
         name: updatedUser.name,
         department: department.name,
         organization: organization.name,
       };
 
-      const generateEmailToken =
-        generateToken.generateEmailToken(emailTokenData);
-
       const response = await sendEmails.sendInviteEmailToExistingUser(
-        generateEmailToken
+        emailData
       );
 
       if (response.status === 200) {
@@ -164,7 +161,7 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
         },
       });
 
-      const emailTokenData = {
+      const emailData = {
         email: user.email,
         name: user.name,
         password: defaultPassword,
@@ -172,11 +169,8 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
         organization: organization?.name,
       };
 
-      const generateEmailToken =
-        generateToken.generateEmailToken(emailTokenData);
-
       // Send invitation email
-      const response = await sendEmails.sendInviteEmail(generateEmailToken);
+      const response = await sendEmails.sendInviteEmail(emailData);
 
       if (response.status === 200) {
         return res.status(200).json({

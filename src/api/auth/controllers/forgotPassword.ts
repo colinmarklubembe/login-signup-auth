@@ -13,17 +13,15 @@ const forgotPassword = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const emailTokenData = {
+    const emailData = {
       id: user.id,
       email: user.email,
       name: user.name,
     };
 
-    const generateEmailToken = generateToken.generateEmailToken(emailTokenData);
-
     // send email with password reset link
     const emailResponse: { status: number } =
-      await sendEmails.sendForgotPasswordEmail(generateEmailToken);
+      await sendEmails.sendForgotPasswordEmail(emailData);
 
     if (emailResponse.status === 200) {
       res.status(200).json({
