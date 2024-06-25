@@ -7,7 +7,6 @@ import mapStringToUserType from "../../../utils/mapStringToUserType";
 import userService from "../../auth/services/userService";
 import departmentService from "../../services/departmentService";
 import organizationService from "../../services/organizationService";
-import generateToken from "../../../utils/generateToken";
 
 interface AuthenticatedRequest extends Request {
   organization?: { organizationId: string };
@@ -92,7 +91,11 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       );
 
       if (response.status === 200) {
-        return updatedUser;
+        return res.status(200).json({
+          message: "Invitation email sent successfully!",
+          success: true,
+          user: updatedUser,
+        });
       } else {
         return res.status(400).json({ message: "Failed to send email" });
       }
@@ -183,7 +186,7 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       }
     }
   } catch (error: any) {
-    res.json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
