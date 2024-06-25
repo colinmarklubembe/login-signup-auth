@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import contactService from "../services/contactService";
 
 interface AuthenticatedRequest extends Request {
-  user?: { id: string; email: string }; // Ensure user object includes id for userId
+  user?: { email: string };
 }
 
 // Create contact
@@ -13,13 +13,24 @@ const createContact = async (req: AuthenticatedRequest, res: Response) => {
       contactEmail,
       phoneNumber,
       title,
-      leadStatus = "LEAD",
+      leadStatus,
       location,
       businessType,
       description,
     } = req.body;
 
     const { email } = req.user!;
+
+    const data = {
+      fullName,
+      contactEmail,
+      phoneNumber,
+      title,
+      leadStatus,
+      location,
+      businessType,
+      description,
+    };
 
     // Create the contact using the contactService
     const newContact = await contactService.createContact(

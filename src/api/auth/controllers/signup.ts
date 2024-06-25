@@ -47,7 +47,7 @@ const signup = async (req: Request, res: Response) => {
       verificationToken: token,
     };
 
-    await userService.updateUser(userId, newData);
+    const updatedUser = await userService.updateUser(userId, newData);
 
     const emailData = {
       email: user.email,
@@ -58,14 +58,11 @@ const signup = async (req: Request, res: Response) => {
     const emailResponse: { status: number } =
       await sendEmails.sendVerificationEmail(emailData);
 
-    if (emailResponse.status === 200) {
-      return res.status(200).json({
-        message:
-          "Verification email sent successfully! Please verify your email",
-      });
-    } else {
-      return res.status(400).json({ message: "Failed to send email!" });
-    }
+    return res.status(200).json({
+      message: "User created successfully",
+      success: true,
+      user: updatedUser,
+    });
   } catch (error: any) {
     res.status(500).json(error.message);
   }
