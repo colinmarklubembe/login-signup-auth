@@ -22,12 +22,26 @@ const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     // check if user already has an organization with the same name
-    const organization = await organizationService.findOrganizationByName(name);
+    const organizationName = name.trim().toLowerCase();
+    const organization = await organizationService.findOrganizationByName(
+      organizationName
+    );
 
     if (organization) {
       return res
         .status(400)
         .json({ message: "Organization with that name already exists" });
+    }
+
+    // check if organization email already exists
+    const orgEmail = await organizationService.findOrganizationEmail(
+      organizationEmail
+    );
+
+    if (orgEmail) {
+      return res
+        .status(400)
+        .json({ message: "Organization email already exists" });
     }
 
     // create organization

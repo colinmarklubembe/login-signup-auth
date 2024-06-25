@@ -37,7 +37,20 @@ const getAllOrganizations = async () => {
 const getOrganizationByName = async (organizationName: string) => {
   return prisma.organization.findFirst({
     where: {
-      name: organizationName,
+      name: {
+        equals: organizationName,
+        mode: "insensitive",
+      },
+    },
+  });
+};
+
+const findOrganizationEmail = async (organizationEmail: string) => {
+  return prisma.organization.findFirst({
+    where: {
+      organizationEmail: {
+        equals: organizationEmail.toLowerCase(),
+      },
     },
   });
 };
@@ -123,5 +136,6 @@ export default {
   findOrganizationByName,
   findManyOrganizations,
   getOrganizationByName,
+  findOrganizationEmail,
   deleteOrganizationTransaction,
 };
