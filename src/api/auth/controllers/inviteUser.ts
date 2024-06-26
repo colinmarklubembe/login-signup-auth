@@ -33,14 +33,17 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       );
 
       if (!department) {
-        return res.status(400).json({ message: "Department not found" });
+        return res
+          .status(400)
+          .json({ success: false, error: "Department not found" });
       }
 
       // check if the department belongs to the organization
       if (department.organizationId !== organizationId) {
-        res
-          .status(400)
-          .json({ message: "Department doesn't belong to organization" });
+        res.status(400).json({
+          success: false,
+          error: "Department doesn't belong to organization",
+        });
       }
 
       // get the organization with the id of organizationId
@@ -109,14 +112,17 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       );
 
       if (!department) {
-        return res.status(400).json({ message: "Department not found" });
+        return res
+          .status(400)
+          .json({ success: false, error: "Department not found" });
       }
 
       // check if the department belongs to the organization
       if (department.organizationId !== organizationId) {
-        res
-          .status(400)
-          .json({ message: "Department doesn't belong to organization" });
+        res.status(400).json({
+          success: false,
+          error: "Department doesn't belong to organization",
+        });
       }
 
       // get the name of the organization with the id of organizationId
@@ -172,7 +178,7 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       // Send invitation email
       const response = await sendEmails.sendInviteEmail(emailData);
 
-      systemLog.returnConsoleLog(response.message);
+      systemLog.systemError(response.message);
 
       return res.status(200).json({
         message: "Invitation email sent successfully!",
@@ -181,7 +187,7 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       });
     }
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

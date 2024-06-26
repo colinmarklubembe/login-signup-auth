@@ -14,7 +14,7 @@ router.post(
 );
 router.put(
   "/update-department/:id",
-  checkMissingFields(["name"]),
+  checkMissingFields(["name", "description"]),
   departmentController.updateDepartment
 );
 

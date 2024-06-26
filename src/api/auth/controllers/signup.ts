@@ -59,7 +59,7 @@ const signup = async (req: Request, res: Response) => {
     const emailResponse: { status: number; message: any } =
       await sendEmails.sendVerificationEmail(emailData);
 
-    systemLog.returnConsoleLog(emailResponse.message);
+    systemLog.systemError(emailResponse.message);
 
     return res.status(200).json({
       message: "User created successfully",
@@ -67,7 +67,7 @@ const signup = async (req: Request, res: Response) => {
       user: updatedUser,
     });
   } catch (error: any) {
-    res.status(500).json(error.message);
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

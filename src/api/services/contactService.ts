@@ -1,49 +1,36 @@
 import prisma from "../../prisma/client";
-import { LeadStatus } from "@prisma/client";
-import { BusinessType } from "@prisma/client";
 
-const createContact = async (
-  fullName: string,
-  contactEmail: string,
-  phoneNumber: string,
-  title: string,
-  leadStatus: LeadStatus = LeadStatus.LEAD,
-  location: string,
-  businessType: BusinessType,
-  description: string,
-  email: string
+const findOrganizationContact = async (
+  name: string,
+  organizationId: string
 ) => {
-  // Check if the user exists in the database
-  const user = await prisma.user.findUnique({
+  return prisma.contact.findFirst({
     where: {
-      email,
-    },
-  });
-
-  if (!user) {
-    throw { status: 404, message: "User not found" };
-  }
-
-  const addedByUserId = user.id;
-
-  return prisma.contact.create({
-    data: {
-      fullName,
-      contactEmail,
-      phoneNumber,
-      title,
-      leadStatus,
-      location,
-      businessType,
-      description,
-      addedByUserId,
+      name,
+      organizationId,
     },
   });
 };
 
-const getContactById = async (id: string) => {
-  return await prisma.contact.findUnique({
-    where: { id },
+const createContact = async (data: any) => {
+  const createdContact = await prisma.contact.create({
+    data,
+  });
+
+  // Extract organizationId from createdContact if needed
+  const organizationId = createdContact.organizationId;
+
+  return {
+    ...createdContact,
+    organizationId, // Include organizationId directly in the response
+  };
+};
+
+const getContactById = async (contactId: string) => {
+  return prisma.contact.findUnique({
+    where: {
+      id: contactId,
+    },
   });
 };
 
@@ -51,40 +38,58 @@ const getAllContacts = async () => {
   return prisma.contact.findMany();
 };
 
-const updateContact = async (
-  id: string,
-  data: {
-    fullName?: string;
-    contactEmail?: string;
-    phoneNumber?: string;
-    title?: string;
-    leadStatus?: LeadStatus;
-    leadScore?: number;
-    location?: string;
-    businessType?: BusinessType;
-    description?: string;
-  }
-) => {
-  return await prisma.contact.update({
-    where: {
-      id,
+const updateContact = async (contactId: string, newData: any) => {
+  return prisma.contact.update({
+    where: { id: contactId },
+    data: {
+      ...newData,
     },
-    data,
   });
 };
 
 const deleteContact = async (id: string) => {
-  return await prisma.contact.delete({
+  return prisma.contact.delete({
     where: {
       id,
+    },
+  });
+};
+
+const findContactByEmail = async (contactEmail: string) => {
+  return prisma.contact.findUnique({
+    where: { contactEmail },
+  });
+};
+
+const findContactByPhoneNumber = async (phoneNumber: string) => {
+  return prisma.contact.findUnique({
+    where: { phoneNumber },
+  });
+};
+
+const findContactById = async (contactId: string) => {
+  return prisma.contact.findUnique({
+    where: { id: contactId },
+  });
+};
+
+const getContactsByOrganization = async (organizationId: string) => {
+  return await prisma.contact.findMany({
+    where: {
+      organizationId: organizationId,
     },
   });
 };
 
 export default {
+  findOrganizationContact,
   createContact,
   getContactById,
   getAllContacts,
   updateContact,
   deleteContact,
+  findContactByEmail,
+  findContactByPhoneNumber,
+  findContactById,
+  getContactsByOrganization,
 };

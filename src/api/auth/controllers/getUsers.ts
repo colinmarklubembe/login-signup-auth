@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import userService from "../../auth/services/userService";
+import organizationService from "../../services/organizationService";
 
 interface AuthenticatedRequest extends Request {
   organization?: { organizationId: string };
@@ -9,9 +10,9 @@ const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await userService.getAllUsers();
 
-    res.status(200).json(users);
+    res.status(200).json({ success: true, users: users });
   } catch (error: any) {
-    res.json({ message: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -23,12 +24,14 @@ const getUserById = async (req: Request, res: Response) => {
     const user = await userService.findUserById(userId);
 
     if (!user) {
-      return res.status(404).json({ error: "User does not exist" });
+      return res
+        .status(404)
+        .json({ success: false, error: "User does not exist" });
     }
 
-    res.status(200).json({ success: true, user });
+    res.status(200).json({ success: true, user: user });
   } catch (error: any) {
-    res.json({ message: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -39,11 +42,23 @@ const getUsersByOrganization = async (
   try {
     const { organizationId } = req.organization!;
 
+    const organization = await organizationService.findOrganizationById(
+      organizationId
+    );
+
+    if (!organization) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Organization does not exist" });
+    }
+
     const users = await userService.findUsersByOrganization(organizationId);
 
-    res.status(200).json(users);
+    res
+      .status(200)
+      .json({ success: true, organization: organization.name, users: users });
   } catch (error: any) {
-    res.json({ message: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

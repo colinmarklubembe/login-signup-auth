@@ -1,5 +1,9 @@
-const returnConsoleLog = (message: any) => {
+const systemError = (message: any) => {
   console.log(message);
 };
 
-export default { returnConsoleLog };
+const systemInfo = (message: any) => {};
+
+const systemWarning = (message: any) => {};
+
+export default { systemError, systemInfo, systemWarning };

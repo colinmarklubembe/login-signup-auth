@@ -29,10 +29,10 @@ const forgotPassword = async (req: Request, res: Response) => {
         success: true,
       });
     } else {
-      res.status(500).json({ message: "Failed to send email" });
+      res.status(422).json({ success: false, error: "Failed to send email" });
     }
   } catch (error: any) {
-    res.json({ message: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
+import userService from "../../api/auth/services/userService";
+import organizationService from "../services/organizationService";
 import contactService from "../services/contactService";
 
 interface AuthenticatedRequest extends Request {
-  user?: { email: string };
+  user?: { id: string; email: string };
+  organization?: { organizationId: string };
 }
 
 // Create contact
@@ -13,14 +16,54 @@ const createContact = async (req: AuthenticatedRequest, res: Response) => {
       contactEmail,
       phoneNumber,
       title,
-      leadStatus,
+      leadStatus = "LEAD",
       location,
       businessType,
       description,
     } = req.body;
-
     const { email } = req.user!;
+    const { organizationId } = req.organization!;
 
+    // Check if user exists
+    const user = await userService.findUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    const addedByUserId = user.id;
+    // check if user belongs to the organization
+    const userOrganization = await userService.findUserOrganization(
+      addedByUserId,
+      organizationId
+    );
+
+    if (!userOrganization) {
+      return res
+        .status(403)
+        .json({ success:false, error: "User does not belong to the Organization" });
+    }
+    // Check if contact email already exists
+    const existingContactByEmail = await contactService.findContactByEmail(
+      contactEmail.trim().toLowerCase()
+    );
+    if (existingContactByEmail) {
+      return res
+        .status(409).
+        json({
+          success:false,
+          error: "Contact with the same email already exists"
+        });
+    }
+
+    // Check if contact phone number already exists
+    const existingContactByPhone = await contactService.findContactByPhoneNumber(phoneNumber);
+    if (existingContactByPhone) {
+      return res
+        .status(409)
+        .json({ success:false, error: "Contact with the same phone number already exists" });
+    }
+    //create new contact
     const data = {
       fullName,
       contactEmail,
@@ -30,30 +73,18 @@ const createContact = async (req: AuthenticatedRequest, res: Response) => {
       location,
       businessType,
       description,
+      addedByUserId,
+      organizationId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
-
-    // Create the contact using the contactService
-    const newContact = await contactService.createContact(
-      fullName,
-      contactEmail,
-      phoneNumber,
-      title,
-      leadStatus,
-      location,
-      businessType,
-      description,
-      email
-    );
-
-    res.status(201).json({
-      message: "Contact created successfully",
-      success: true,
-      contact: newContact,
-    });
+    const newContact = await contactService.createContact(data);
+    res.status(201).json({ 
+      message: "Contact created successfully", 
+      success: true, 
+      newContact: newContact });
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -62,30 +93,25 @@ const getContactById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const contact = contactService.getContactById(id);
+    const contact = await contactService.getContactById(id);
 
     if (!contact) {
-      throw { status: 404, message: "Contact not found" };
+      return res.status(404).json({ success:false, error: "Contact not found" });
     }
 
-    res.status(200).json({ status: "OK", message: "success", contact });
+    res.status(200).json({ message: "Contact retrieved successfully", success: true, contact: contact });
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.status(500).json({ success:false, error: error.message });
   }
 };
 
 // Read all contacts
 const getAllContacts = async (req: Request, res: Response) => {
   try {
-    // Fetch all contacts using Prisma
-    const contacts = contactService.getAllContacts();
-    res.status(200).json({ status: "OK", message: "success", contacts });
+    const contacts = await contactService.getAllContacts();
+    res.status(200).json({ message: "All contacts retrieved successfully", success: true, contacts: contacts });
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.status(500).json({ success:false, error: error.message });
   }
 };
 
@@ -93,22 +119,42 @@ const getAllContacts = async (req: Request, res: Response) => {
 const updateContact = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
-
-    // Update the contact using Prisma
-    const updatedContact = contactService.updateContact(id, updateData);
-
-    // Handle case where contact is not found
-    if (!updatedContact) {
-      return res.status(404).json({ error: "Contact not found" });
+    const { fullName,
+      contactEmail,
+      phoneNumber,
+      title,
+      leadStatus,
+      location,
+      businessType,
+      description,
+    } = req.body;
+    const contactId = id;
+    // Check if the contact exists
+    const contact = await contactService.findContactById(contactId);
+    if (!contact) {
+      return res.status(404).json({ success:false, error: "Contact not found" });
     }
+    const newData = {
+      fullName,
+      contactEmail,
+      phoneNumber,
+      title,
+      leadStatus,
+      location,
+      businessType,
+      description,
+      updatedAt: new Date().toISOString(),
+    };
+    const updatedContact = await contactService.updateContact(
+      contactId,
+      newData
+    );
 
-    // Respond with the updated contact
-    res.status(200).json(updatedContact);
-  } catch (error: any) {
     res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+      .status(200)
+      .json({ message: "Contact updated successfully", success: true, updatedContact: updatedContact });
+  } catch (error: any) {
+    res.status(500).json({ success:false, error: error.message });
   }
 };
 
@@ -116,25 +162,54 @@ const updateContact = async (req: Request, res: Response) => {
 const deleteContact = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const contactId = id;
 
-    // Check if contact exists
-    const contact = contactService.getContactById(id);
-
+    // Check if the contact exists
+    const contact = await contactService.findContactById(contactId);
     if (!contact) {
-      throw { status: 404, message: "Contact not found" };
+      return res.status(404).json({ success:false, error: "Contact not found" });
     }
+    const deletedContact =
+      contactService.deleteContact(contactId);
 
-    // Delete the contact using Prisma
-    const deletedContact = contactService.deleteContact(id);
-
-    // Respond with success message
     res
       .status(200)
-      .json({ message: "Contact deleted successfully", deletedContact });
+      .json({ message: "Contact deleted successfully", success: true, deletedContact: deletedContact });
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    res.status(500).json({ success:false, error: error.message });
+  }
+};
+
+const getContactsByOrganization = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { organizationId } = req.organization!;
+
+    // Check if the organization exists
+    const organization = await organizationService.findOrganizationById(
+      organizationId
+    );
+
+    if (!organization) {
+      return res.status(404).json({ success:false, error: "Organization not found" });
+    }
+     
+    // Fetch contacts for the organization
+    const contacts = await contactService.getContactsByOrganization(
+      organizationId
+    );
+
+    if (!contacts) {
+      return res
+        .status(404)
+        .json({ success:false, error: `No contacts found for the organization: ${organization.name}` });
+    }
+
+    res.status(200).json({ message: `Contacts belonging to the organization ${organization.name} retrieved successfully`, success: true, organizationContacts: contacts });
+  } catch (error: any) {
+    res.status(500).json({ success:false, error: error.message });
   }
 };
 
@@ -144,4 +219,5 @@ export default {
   getAllContacts,
   updateContact,
   deleteContact,
+  getContactsByOrganization,
 };

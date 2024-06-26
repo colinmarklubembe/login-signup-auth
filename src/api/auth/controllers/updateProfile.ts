@@ -11,7 +11,7 @@ const updateProfile = async (req: Request, res: Response) => {
     const user = await userService.findUserById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ success: false, error: "User not found" });
     }
 
     const userId = user.id;
@@ -41,7 +41,7 @@ const updateProfile = async (req: Request, res: Response) => {
       });
     }
   } catch (error: any) {
-    res.json({ message: error.message });
+    res.json({ success: false, error: error.message });
   }
 };
 

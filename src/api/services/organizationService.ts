@@ -1,4 +1,4 @@
-import { UserDepartment } from "./../../../node_modules/.prisma/client/index.d";
+import { UserDepartment } from ".prisma/client";
 import prisma from "../../prisma/client";
 import generateToken from "../../utils/generateToken";
 import userService from "../auth/services/userService";

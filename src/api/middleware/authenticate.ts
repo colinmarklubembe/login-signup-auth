@@ -32,9 +32,10 @@ const checkOrganizationId = (
   const organizationId = req.headers["organization-id"];
 
   if (!organizationId) {
-    return res
-      .status(404)
-      .json({ error: "Organization ID is missing from the headers" });
+    return res.status(404).json({
+      success: false,
+      error: "Organization ID is missing from the headers",
+    });
   }
 
   req.organization = { organizationId: organizationId as string };

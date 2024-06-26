@@ -99,13 +99,14 @@ model Contact {
   id          String       @id @default(auto()) @map("_id") @db.ObjectId
   fullName    String
   contactEmail       String      @unique
-  phoneNumber String
+  phoneNumber String @unique
   title       String
   leadStatus  LeadStatus  @default(LEAD)
   location    String?
   businessType BusinessType
   description String?
-  addedByUserId String      
+  addedByUserId String
+  organizationId  String  @db.ObjectId 
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
