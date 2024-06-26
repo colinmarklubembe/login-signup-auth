@@ -8,16 +8,25 @@
   - [3. Invite User](#3-invite-user)
   - [4. Forgot Password Request](#4-forgot-password-request)
   - [5. Change User Password](#5-change-user-password)
-  - [6. Update User Password](#6-update-user-password)
+  - [6. Reset User Password](#6-reset-user-password)
   - [7. Delete User](#7-delete-user)
+  - [8. Get Users](#8-get-users)
+  - [9. Get User by ID](#9-get-user-by-id)
+  - [10. Get Users by Organization](#10-get-users-by-organization)
 - [B. ORGANIZATION](#b-organization)
   - [1. Create Organization](#1-create-organization)
   - [2. Update Organization](#2-update-organization)
   - [3. Select Organization](#3-select-organization)
   - [4. Retrieve Organization Details](#4-retrieve-organization-details)
+  - [5. Retrieve User Organizations](#5-retrieve-user-organizations)
+  - [6. Retrieve All Organizations](#6-retrieve-all-organizations)
+  - [7. Delete an organization](#7-delete-an-organization)
 - [C. DEPARTMENTS](#c-departments)
   - [1. Get Departments by Organization](#1-get-departments-by-organization)
   - [2. Get Department Details](#2-get-department-details)
+  - [3. Create Department](#3-create-department)
+  - [4. Update Department](#4-update-department)
+  - [5. Delete Department](#5-delete-department)
 
 ## A. AUTH
 
@@ -266,6 +275,70 @@ This endpoint sends an HTTP DELETE request to delete a specific user identified 
 }
 ```
 
+### 8. Get Users
+
+**Endpoint**: `GET /api/v1/auth/get-users/`
+
+This endpoint sends an HTTP GET request to get users.
+
+**Request:**
+
+- Method: GET
+- Endpoint: `/api/v1/auth/get-users`
+- No request body parameters are required for this endpoint.
+
+**Response:**
+
+```json
+{
+  "users": [{ "user": "object" }]
+}
+```
+
+### 9. Get User by ID
+
+**Endpoint**: `GET /api/v1/auth/get-user/:id`
+
+This endpoint sends an HTTP GET request to get a specific user identified by their unique ID.
+
+**Request:**
+
+- Method: GET
+- Endpoint: `/api/v1/auth/get-user/:id`
+- No request body parameters are required for this endpoint.
+
+**Response:**
+
+```json
+{
+  "success": boolean,
+  "user": {
+    "type": "object"
+  }
+}
+```
+
+### 10. Get Users by Organization
+
+**Endpoint**: `GET /api/v1/auth/get-users/`
+
+This endpoint sends an HTTP GET request to get users.
+
+**Request:**
+
+- Method: GET
+- Endpoint: `/api/v1/auth/get-users`
+- No request body parameters are required for this endpoint.
+
+**Response:**
+
+```json
+{
+  "organization": "string",
+  "users": [{ "user": "object" }]
+}
+```
+
 ## B. ORGANIZATION
 
 ### 1. Create Organization
@@ -296,7 +369,7 @@ This endpoint allows you to create a new organization.
 {
   "message": "string",
   "success": true,
-  "token": "string",
+  "user": "object",
   "organization": {
     "address": { "type": "object" },
     "id": "string",
@@ -319,17 +392,31 @@ This endpoint allows updating an organization with the specified ID.
 **Request:**
 
 - Method: PUT
-- URL: `{{baseURL}}/api/v1/organizations/update-organization/:id`
+- URL: `/api/v1/organizations/update-organization/:id`
 - Headers:
   - Content-Type: application/json
 
 **Request Body Parameters:**
 
+- `name` (string, required): The name of the organization.
+- `description` (string, required): Description of the organization.
+
+  - `address` (object, required): Address details of the organization.
+  - `addressLine1` (string, required): First line of the address.
+  - `addressLine2` (string, required): Second line of the address.
+  - `city` (string, required): City of the organization.
+  - `region` (string, required): Region of the organization.
+  - `postalCode` (string, required): Postal code of the organization.
+  - `country` (string, required): Country of the organization.
+
+- `phoneNumber` (string, required): Phone number of the organization.
+- `organizationEmail` (string, required): Email of the organization.
+
 ```json
 {
   "message": "string",
   "success": true,
-  "token": "string",
+  "user": "object",
   "organization": {
     "address": { "type": "object" },
     "id": "string",
@@ -337,7 +424,6 @@ This endpoint allows updating an organization with the specified ID.
     "description": "string",
     "phoneNumber": "string",
     "organizationEmail": "string",
-    "createdAt": "string",
     "updatedAt": "string"
   }
 }
@@ -357,11 +443,16 @@ This endpoint allows the user to select an organization by providing the organiz
 
 ```json
 {
-  "status": "string",
   "message": "string",
-  "data": {
-    "organizationId": "string",
-    "organizationName": "string"
+  "success": true,
+  "organization": {
+    "address": { "type": "object" },
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "phoneNumber": "string",
+    "organizationEmail": "string",
+    "updatedAt": "string"
   }
 }
 ```
@@ -381,13 +472,75 @@ This endpoint retrieves the details of a specific organization.
 
 ```json
 {
-  "organizationId": "string",
-  "name": "string",
-  "address": "string",
-  "contact": {
-    "email": "string",
-    "phone": "string"
+  "organization": {
+    "address": { "type": "object" },
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "phoneNumber": "string",
+    "organizationEmail": "string",
+    "updatedAt": "string"
   }
+}
+```
+
+### 5. Retrieve User Organizations
+
+**Endpoint**: `GET /api/v1/organizations/user-organizations`
+
+This endpoint retrieves the organizations of a specific user.
+
+**Request:**
+
+- Method: GET
+- Endpoint: `/api/v1/organizations/user-organizations`
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "organizations": [{ "organization": "object" }]
+}
+```
+
+### 6. Retrieve All Organizations
+
+**Endpoint**: `GET /api/v1/organizations/organizations`
+
+This endpoint retrieves all organizations.
+
+**Request:**
+
+- Method: GET
+- Endpoint: `/api/v1/organizations`
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "organizations": [{ "organization": "object" }]
+}
+```
+
+### 7. Delete an organization
+
+**Endpoint**: `DELETE /api/v1/organizations/delete-organization/:id`
+
+This endpoint retrieves the organizations of a specific user.
+
+**Request:**
+
+- Method: DELETE
+- Endpoint: `/api/v1/organizations/delete-organization/:id`
+
+**Response:**
+
+```json
+{
+  "message": "object",
+  "organization": undefined
 }
 ```
 
@@ -444,5 +597,84 @@ This endpoint retrieves the details of a specific department.
   "departmentId": "string",
   "name": "string",
   "description": "string"
+}
+```
+
+### 3. Create Department
+
+**Endpoint**: `POST /api/v1/departments/create-department`
+
+The Create Department endpoint allows you to add a new department to the CRM system.
+
+**Reques Body:**
+
+- `name` (string, required): The name of the department.
+- `description` (string, required): A brief description of the department.
+
+**Response:**
+The response is in JSON format and includes the following fields:
+
+```json
+{
+  "message": "string",
+  "newDepartment": {
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "organizationId": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
+}
+```
+
+### 4. Update Department
+
+**Endpoint**: `PUT /api/v1/departments/update-department`
+
+The Update Department endpoint allows you to update a department.
+
+**Reques Body:**
+
+- `name` (string, required): The name of the department.
+- `description` (string, required): A brief description of the department.
+
+**Response:**
+The response is in JSON format and includes the following fields:
+
+```json
+{
+  "message": "string",
+  "updatedDepartment": {
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "organizationId": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
+}
+```
+
+### 5. Delete Department
+
+**Endpoint**: `DELETE /api/v1/departments/delete-department`
+
+The Delete Department endpoint allows you to delete a department from the CRM system.
+
+**Response:**
+The response is in JSON format and includes the following fields:
+
+```json
+{
+  "message": "string",
+  "deletedDepartment": {
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "organizationId": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
 }
 ```
