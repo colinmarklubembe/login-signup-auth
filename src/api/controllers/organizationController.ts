@@ -120,12 +120,9 @@ const updateOrganization = async (req: Request, res: Response) => {
 };
 
 //read by organization by id
-const getOrganizationById = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
+const getOrganizationById = async (req: Request, res: Response) => {
   try {
-    const { organizationId } = req.organization!;
+    const { organizationId } = req.params;
 
     const organization = await organizationService.getOrganizationById(
       organizationId
@@ -138,6 +135,45 @@ const getOrganizationById = async (
     res.status(200).json(organization);
   } catch (error: any) {
     res.json({ message: error.message });
+  }
+};
+
+const getUserOrgnaizationById = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { email } = req.user!;
+    const { organizationId } = req.organization!;
+
+    const user = await userService.findUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    // check if user is part of the organization
+    const userOrganization = user.userOrganizations.find(
+      (org: any) => org.organizationId === organizationId
+    );
+
+    if (!userOrganization) {
+      return res.status(404).json({
+        success: false,
+        error: "User is not part of the organization",
+      });
+    }
+
+    const organization = await organizationService.getOrganizationById(
+      organizationId
+    );
+
+    res.status(200).json({
+      success: true,
+      organization: organization,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -281,4 +317,5 @@ export default {
   deleteOrganization,
   selectOrganization,
   getUserOrganizations,
+  getUserOrgnaizationById,
 };

@@ -1,9 +1,4 @@
-import { UserDepartment } from ".prisma/client";
 import prisma from "../../prisma/client";
-import generateToken from "../../utils/generateToken";
-import userService from "../auth/services/userService";
-import { UserType } from "@prisma/client";
-import { get } from "http";
 
 const createOrganization = async (data: any) => {
   return prisma.organization.create({
@@ -26,6 +21,9 @@ const getOrganizationById = async (organizationId: string) => {
   return prisma.organization.findUnique({
     where: {
       id: organizationId,
+    },
+    include: {
+      userOrganizations: true,
     },
   });
 };

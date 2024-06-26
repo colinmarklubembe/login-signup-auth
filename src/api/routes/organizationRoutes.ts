@@ -44,4 +44,11 @@ router.get(
   organizationController.getUserOrganizations
 );
 
+router.get(
+  "/get-user-organization",
+  authenticate.authenticateToken,
+  authenticate.checkOrganizationId,
+  organizationController.getUserOrgnaizationById
+);
+
 export default router;
