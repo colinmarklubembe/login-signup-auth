@@ -156,6 +156,30 @@ const deleteUserTransaction = async (userId: string) => {
   ]);
 };
 
+const findUsersByOrganization = async (organizationId: string) => {
+  return prisma.user.findMany({
+    where: {
+      userOrganizations: {
+        some: {
+          organizationId,
+        },
+      },
+      include: {
+        userOrganizations: {
+          include: {
+            organization: true,
+          },
+        },
+        userDepartments: {
+          include: {
+            department: true,
+          },
+        },
+      },
+    },
+  });
+};
+
 const getAllUsers = async () => {
   return prisma.user.findMany();
 };
@@ -168,6 +192,7 @@ export default {
   assignRoleToUser,
   addUserToDepartmentWithRole,
   addUserToOrganization,
+  findUsersByOrganization,
   updateUser,
   findUserById,
   findUserOrganization,

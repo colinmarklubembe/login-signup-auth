@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import userService from "../../auth/services/userService";
 
+interface AuthenticatedRequest extends Request {
+  organization?: { organizationId: string };
+}
+
 const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await userService.getAllUsers();
@@ -28,4 +32,19 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-export default { getAllUsers, getUserById };
+const getUsersByOrganization = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { organizationId } = req.organization!;
+
+    const users = await userService.findUsersByOrganization(organizationId);
+
+    res.status(200).json(users);
+  } catch (error: any) {
+    res.json({ message: error.message });
+  }
+};
+
+export default { getAllUsers, getUserById, getUsersByOrganization };

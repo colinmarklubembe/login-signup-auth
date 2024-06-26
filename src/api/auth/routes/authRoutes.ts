@@ -8,6 +8,7 @@ import deleteUserController from "../controllers/deleteUser";
 import forgotPasswordController from "../controllers/forgotPassword";
 import inviteUserController from "../controllers/inviteUser";
 import updateProfileController from "../controllers/updateProfile";
+import getUserController from "../controllers/getUsers";
 import authenticate from "../../middleware/authenticate";
 import checkMissingFields from "../middleware/checkMissingFields";
 
@@ -64,6 +65,10 @@ router.put(
   checkMissingFields(["name", "email"]),
   updateProfileController.updateProfile
 );
+
+router.get("/get-user/:id", getUserController.getUserById);
+
+router.get("/get-users", getUserController.getAllUsers);
 
 router.delete("/delete-user/:id", deleteUserController.deleteUser);
 
