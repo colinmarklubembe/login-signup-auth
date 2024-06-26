@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendVerificationEmail = async (emailData: any) => {
   const verificationResponse = await resend.emails.send({
-    from: "noreply@novasuite.app",
+    from: `${process.env.RESEND_SENDER_EMAIL}`,
     to: emailData.email,
     subject: "Account Verification",
     html: `
@@ -13,13 +13,13 @@ const sendVerificationEmail = async (emailData: any) => {
         <p>Thank you for signing up, ${emailData.name}. We're excited to have you on board.</p>
         <p>To get started, please verify your email address by clicking the button below:</p>
         <div style="text-align: center;">
-          <a href="http://localhost:4000/api/v1/auth/verify?token=${emailData.token}" 
+          <a href="${process.env.BASE_URL}/api/v1/auth/verify?token=${emailData.token}" 
              style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: blue; text-decoration: none; border-radius: 5px;">
              Verify Your Account
           </a>
         </div>
         <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
-        <p>http://localhost:4000/api/v1/auth/verify?token=${emailData.token}</p>
+        <p>${process.env.BASE_URL}/api/v1/auth/verify?token=${emailData.token}</p>
         <p>Best regards,<br>The Team</p>
       `,
   });
@@ -37,7 +37,7 @@ const sendVerificationEmail = async (emailData: any) => {
 
 const sendUpdatedProfileEmail = async (emailData: any) => {
   const updatedResponse = await resend.emails.send({
-    from: "noreply@novasuite.app",
+    from: `${process.env.RESEND_SENDER_EMAIL}`,
     to: emailData.email,
     subject: "Your Profile Has Been Updated",
     html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
@@ -71,7 +71,7 @@ const sendUpdatedProfileEmail = async (emailData: any) => {
 
 const sendForgotPasswordEmail = async (emailData: any) => {
   const forgotPasswordResponse = await resend.emails.send({
-    from: "noreply@novasuite.app",
+    from: `${process.env.RESEND_SENDER_EMAIL}`,
     to: emailData.email,
     subject: "Reset Your Password",
     html: `
@@ -80,7 +80,7 @@ const sendForgotPasswordEmail = async (emailData: any) => {
         <p>Hello ${emailData.name},</p>
         <p>We received a request to reset your password for your NOVA CRM account associated with this email address. If you made this request, please click the button below to reset your password:</p>
         <div style="text-align: center; margin: 20px 0;">
-          <a href="http://localhost:3000/reset-password" 
+          <a href="${process.env.FRONTEND_URL}/reset-password" 
              style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
              Reset Your Password
           </a>
@@ -88,8 +88,8 @@ const sendForgotPasswordEmail = async (emailData: any) => {
         <p>If you did not request a password reset, please ignore this email. Your password will remain unchanged and no further action is required.</p>
         <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
         <p style="word-wrap: break-word;">
-          <a href="http://localhost:3000/reset-password" style="color: #007BFF;">
-            http://localhost:3000/reset-password
+          <a href="${process.env.FRONTEND_URL}/reset-password" style="color: #007BFF;">
+            ${process.env.FRONTEND_URL}/reset-password
           </a>
         </p>
         <p>Thank you,<br>The NOVA CRM Team</p>
@@ -112,7 +112,7 @@ const sendForgotPasswordEmail = async (emailData: any) => {
 const sendInviteEmail = async (emailData: any) => {
   // Send the invitation email
   const inviteResponse = await resend.emails.send({
-    from: "noreply@novasuite.app",
+    from: `${process.env.RESEND_SENDER_EMAIL}`,
     to: emailData.email,
     subject: "You're Invited to Join NOVA CRM",
     html: `
@@ -124,22 +124,22 @@ const sendInviteEmail = async (emailData: any) => {
           <p>You will login using the current email to which this invite was sent.</p>
           <p>Please click the button below to accept the invitation and get started:</p>
           <div style="text-align: center; margin: 20px 0;">
-            <a href="http://localhost:3000/login" 
+            <a href="${process.env.FRONTEND_URL}/login" 
                style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
                Accept Invitation and Login
             </a>
           </div>
           <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
           <p style="word-wrap: break-word;">
-            <a href="http://localhost:3000/login" style="color: #007BFF;">
-              http://localhost:3000/login
+            <a href="${process.env.FRONTEND_URL}/login" style="color: #007BFF;">
+              ${process.env.FRONTEND_URL}/login
             </a>
           </p>
           <p>Thank you,<br>The NOVA CRM Team</p>
         </div>
       `,
 
-    // make a call to the backend login api (http://localhost:4000/api/v1/auth/login)
+    // make a call to the backend login api ${process.env.BASE_URL}/api/v1/auth/login)
   });
 
   // check if the email was sent successfully
@@ -156,7 +156,7 @@ const sendInviteEmail = async (emailData: any) => {
 const sendInviteEmailToExistingUser = async (emailData: any) => {
   // Send the invitation email
   const inviteResponse = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: `${process.env.RESEND_SENDER_EMAIL}`,
     to: emailData.email,
     subject: "You're Invited to Join NOVA CRM",
     html: `
@@ -166,15 +166,15 @@ const sendInviteEmailToExistingUser = async (emailData: any) => {
           <p>We're excited to invite you to join NOVA CRM under the organization <strong>${emailData.organization}</strong> and department <strong>${emailData.department}</strong>.</p>
           <p>As an existing user, you can use your current login credentials to access your account. Click the button below to accept the invitation and get started:</p>
           <div style="text-align: center; margin: 20px 0;">
-            <a href="http://localhost:3000/login" 
+            <a href="${process.env.FRONTEND_URL}/login" 
                style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
                Accept Invitation and Login
             </a>
           </div>
           <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
           <p style="word-wrap: break-word;">
-            <a href="http://localhost:3000/login" style="color: #007BFF;">
-              http://localhost:3000/login
+            <a href="${process.env.FRONTEND_URL}/login" style="color: #007BFF;">
+            ${process.env.FRONTEND_URL}/login
             </a>
           </p>
           <p>If you have any questions or need assistance, please contact our support team.</p>
@@ -182,7 +182,7 @@ const sendInviteEmailToExistingUser = async (emailData: any) => {
         </div>
       `,
 
-    // make a call to the backend login api (http://localhost:4000/api/v1/auth/login)
+    // make a call to the backend login api (${process.env.BASE_URL}/api/v1/auth/login)
   });
 
   // check if the email was sent successfully
