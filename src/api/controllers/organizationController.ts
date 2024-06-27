@@ -170,6 +170,7 @@ const getUserOrgnaizationById = async (
 
     res.status(200).json({
       success: true,
+      user: user,
       organization: organization,
     });
   } catch (error: any) {
