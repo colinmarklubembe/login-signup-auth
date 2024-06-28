@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import { validatePasswordStrength } from "../../../utils/checkPasswordStrength";
 import { UserType } from "@prisma/client";
+import { checkPasswordStrength, hashPassword } from "../../../utils";
 import userService from "../services/userService";
-import { hashPassword } from "../../../utils/hashPassword";
 import generateToken from "../../../utils/generateToken";
 import sendEmails from "../../../utils/sendEmails";
 import systemLog from "../../../utils/systemLog";
@@ -11,7 +10,7 @@ const signup = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
 
-    validatePasswordStrength(password);
+    checkPasswordStrength.validatePasswordStrength(password);
 
     const checkUser = await userService.findUserByEmail(email);
 

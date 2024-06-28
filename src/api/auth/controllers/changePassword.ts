@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import userService from "../services/userService";
 import bcryptjs from "bcryptjs";
-import { validatePasswordStrength } from "../../../utils/checkPasswordStrength";
-import { hashPassword } from "../../../utils/hashPassword";
+
+import { hashPassword, checkPasswordStrength } from "../../../utils";
 
 const changePassword = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -24,7 +24,7 @@ const changePassword = async (req: Request, res: Response) => {
     const password = newPassword;
 
     // validate password strength
-    validatePasswordStrength(password);
+    checkPasswordStrength.validatePasswordStrength(password);
 
     // hash new password
     const hashedPassword = await hashPassword(password);
@@ -62,7 +62,7 @@ const resetPassword = async (req: Request, res: Response) => {
     const password = newPassword;
 
     // validate password strength
-    validatePasswordStrength(password);
+    checkPasswordStrength.validatePasswordStrength(password);
 
     // hash new password
     const hashedPassword = await hashPassword(password);

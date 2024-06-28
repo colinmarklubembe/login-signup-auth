@@ -1,13 +1,14 @@
 import { UserType } from "@prisma/client";
 import { Request, Response } from "express";
-import { hashPassword } from "../../../utils/hashPassword";
-import generateRandomPassword from "../../../utils/generateRandonPassword";
-import sendEmails from "../../../utils/sendEmails";
-import mapStringToUserType from "../../../utils/mapStringToUserType";
-import userService from "../../auth/services/userService";
-import departmentService from "../../services/departmentService";
-import organizationService from "../../services/organizationService";
-import systemLog from "../../../utils/systemLog";
+import {
+  mapStringToUserType,
+  sendEmails,
+  generateRandomPassword,
+  hashPassword,
+  systemLog,
+} from "../../../utils";
+import { departmentService, organizationService } from "../../services";
+import userService from "../services/userService";
 
 interface AuthenticatedRequest extends Request {
   organization?: { organizationId: string };
