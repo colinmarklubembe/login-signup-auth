@@ -1,9 +1,11 @@
 import express from "express";
 import mongoose from "mongoose";
 import authRouter from "./api/auth/routes/authRoutes";
-import contactRouter from "./api/routes/contactRoutes";
-import organizationRouter from "./api/routes/organizationRoutes";
-import departmentRouter from "./api/routes/departmentRoutes";
+import {
+  contactRouter,
+  organizationRouter,
+  departmentRouter,
+} from "./api/routes";
 
 const cors = require("cors");
 const app = express();

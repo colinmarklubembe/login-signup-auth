@@ -1,7 +1,6 @@
 import { Router } from "express";
-import organizationController from "../controllers/organizationController";
-import authenticate from "../middleware/authenticate";
-import checkMissingFields from "../middleware/checkMissingFields";
+import { checkMissingFields, authenticate } from "../middleware";
+import { organizationController } from "../controllers";
 
 const router = Router();
 

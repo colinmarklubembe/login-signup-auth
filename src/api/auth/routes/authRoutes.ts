@@ -1,16 +1,22 @@
 import { Router } from "express";
-import { limiter } from "../middleware/limiter";
-import signupController from "../controllers/signup";
-import verifyUserController from "../controllers/verifyUser";
-import loginController from "../controllers/login";
-import changePasswordController from "../controllers/changePassword";
-import deleteUserController from "../controllers/deleteUser";
-import forgotPasswordController from "../controllers/forgotPassword";
-import inviteUserController from "../controllers/inviteUser";
-import updateProfileController from "../controllers/updateProfile";
-import getUserController from "../controllers/getUsers";
-import authenticate from "../../middleware/authenticate";
-import checkMissingFields from "../middleware/checkMissingFields";
+
+import {
+  signupController,
+  verifyUserController,
+  loginController,
+  changePasswordController,
+  forgotPasswordController,
+  inviteUserController,
+  updateProfileController,
+  getUserController,
+  deleteUserController,
+} from "../controllers";
+
+import {
+  authenticate,
+  checkMissingFields,
+  loginLimiter,
+} from "../../middleware";
 
 const router = Router();
 
@@ -30,7 +36,7 @@ router.post(
 
 router.post(
   "/login",
-  limiter,
+  loginLimiter,
   checkMissingFields(["email", "password"]),
   loginController.login
 );

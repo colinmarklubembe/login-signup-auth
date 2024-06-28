@@ -1,6 +1,4 @@
 import prisma from "../../prisma/client";
-import userService from "../auth/services/userService";
-import organizationService from "./organizationService";
 
 const findOrganizationDepartment = async (
   name: string,

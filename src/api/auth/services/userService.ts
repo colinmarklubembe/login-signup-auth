@@ -27,7 +27,6 @@ const findUserById = async (userId: string) => {
     where: { id: userId },
     include: {
       userOrganizations: { include: { organization: true } },
-      userDepartments: { include: { department: true } },
     },
   });
 };

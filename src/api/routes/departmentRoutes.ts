@@ -1,7 +1,6 @@
 import { Router } from "express";
-import departmentController from "../controllers/departmentController";
-import authenticate from "../middleware/authenticate";
-import checkMissingFields from "../middleware/checkMissingFields";
+import { checkMissingFields, authenticate } from "../middleware";
+import { departmentController } from "../controllers";
 
 const router = Router();
 

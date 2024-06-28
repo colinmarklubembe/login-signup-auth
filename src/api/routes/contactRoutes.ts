@@ -1,19 +1,37 @@
 import { Router } from "express";
-import contactController from "../controllers/contactController";
-import authenticate from "../middleware/authenticate";
-import checkMissingFields from "../middleware/checkMissingFields";
+import { checkMissingFields, authenticate } from "../middleware";
+import { contactController } from "../controllers";
 
 const router = Router();
 
 router.post(
   "/create-contact",
-  checkMissingFields(["fullName", "contactEmail", "phoneNumber", "title", "leadStatus", "location", "businessType", "description"]),
+  checkMissingFields([
+    "fullName",
+    "contactEmail",
+    "phoneNumber",
+    "title",
+    "leadStatus",
+    "location",
+    "businessType",
+    "description",
+  ]),
   authenticate.authenticateToken,
   authenticate.checkOrganizationId,
   contactController.createContact
 );
-router.put("/update-contact/:id",
-  checkMissingFields(["fullName", "contactEmail", "phoneNumber", "title", "leadStatus", "location", "businessType", "description"]),
+router.put(
+  "/update-contact/:id",
+  checkMissingFields([
+    "fullName",
+    "contactEmail",
+    "phoneNumber",
+    "title",
+    "leadStatus",
+    "location",
+    "businessType",
+    "description",
+  ]),
   contactController.updateContact
 );
 
