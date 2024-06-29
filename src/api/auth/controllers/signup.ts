@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
 import { UserType } from "@prisma/client";
-import { checkPasswordStrength, hashPassword } from "../../../utils";
+import {
+  checkPasswordStrength,
+  hashPassword,
+  sendEmails,
+} from "../../../utils";
 import userService from "../services/userService";
 import generateToken from "../../../utils/generateToken";
-import sendEmails from "../../../utils/sendEmails";
 import systemLog from "../../../utils/systemLog";
 
 const signup = async (req: Request, res: Response) => {

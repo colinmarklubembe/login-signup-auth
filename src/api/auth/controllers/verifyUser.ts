@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
+import { sendEmails } from "../../../utils";
 import jwt from "jsonwebtoken";
 import userService from "../services/userService";
 import generateToken from "../../../utils/generateToken";
-import sendEmails from "../../../utils/sendEmails";
 
 const verifyUser = async (req: Request, res: Response) => {
   try {

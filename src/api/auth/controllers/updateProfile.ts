@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import sendEmails from "../../../utils/sendEmails";
+import { sendEmails } from "../../../utils";
 import userService from "../services/userService";
 
 const updateProfile = async (req: Request, res: Response) => {

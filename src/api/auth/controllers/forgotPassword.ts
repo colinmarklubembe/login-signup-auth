@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import sendEmails from "../../../utils/sendEmails";
-import generateToken from "../../../utils/generateToken";
+import { sendEmails } from "../../../utils";
 import userService from "../services/userService";
 
 const forgotPassword = async (req: Request, res: Response) => {
