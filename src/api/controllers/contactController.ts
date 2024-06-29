@@ -39,29 +39,30 @@ const createContact = async (req: AuthenticatedRequest, res: Response) => {
     );
 
     if (!userOrganization) {
-      return res
-        .status(403)
-        .json({ success:false, error: "User does not belong to the Organization" });
+      return res.status(403).json({
+        success: false,
+        error: "User does not belong to the Organization",
+      });
     }
     // Check if contact email already exists
     const existingContactByEmail = await contactService.findContactByEmail(
       contactEmail.trim().toLowerCase()
     );
     if (existingContactByEmail) {
-      return res
-        .status(409).
-        json({
-          success:false,
-          error: "Contact with the same email already exists"
-        });
+      return res.status(409).json({
+        success: false,
+        error: "Contact with the same email already exists",
+      });
     }
 
     // Check if contact phone number already exists
-    const existingContactByPhone = await contactService.findContactByPhoneNumber(phoneNumber);
+    const existingContactByPhone =
+      await contactService.findContactByPhoneNumber(phoneNumber);
     if (existingContactByPhone) {
-      return res
-        .status(409)
-        .json({ success:false, error: "Contact with the same phone number already exists" });
+      return res.status(409).json({
+        success: false,
+        error: "Contact with the same phone number already exists",
+      });
     }
     //create new contact
     const data = {
@@ -79,10 +80,11 @@ const createContact = async (req: AuthenticatedRequest, res: Response) => {
       updatedAt: new Date().toISOString(),
     };
     const newContact = await contactService.createContact(data);
-    res.status(201).json({ 
-      message: "Contact created successfully", 
-      success: true, 
-      newContact: newContact });
+    res.status(201).json({
+      message: "Contact created successfully",
+      success: true,
+      newContact: newContact,
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -96,12 +98,18 @@ const getContactById = async (req: Request, res: Response) => {
     const contact = await contactService.getContactById(id);
 
     if (!contact) {
-      return res.status(404).json({ success:false, error: "Contact not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Contact not found" });
     }
 
-    res.status(200).json({ message: "Contact retrieved successfully", success: true, contact: contact });
+    res.status(200).json({
+      message: "Contact retrieved successfully",
+      success: true,
+      contact: contact,
+    });
   } catch (error: any) {
-    res.status(500).json({ success:false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -109,9 +117,13 @@ const getContactById = async (req: Request, res: Response) => {
 const getAllContacts = async (req: Request, res: Response) => {
   try {
     const contacts = await contactService.getAllContacts();
-    res.status(200).json({ message: "All contacts retrieved successfully", success: true, contacts: contacts });
+    res.status(200).json({
+      message: "All contacts retrieved successfully",
+      success: true,
+      contacts: contacts,
+    });
   } catch (error: any) {
-    res.status(500).json({ success:false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -119,7 +131,8 @@ const getAllContacts = async (req: Request, res: Response) => {
 const updateContact = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { fullName,
+    const {
+      fullName,
       contactEmail,
       phoneNumber,
       title,
@@ -132,7 +145,9 @@ const updateContact = async (req: Request, res: Response) => {
     // Check if the contact exists
     const contact = await contactService.findContactById(contactId);
     if (!contact) {
-      return res.status(404).json({ success:false, error: "Contact not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Contact not found" });
     }
     const newData = {
       fullName,
@@ -150,11 +165,13 @@ const updateContact = async (req: Request, res: Response) => {
       newData
     );
 
-    res
-      .status(200)
-      .json({ message: "Contact updated successfully", success: true, updatedContact: updatedContact });
+    res.status(200).json({
+      message: "Contact updated successfully",
+      success: true,
+      updatedContact: updatedContact,
+    });
   } catch (error: any) {
-    res.status(500).json({ success:false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -167,16 +184,19 @@ const deleteContact = async (req: Request, res: Response) => {
     // Check if the contact exists
     const contact = await contactService.findContactById(contactId);
     if (!contact) {
-      return res.status(404).json({ success:false, error: "Contact not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Contact not found" });
     }
-    const deletedContact =
-      contactService.deleteContact(contactId);
+    const deletedContact = contactService.deleteContact(contactId);
 
-    res
-      .status(200)
-      .json({ message: "Contact deleted successfully", success: true, deletedContact: deletedContact });
+    res.status(200).json({
+      message: "Contact deleted successfully",
+      success: true,
+      deletedContact: deletedContact,
+    });
   } catch (error: any) {
-    res.status(500).json({ success:false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -193,23 +213,64 @@ const getContactsByOrganization = async (
     );
 
     if (!organization) {
-      return res.status(404).json({ success:false, error: "Organization not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Organization not found" });
     }
-     
+
     // Fetch contacts for the organization
     const contacts = await contactService.getContactsByOrganization(
       organizationId
     );
 
     if (!contacts) {
-      return res
-        .status(404)
-        .json({ success:false, error: `No contacts found for the organization: ${organization.name}` });
+      return res.status(404).json({
+        success: false,
+        error: `No contacts found for the organization: ${organization.name}`,
+      });
     }
 
-    res.status(200).json({ message: `Contacts belonging to the organization ${organization.name} retrieved successfully`, success: true, organizationContacts: contacts });
+    res.status(200).json({
+      message: `Contacts belonging to the organization ${organization.name} retrieved successfully`,
+      success: true,
+      organizationContacts: contacts,
+    });
   } catch (error: any) {
-    res.status(500).json({ success:false, error: error.message });
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const changeLeadStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { leadStatus } = req.body;
+    const contactId = id;
+
+    // Check if the contact exists
+    const contact = await contactService.findContactById(contactId);
+    if (!contact) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Contact not found" });
+    }
+
+    const newData = {
+      leadStatus,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updatedContact = await contactService.updateContact(
+      contactId,
+      newData
+    );
+
+    res.status(200).json({
+      message: `Contact lead status updated from ${contact.leadStatus} to ${updatedContact.leadStatus} successfully`,
+      success: true,
+      updatedContact: updatedContact,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -220,4 +281,5 @@ export default {
   updateContact,
   deleteContact,
   getContactsByOrganization,
+  changeLeadStatus,
 };
