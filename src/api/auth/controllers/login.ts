@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
+import { organizationService } from "../../services";
+import { comparePassword, generateToken } from "../../../utils";
 import userService from "../services/userService";
-import comparePassword from "../../../utils/comparePassword";
-import organizationService from "../../services/organizationService";
-import generateToken from "../../../utils/generateToken";
 
 const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;

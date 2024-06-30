@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
-import departmentService from "../services/departmentService";
+import { departmentService, organizationService } from "../services";
 import userService from "../../api/auth/services/userService";
-import organizationService from "../services/organizationService";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string };

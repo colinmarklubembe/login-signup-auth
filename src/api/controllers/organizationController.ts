@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import organizationService from "../services/organizationService";
-import userService from "../auth/services/userService";
 import { UserType } from "@prisma/client";
-import departmentService from "../services/departmentService";
+import { organizationService, departmentService } from "../services";
+import userService from "../auth/services/userService";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string };
