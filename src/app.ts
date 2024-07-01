@@ -1,11 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import authRouter from "./api/auth/routes/authRoutes";
-import {
-  contactRouter,
-  organizationRouter,
-  departmentRouter,
-} from "./api/routes";
+import { leadRouter, organizationRouter, departmentRouter } from "./api/routes";
 
 const cors = require("cors");
 const app = express();
@@ -24,7 +20,7 @@ mongoose
 app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/contacts", contactRouter);
+app.use("/api/v1/leads", leadRouter);
 app.use("/api/v1/organizations", organizationRouter);
 app.use("/api/v1/departments", departmentRouter);
 

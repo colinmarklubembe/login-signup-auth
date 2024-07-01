@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { checkMissingFields, authenticate } from "../middleware";
-import { contactController } from "../controllers";
+import { leadController } from "../controllers";
 
 const router = Router();
 
 router.post(
-  "/create-contact",
+  "/create-lead",
   checkMissingFields([
     "fullName",
-    "contactEmail",
+    "leadEmail",
     "phoneNumber",
     "title",
     "leadStatus",
@@ -18,13 +18,13 @@ router.post(
   ]),
   authenticate.authenticateToken,
   authenticate.checkOrganizationId,
-  contactController.createContact
+  leadController.createLead
 );
 router.put(
-  "/update-contact/:id",
+  "/update-lead/:id",
   checkMissingFields([
     "fullName",
-    "contactEmail",
+    "leadEmail",
     "phoneNumber",
     "title",
     "leadStatus",
@@ -32,17 +32,19 @@ router.put(
     "businessType",
     "description",
   ]),
-  contactController.updateContact
+  leadController.updateLead
 );
 
-router.get("/get-contacts", contactController.getAllContacts);
+router.get("/get-leads", leadController.getAllLeads);
 
-router.get("/get-contact/:id", contactController.getContactById);
-router.delete("/delete-contact/:id", contactController.deleteContact);
+router.get("/get-lead/:id", leadController.getLeadById);
+router.delete("/delete-lead/:id", leadController.deleteLead);
 router.get(
-  "/get-contacts-by-organization",
+  "/get-leads-by-organization",
   authenticate.checkOrganizationId,
-  contactController.getContactsByOrganization
+  leadController.getLeadsByOrganization
 );
+
+router.post("/change-status/:id", leadController.changeLeadStatus);
 
 export default router;

@@ -1,9 +1,8 @@
-import { UserType } from "@prisma/client";
 import { Request, Response } from "express";
 import {
-  mapStringToUserType,
   sendEmails,
   generateRandomPassword,
+  mapStringToEnum,
   hashPassword,
   systemLog,
 } from "../../../utils";
@@ -21,9 +20,9 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
   const { organizationId } = req.organization!;
 
   try {
-    let mappedUserType: UserType;
+    let mappedUserType: any;
 
-    mappedUserType = mapStringToUserType(userType);
+    mappedUserType = mapStringToEnum.mapStringToUserType(userType, res);
 
     // Check if user already exists
     const existingUser = await userService.findUserByEmail(email);

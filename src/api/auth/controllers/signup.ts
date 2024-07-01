@@ -5,8 +5,9 @@ import {
   hashPassword,
   sendEmails,
 } from "../../../utils";
-import { generateToken, systemLog } from "../../../utils";
 import userService from "../services/userService";
+import generateToken from "../../../utils/generateToken";
+import systemLog from "../../../utils/systemLog";
 
 const signup = async (req: Request, res: Response) => {
   try {

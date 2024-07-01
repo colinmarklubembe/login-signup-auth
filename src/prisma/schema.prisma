@@ -95,10 +95,10 @@ model Tasks {
   updatedAt               DateTime? 
 }
 
-model Contact {
+model Lead {
   id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
   fullName                String    
-  contactEmail            String                        @unique
+  leadEmail            String                        @unique
   phoneNumber             String                        @unique
   title                   String    
   leadStatus              LeadStatus  @default(LEAD)    
@@ -188,7 +188,7 @@ enum UserType {
 enum LeadStatus {
   LEAD
   PROSPECT
-  CLOSED
+  CUSTOMER
 }
 
 enum BusinessType {
