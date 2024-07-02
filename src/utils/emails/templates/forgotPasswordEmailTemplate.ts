@@ -9,7 +9,7 @@ const forgotPasswordEmailTemplate = (emailData: any) => `
         <p>We received a request to reset your password. If you made this request, please click the button below to continue:</p>
         <p style="text-align: center">
           <a
-            href="${process.env.FRONTEND_URL}/reset-password"
+            href="${process.env.FRONTEND_URL}/reset-password?id=${emailData.id}"
             style="display: inline-block;padding: 8px 18px; background-color: #009699; color: #ffffff; text-decoration: none; border-radius: 5px;">
             Reset Password</a>
         </p>
@@ -22,12 +22,10 @@ const forgotPasswordEmailTemplate = (emailData: any) => `
             your web browser:
           </p>
           <p style="word-wrap: break-word; max-width: 100%; color: #009699">
-          <a href="${process.env.FRONTEND_URL}/reset-password">${process.env.FRONTEND_URL}/reset-password</a>
+          <a href="${process.env.FRONTEND_URL}/reset-password?id=${emailData.id}">${process.env.FRONTEND_URL}/reset-password?id=${emailData.id}</a>
           </p>
         </div>
       </div>
     </div>
   </body>`;
 export default forgotPasswordEmailTemplate;
-
-
