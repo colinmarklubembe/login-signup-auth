@@ -4,28 +4,31 @@ import {
   checkPasswordStrength,
   hashPassword,
   sendEmails,
+  generateToken,
+  systemLog,
+  responses,
 } from "../../../utils";
 import userService from "../services/userService";
-import generateToken from "../../../utils/generateToken";
-import systemLog from "../../../utils/systemLog";
 
 const signup = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { firstName, middleName, lastName, email, password } = req.body;
 
     checkPasswordStrength.validatePasswordStrength(password);
 
     const checkUser = await userService.findUserByEmail(email);
 
     if (checkUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return responses.errorResponse(res, 400, "User already exists");
     }
 
     const hashedPassword = await hashPassword(password);
 
     // Create the user data
     const data = {
-      name,
+      firstName,
+      middleName,
+      lastName,
       email,
       password: hashedPassword,
       userType: UserType.USER,
@@ -38,7 +41,7 @@ const signup = async (req: Request, res: Response) => {
     const tokenData = {
       id: user.id,
       email: user.email,
-      username: user.name,
+      username: user.firstName,
       createdAt: new Date().toISOString(), // temporarily store the timestamp of the token creation
       userType: user.userType,
     };
@@ -54,7 +57,7 @@ const signup = async (req: Request, res: Response) => {
 
     const emailData = {
       email: user.email,
-      name: user.name,
+      name: user.firstName,
       token,
     };
 
@@ -63,13 +66,14 @@ const signup = async (req: Request, res: Response) => {
 
     systemLog.systemError(emailResponse.message);
 
-    return res.status(200).json({
-      message: "User created successfully",
-      success: true,
-      user: updatedUser,
-    });
+    responses.successResponse(
+      res,
+      201,
+      "User created successfully. Please verify your email",
+      updatedUser
+    );
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 

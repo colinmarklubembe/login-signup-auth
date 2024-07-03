@@ -1,6 +1,7 @@
+import { responses } from "../../../utils";
 import { Request, Response } from "express";
+import { organizationService } from "../../services";
 import userService from "../../auth/services/userService";
-import organizationService from "../../services/organizationService";
 
 interface AuthenticatedRequest extends Request {
   organization?: { organizationId: string };
@@ -10,9 +11,13 @@ const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await userService.getAllUsers();
 
-    res.status(200).json({ success: true, users: users });
+    if (!users) {
+      return responses.errorResponse(res, 404, "No users found");
+    }
+
+    responses.successResponse(res, 200, "Users:", users);
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 
@@ -24,14 +29,12 @@ const getUserById = async (req: Request, res: Response) => {
     const user = await userService.findUserById(userId);
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, error: "User does not exist" });
+      return responses.errorResponse(res, 404, "User not found");
     }
 
-    res.status(200).json({ success: true, user: user });
+    responses.successResponse(res, 200, "User:", user);
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 
@@ -47,18 +50,19 @@ const getUsersByOrganization = async (
     );
 
     if (!organization) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Organization does not exist" });
+      return responses.errorResponse(res, 404, "Organization not found");
     }
 
     const users = await userService.findUsersByOrganization(organizationId);
 
-    res
-      .status(200)
-      .json({ success: true, organization: organization.name, users: users });
+    responses.successResponse(
+      res,
+      200,
+      `Users for the organization ${organization.name} `,
+      { users: users }
+    );
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 

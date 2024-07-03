@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { sendEmails } from "../../../utils";
+import { sendEmails, responses } from "../../../utils";
 import userService from "../services/userService";
 
 const forgotPassword = async (req: Request, res: Response) => {
@@ -9,13 +9,13 @@ const forgotPassword = async (req: Request, res: Response) => {
     const user = await userService.findUserByEmail(email);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return responses.errorResponse(res, 404, "User not found");
     }
 
     const emailData = {
       id: user.id,
       email: user.email,
-      name: user.name,
+      name: user.firstName,
     };
 
     // send email with password reset link
@@ -23,15 +23,16 @@ const forgotPassword = async (req: Request, res: Response) => {
       await sendEmails.sendForgotPasswordEmail(emailData);
 
     if (emailResponse.status === 200) {
-      res.status(200).json({
-        message: "Password reset link sent successfully!",
-        success: true,
-      });
+      responses.successResponse(
+        res,
+        200,
+        "Password reset link has been sent to your email"
+      );
     } else {
-      res.status(422).json({ success: false, error: "Failed to send email" });
+      responses.errorResponse(res, 500, "Email could not be sent");
     }
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 

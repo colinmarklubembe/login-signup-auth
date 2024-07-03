@@ -1,7 +1,7 @@
 import { Response } from "express";
 
 class Responses {
-  static sendSuccessResponse(
+  static successResponse(
     res: Response,
     statusCode: number,
     message: string,
@@ -14,10 +14,10 @@ class Responses {
     });
   }
 
-  static sendErrorResponse(res: Response, statusCode: number, message: string) {
+  static errorResponse(res: Response, statusCode: number, error: string) {
     res.status(statusCode).json({
       success: false,
-      message,
+      error,
     });
   }
 }

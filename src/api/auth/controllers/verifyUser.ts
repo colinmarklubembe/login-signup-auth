@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import { sendEmails } from "../../../utils";
+import { sendEmails, generateToken, responses } from "../../../utils";
 import jwt from "jsonwebtoken";
 import userService from "../services/userService";
-import generateToken from "../../../utils/generateToken";
 
 const verifyUser = async (req: Request, res: Response) => {
   try {
@@ -27,14 +26,14 @@ const verifyUser = async (req: Request, res: Response) => {
 
     // check if both tokens match
     if (checkUser?.verificationToken !== token) {
-      // return res.status(404).json({ message: "Invalid token" });
+      return responses.errorResponse(res, 400, "Invalid token");
     }
 
     // check if token has expired
     const tokenAge = Date.now() - new Date(decoded.createdAt).getTime();
 
     if (tokenAge > 3600000) {
-      // return res.status(404).json({ message: "Token has expired" });
+      return responses.errorResponse(res, 400, "Token has expired");
     }
 
     const newData = {
@@ -48,7 +47,7 @@ const verifyUser = async (req: Request, res: Response) => {
 
     res.status(200).redirect("http://localhost:3000/verifiedEmail");
   } catch (error: any) {
-    res.json({ message: error.message });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 
@@ -59,18 +58,18 @@ const reverifyUser = async (req: Request, res: Response) => {
     const user = await userService.findUserByEmail(email);
 
     if (!user) {
-      // return res.status(404).json({ message: "User not found" });
+      return responses.errorResponse(res, 404, "User not found");
     }
 
     if (user.isVerified) {
-      // return res.status(400).json({ message: "User is already verified" });
+      return responses.errorResponse(res, 400, "User is already verified");
     }
 
     // create token data with timestamp
     const tokenData = {
       id: user.id,
       email: user.email,
-      username: user.name,
+      username: user.firstName,
       createdAt: user.createdAt,
       userType: user.userType,
     };
@@ -90,7 +89,7 @@ const reverifyUser = async (req: Request, res: Response) => {
 
     const emailTokenData = {
       email: user.email,
-      name: user.name,
+      name: user.firstName,
       token,
     };
 
@@ -104,14 +103,16 @@ const reverifyUser = async (req: Request, res: Response) => {
       await sendEmails.sendVerificationEmail(generateEmailToken);
 
     if (emailResponse.status === 200) {
-      return res.status(200).json({ message: "Email sent" });
+      return responses.successResponse(
+        res,
+        200,
+        "Verification email sent successfully"
+      );
     } else {
-      return res.status(500).json({ message: "Email not sent" });
+      return responses.errorResponse(res, 500, "Email could not be sent");
     }
   } catch (error: any) {
-    res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server error" });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 

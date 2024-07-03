@@ -29,8 +29,8 @@ const mapStringToLeadStatus = (
       return LeadStatus.LEAD;
     case "PROSPECT":
       return LeadStatus.PROSPECT;
-    case "CUSTOMER":
-      return LeadStatus.CUSTOMER;
+    case "CLOSED":
+      return LeadStatus.CLOSED;
     default:
       return res
         .status(400)
@@ -43,10 +43,10 @@ const mapStringToBusinessType = (
   res: Response
 ): BusinessType | Response<any> => {
   switch (businessType.toUpperCase()) {
-    case "INDIVIDUAL":
-      return BusinessType.INDIVIDUAL;
-    case "BUSINESS":
-      return BusinessType.BUSINESS;
+    case "ENTERPRISE":
+      return BusinessType.ENTERPRISE;
+    case "HOME":
+      return BusinessType.HOME;
     default:
       return res
         .status(400)

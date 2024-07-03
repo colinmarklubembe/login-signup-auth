@@ -6,3 +6,4 @@ export { default as hashPassword } from "./hashPassword";
 export { default as mapStringToEnum } from "./mapStringToEnum";
 export { default as systemLog } from "./systemLog";
 export { default as sendEmails } from "./emails/sendEmails";
+export { default as responses } from "./getResponse";

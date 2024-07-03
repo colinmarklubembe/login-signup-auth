@@ -13,7 +13,7 @@ router.post(
 );
 router.put(
   "/update-department/:id",
-  checkMissingFields(["name", "description"]),
+  checkMissingFields(["name"]),
   departmentController.updateDepartment
 );
 

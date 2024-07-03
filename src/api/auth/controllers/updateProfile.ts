@@ -1,22 +1,24 @@
 import { Request, Response } from "express";
-import { sendEmails } from "../../../utils";
+import { sendEmails, responses } from "../../../utils";
 import userService from "../services/userService";
 
 const updateProfile = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { name, email } = req.body;
+  const { firstName, middleName, lastName, email } = req.body;
 
   try {
     const user = await userService.findUserById(id);
 
     if (!user) {
-      return res.status(404).json({ success: false, error: "User not found" });
+      return responses.errorResponse(res, 404, "User not found");
     }
 
     const userId = user.id;
 
     const newData = {
-      name,
+      firstName,
+      middleName,
+      lastName,
       email,
       updatedAt: new Date().toISOString(),
     };
@@ -26,21 +28,19 @@ const updateProfile = async (req: Request, res: Response) => {
     // send update profile email to user
     const emailData = {
       email: user.email,
-      name: user.name,
+      name: user.firstName,
     };
 
     // Send invitation email
     const response = await sendEmails.sendUpdatedProfileEmail(emailData);
 
     if (response.status === 200) {
-      return res.status(200).json({
-        message: "Profile updated successfully!",
-        success: true,
+      responses.successResponse(res, 200, "Profile updated successfully", {
         user: updatedUser,
       });
     }
   } catch (error: any) {
-    res.json({ success: false, error: error.message });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 

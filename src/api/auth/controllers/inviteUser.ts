@@ -5,6 +5,7 @@ import {
   mapStringToEnum,
   hashPassword,
   systemLog,
+  responses,
 } from "../../../utils";
 import { departmentService, organizationService } from "../../services";
 import userService from "../services/userService";
@@ -15,7 +16,7 @@ interface AuthenticatedRequest extends Request {
 
 const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
   const { departmentId } = req.params;
-  const { name, email, userType } = req.body;
+  const { firstName, middleName, lastName, email, userType } = req.body;
 
   const { organizationId } = req.organization!;
 
@@ -33,17 +34,16 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       );
 
       if (!department) {
-        return res
-          .status(400)
-          .json({ success: false, error: "Department not found" });
+        return responses.errorResponse(res, 404, "Department not found");
       }
 
       // check if the department belongs to the organization
       if (department.organizationId !== organizationId) {
-        res.status(400).json({
-          success: false,
-          error: "Department doesn't belong to organization",
-        });
+        responses.errorResponse(
+          res,
+          400,
+          "Department doesn't belong to organization"
+        );
       }
 
       // get the organization with the id of organizationId
@@ -85,7 +85,7 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       // Send invitation email
       const emailData = {
         email: updatedUser.email,
-        name: updatedUser.name,
+        name: updatedUser.firstName,
         department: department.name,
         organization: organization.name,
       };
@@ -94,11 +94,12 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
         emailData
       );
 
-      return res.status(200).json({
-        message: "Invitation email sent successfully!",
-        success: true,
-        user: updatedUser,
-      });
+      return responses.successResponse(
+        res,
+        200,
+        "Invitation email sent successfully!",
+        { user: updatedUser }
+      );
     } else {
       // generate random password
       const password = generateRandomPassword();
@@ -112,17 +113,16 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       );
 
       if (!department) {
-        return res
-          .status(400)
-          .json({ success: false, error: "Department not found" });
+        return responses.errorResponse(res, 404, "Department not found");
       }
 
       // check if the department belongs to the organization
       if (department.organizationId !== organizationId) {
-        res.status(400).json({
-          success: false,
-          error: "Department doesn't belong to organization",
-        });
+        responses.errorResponse(
+          res,
+          400,
+          "Department doesn't belong to organization"
+        );
       }
 
       // get the name of the organization with the id of organizationId
@@ -132,7 +132,9 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
 
       // create data for the user
       const data = {
-        name,
+        firstName,
+        middleName,
+        lastName,
         email,
         password: hashedPassword,
         userType: mappedUserType,
@@ -169,7 +171,7 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
 
       const emailData = {
         email: user.email,
-        name: user.name,
+        name: user.firstName,
         password: defaultPassword,
         department: department.name,
         organization: organization?.name,
@@ -180,14 +182,15 @@ const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
 
       systemLog.systemError(response.message);
 
-      return res.status(200).json({
-        message: "Invitation email sent successfully!",
-        success: true,
-        user: updatedUser,
-      });
+      return responses.successResponse(
+        res,
+        200,
+        "Invitation email sent successfully!",
+        { user: updatedUser }
+      );
     }
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 

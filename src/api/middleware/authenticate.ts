@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { responses } from "../../utils";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string };
@@ -14,10 +15,11 @@ const authenticateToken = (
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  if (!token) return res.sendStatus(401);
+  if (!token)
+    return responses.errorResponse(res, 401, "Unauthorized! No token found");
 
   jwt.verify(token, process.env.JWT_SECRET!, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) return responses.errorResponse(res, 403, "Invalid token");
 
     req.user = user as { email: string; organizationId: string };
     next();
@@ -32,10 +34,11 @@ const checkOrganizationId = (
   const organizationId = req.headers["organization-id"];
 
   if (!organizationId) {
-    return res.status(404).json({
-      success: false,
-      error: "Organization ID is missing from the headers",
-    });
+    return responses.errorResponse(
+      res,
+      400,
+      "Organization ID is required in the headers"
+    );
   }
 
   req.organization = { organizationId: organizationId as string };

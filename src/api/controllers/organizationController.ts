@@ -1,322 +1,336 @@
-import { Request, Response } from "express";
-import organizationService from "../services/organizationService";
-import userService from "../auth/services/userService";
 import { UserType } from "@prisma/client";
-import departmentService from "../services/departmentService";
+import { Request, Response } from "express";
+import { responses } from "../../utils";
+import { organizationService, departmentService } from "../services";
+import userService from "../auth/services/userService";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string };
   organization?: { organizationId: string };
 }
 
-const createOrganization = async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { name, address, phoneNumber, organizationEmail } = req.body;
-    const { email } = req.user!;
+class OrganizationController {
+  createOrganization = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { name, address, phoneNumber, organizationEmail } = req.body;
+      const { email } = req.user!;
 
-    // check if email exists in the database
-    const user = await userService.findUserByEmail(email);
+      // check if email exists in the database
+      const user = await userService.findUserByEmail(email);
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+      if (!user) {
+        return responses.errorResponse(res, 404, "User not found");
+      }
 
-    // check if user already has an organization with the same name
-    const organizationName = name.trim().toLowerCase();
-    const organization = await organizationService.findOrganizationByName(
-      organizationName
-    );
+      // check if user already has an organization with the same name
+      const organizationName = name.trim().toLowerCase();
+      const organization = await organizationService.findOrganizationByName(
+        organizationName
+      );
 
-    if (organization) {
-      return res
-        .status(400)
-        .json({ message: "Organization with that name already exists" });
-    }
+      if (organization) {
+        return responses.errorResponse(
+          res,
+          400,
+          "Organization name already exists"
+        );
+      }
 
-    // check if organization email already exists
-    const orgEmail = await organizationService.findOrganizationEmail(
-      organizationEmail
-    );
+      // check if organization email already exists
+      const orgEmail = await organizationService.findOrganizationEmail(
+        organizationEmail
+      );
 
-    if (orgEmail) {
-      return res
-        .status(400)
-        .json({ message: "Organization email already exists" });
-    }
+      if (orgEmail) {
+        return responses.errorResponse(
+          res,
+          400,
+          "Organization with this email already exists"
+        );
+      }
 
-    // create organization
-    const data = {
-      name,
-      address,
-      phoneNumber,
-      organizationEmail,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      // create organization
+      const data = {
+        name,
+        address,
+        phoneNumber,
+        organizationEmail,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    const newOrganization = await organizationService.createOrganization(data);
+      const newOrganization = await organizationService.createOrganization(
+        data
+      );
 
-    const userId = user.id;
-    const organizationId = newOrganization.id;
+      const userId = user.id;
+      const organizationId = newOrganization.id;
 
-    // create userOrganization record
-    await userService.addUserToOrganization(userId, organizationId);
+      // create userOrganization record
+      await userService.addUserToOrganization(userId, organizationId);
 
-    // update the user to be an owner of the organization
-    const newData = {
-      userType: UserType.OWNER,
-    };
+      // update the user to be an owner of the organization
+      const newData = {
+        userType: UserType.OWNER,
+      };
 
-    await userService.updateUser(userId, newData);
+      await userService.updateUser(userId, newData);
 
-    const updatedUser = await userService.findUserByEmail(email);
+      const updatedUser = await userService.findUserByEmail(email);
 
-    res.status(201).setHeader("organization-id", `${organizationId}`).json({
-      message: "Organization created successfully",
-      success: true,
-      user: updatedUser,
-      organization: newOrganization,
-    });
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
-
-//updating organization
-const updateOrganization = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { name, description, address, phoneNumber, organizationEmail } =
-      req.body;
-
-    const organizationId = id;
-
-    const organization = await organizationService.findOrganizationById(
-      organizationId
-    );
-
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
-    }
-
-    const newData = {
-      name,
-      description,
-      address,
-      phoneNumber,
-      organizationEmail,
-      updatedAt: new Date().toISOString(),
-    };
-
-    const updatedOrganization = await organizationService.updateOrganization(
-      organizationId,
-      newData
-    );
-
-    res.status(200).json(updatedOrganization);
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
-
-//read by organization by id
-const getOrganizationById = async (req: Request, res: Response) => {
-  try {
-    const { organizationId } = req.params;
-
-    const organization = await organizationService.getOrganizationById(
-      organizationId
-    );
-
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
-    }
-
-    res.status(200).json(organization);
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
-
-const getUserOrgnaizationById = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
-    const { email } = req.user!;
-    const { organizationId } = req.organization!;
-
-    const user = await userService.findUserByEmail(email);
-
-    if (!user) {
-      return res.status(404).json({ success: false, error: "User not found" });
-    }
-
-    // check if user is part of the organization
-    const userOrganization = user.userOrganizations.find(
-      (org: any) => org.organizationId === organizationId
-    );
-
-    if (!userOrganization) {
-      return res.status(404).json({
-        success: false,
-        error: "User is not part of the organization",
+      responses.successResponse(res, 201, "Organization created successfully", {
+        newOrganization: newOrganization,
+        updatedUser: updatedUser,
       });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    const organization = await organizationService.getOrganizationById(
-      organizationId
-    );
+  //updating organization
+  updateOrganization = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { name, description, address, phoneNumber, organizationEmail } =
+        req.body;
 
-    res.status(200).json({
-      success: true,
-      user: user,
-      organization: organization,
-    });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
+      const organizationId = id;
 
-//read all organizations
-const getAllOrganizations = async (req: Request, res: Response) => {
-  try {
-    const organizations = organizationService.getAllOrganizations();
+      const organization = await organizationService.findOrganizationById(
+        organizationId
+      );
 
-    res.status(200).json(organizations);
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
+      if (!organization) {
+        return responses.errorResponse(res, 404, "Organization not found");
+      }
 
-// Delete organization
-const deleteOrganization = async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { email } = req.user!;
+      const newData = {
+        name,
+        description,
+        address,
+        phoneNumber,
+        organizationEmail,
+        updatedAt: new Date().toISOString(),
+      };
 
-    // check if email exists in the database
-    const user = await userService.findUserByEmail(email);
+      const updatedOrganization = await organizationService.updateOrganization(
+        organizationId,
+        newData
+      );
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      responses.successResponse(res, 200, "Organization updated successfully", {
+        updatedOrganization: updatedOrganization,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    // check if the user type is an owner
-    if (user.userType !== "OWNER") {
-      return res
-        .status(403)
-        .json({ error: "User is not authorized to delete this organization" });
+  //read by organization by id
+  getOrganizationById = async (req: Request, res: Response) => {
+    try {
+      const { organizationId } = req.params;
+
+      const organization = await organizationService.getOrganizationById(
+        organizationId
+      );
+
+      if (!organization) {
+        return responses.errorResponse(res, 404, "Organization not found");
+      }
+
+      responses.successResponse(
+        res,
+        200,
+        `Organization ${organization.name} found`,
+        {
+          organization: organization,
+        }
+      );
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    // Check if the organization exists
-    const organizationId = id;
-    const organization = await organizationService.getOrganizationById(
-      organizationId
-    );
+  getUserOrgnaizationById = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    try {
+      const { email } = req.user!;
+      const { organizationId } = req.organization!;
 
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
+      const user = await userService.findUserByEmail(email);
+
+      if (!user) {
+        return responses.errorResponse(res, 404, "User not found");
+      }
+
+      // check if user is part of the organization
+      const userOrganization = user.userOrganizations.find(
+        (org: any) => org.organizationId === organizationId
+      );
+
+      if (!userOrganization) {
+        return responses.errorResponse(
+          res,
+          403,
+          "User is not part of this organization"
+        );
+      }
+
+      const organization = await organizationService.getOrganizationById(
+        organizationId
+      );
+
+      responses.successResponse(
+        res,
+        200,
+        `Organization ${organization.name} found`,
+        {
+          organization: organization,
+        }
+      );
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    const userId = user.id;
+  //read all organizations
+  getAllOrganizations = async (req: Request, res: Response) => {
+    try {
+      const organizations = organizationService.getAllOrganizations();
 
-    // get all departments in the organization
-    const departments = await departmentService.getDepartmentsByOrganization(
-      organizationId
-    );
+      if (!organizations) {
+        return responses.errorResponse(res, 404, "No organizations found");
+      }
 
-    // get the department IDs
-    const departmentIds = departments.map((department: any) => department.id);
-
-    const response = await organizationService.deleteOrganizationTransaction(
-      organizationId,
-      departmentIds
-    );
-
-    res.status(200).json({
-      message: "Organization and all related data deleted successfully",
-      response,
-    });
-  } catch (error: any) {
-    console.error("Error deleting organization", error);
-    res.json({ message: error.message });
-  }
-};
-
-const selectOrganization = async (req: Request, res: Response) => {
-  try {
-    const { organizationName } = req.body;
-
-    // Get the organization ID based on organizationName
-    const organization = await organizationService.findOrganizationByName(
-      organizationName
-    );
-
-    if (!organization) {
-      return res.status(404).json({ message: "Organization not found" });
+      responses.successResponse(res, 200, "Organizations found", {
+        organizations: organizations,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    // Set the token in the Authorization header
-    res.setHeader("organization-id", `${organization.id}`);
+  // Delete organization
+  deleteOrganization = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { email } = req.user!;
 
-    res.status(201).json({
-      message: `Organization ${organization.name} selected successfully`,
-      success: true,
-      organization: organization,
-    });
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
+      // check if email exists in the database
+      const user = await userService.findUserByEmail(email);
 
-const getUserOrganizations = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
-    const { email } = req.user!;
+      if (!user) {
+        return responses.errorResponse(res, 404, "User not found");
+      }
 
-    const user = await userService.findUserByEmail(email);
+      // check if the user type is an owner
+      if (user.userType !== "OWNER") {
+        return responses.errorResponse(
+          res,
+          403,
+          "Unauthorized! Only the organization owner can delete this organization"
+        );
+      }
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+      // Check if the organization exists
+      const organizationId = id;
+      const organization = await organizationService.getOrganizationById(
+        organizationId
+      );
 
-    const organizations = user.userOrganizations.map((userOrg: any) => ({
-      organizationId: userOrg.organizationId,
-    }));
+      if (!organization) {
+        return responses.errorResponse(res, 404, "Organization not found");
+      }
 
-    // check the organization table for the organization name matching the organizationId
-    const returnedOrganizations = await Promise.all(
-      organizations.map(async (org: any) => {
-        const organizationId = org.organizationId;
-        const organization = await organizationService.getOrganizationById(
-          organizationId
+      const userId = user.id;
+
+      // get all departments in the organization
+      const departments = await departmentService.getDepartmentsByOrganization(
+        organizationId
+      );
+
+      // get the department IDs
+      const departmentIds = departments.map((department: any) => department.id);
+
+      const deletedOrganization =
+        await organizationService.deleteOrganizationTransaction(
+          organizationId,
+          departmentIds
         );
 
-        return organization;
-      })
-    );
+      responses.successResponse(res, 200, "Organization deleted successfully", {
+        deletedOrganization: deletedOrganization,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
+    }
+  };
 
-    res.status(200).json({
-      success: true,
-      organizations: returnedOrganizations,
-    });
-  } catch (error: any) {
-    res.json({
-      message: error.message,
-    });
-  }
-};
+  selectOrganization = async (req: Request, res: Response) => {
+    try {
+      const { organizationName } = req.body;
 
-export default {
-  createOrganization,
-  updateOrganization,
-  getOrganizationById,
-  getAllOrganizations,
-  deleteOrganization,
-  selectOrganization,
-  getUserOrganizations,
-  getUserOrgnaizationById,
-};
+      // Get the organization ID based on organizationName
+      const organization = await organizationService.findOrganizationByName(
+        organizationName
+      );
+
+      if (!organization) {
+        return responses.errorResponse(res, 404, "Organization not found");
+      }
+
+      // Set the token in the Authorization header
+      res.setHeader("organization-id", `${organization.id}`);
+
+      responses.successResponse(
+        res,
+        200,
+        `Organization ${organization.name} selected successfully`,
+        {
+          organization: organization,
+        }
+      );
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
+    }
+  };
+
+  getUserOrganizations = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { email } = req.user!;
+
+      const user = await userService.findUserByEmail(email);
+
+      if (!user) {
+        return responses.errorResponse(res, 404, "User not found");
+      }
+
+      const organizations = user.userOrganizations.map((userOrg: any) => ({
+        organizationId: userOrg.organizationId,
+      }));
+
+      // check the organization table for the organization name matching the organizationId
+      const returnedOrganizations = await Promise.all(
+        organizations.map(async (org: any) => {
+          const organizationId = org.organizationId;
+          const organization = await organizationService.getOrganizationById(
+            organizationId
+          );
+
+          return organization;
+        })
+      );
+
+      responses.successResponse(res, 200, "User organizations found", {
+        organizations: returnedOrganizations,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
+    }
+  };
+}
+
+export default new OrganizationController();

@@ -1,221 +1,246 @@
+import { responses, systemLog } from "../../utils";
 import { Request, Response } from "express";
-import departmentService from "../services/departmentService";
+import { organizationService, departmentService } from "../services";
 import userService from "../../api/auth/services/userService";
-import organizationService from "../services/organizationService";
 
 interface AuthenticatedRequest extends Request {
   user?: { email: string };
   organization?: { organizationId: string };
 }
 
-const createDepartment = async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { name, description } = req.body;
-    const { email } = req.user!;
-    const { organizationId } = req.organization!;
+class DepartmentController {
+  createDepartment = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { name, description } = req.body;
+      const { email } = req.user!;
+      const { organizationId } = req.organization!;
 
-    // Check if user exists
-    const user = await userService.findUserByEmail(email);
+      // Check if user exists
+      const user = await userService.findUserByEmail(email);
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      if (!user) {
+        return responses.errorResponse(res, 404, "User not found");
+      }
+
+      if (user.userType !== "OWNER") {
+        return responses.errorResponse(
+          res,
+          403,
+          "Only owners can create departments"
+        );
+      }
+
+      const userId = user.id;
+
+      // check if user belongs to the organization
+      const userOrganization = await userService.findUserOrganization(
+        userId,
+        organizationId
+      );
+
+      if (!userOrganization) {
+        return responses.errorResponse(
+          res,
+          403,
+          "User does not belong to the organization"
+        );
+      }
+
+      // Check if the organization exists
+      const organization = await organizationService.findOrganizationById(
+        organizationId
+      );
+
+      if (!organization) {
+        return responses.errorResponse(res, 404, "Organization not found");
+      }
+
+      // check if the organization has a department with the same name
+      const checkDepartment =
+        await departmentService.findOrganizationDepartment(
+          name,
+          organizationId
+        );
+
+      if (checkDepartment) {
+        return responses.errorResponse(
+          res,
+          409,
+          "Department with the same name already exists in the organization"
+        );
+      }
+
+      const data = {
+        name,
+        description,
+        organizationId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Create the department
+      const newDepartment = await departmentService.createDepartment(data);
+
+      const departmentId = newDepartment.id;
+
+      // add the user to the department
+      const userDepartment = await userService.addUserToDepartment(
+        userId,
+        departmentId
+      );
+
+      responses.successResponse(res, 201, "Department created successfully", {
+        newDepartment: newDepartment,
+        userDepartment: userDepartment,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    if (user.userType !== "OWNER") {
-      return res
-        .status(403)
-        .json({ message: " User is not authorized to create a department" });
+  updateDepartment = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { name, description } = req.body;
+
+      const departmentId = id;
+      // Check if the department exists
+      const department = await departmentService.findDepartmentById(
+        departmentId
+      );
+
+      if (!department) {
+        return responses.errorResponse(res, 404, "Department not found");
+      }
+
+      const newData = {
+        name,
+        description,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const updatedDepartment = await departmentService.updateDepartment(
+        departmentId,
+        newData
+      );
+
+      responses.successResponse(res, 200, "Updated successfully", {
+        updatedDepartment: updatedDepartment,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    const userId = user.id;
+  deleteDepartment = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
 
-    // check if user belongs to the organization
-    const userOrganization = await userService.findUserOrganization(
-      userId,
-      organizationId
-    );
+      const departmentId = id;
 
-    if (!userOrganization) {
-      return res
-        .status(403)
-        .json({ message: "User does not belong to the Organization" });
+      // Check if the department exists
+      const department = await departmentService.findDepartmentById(
+        departmentId
+      );
+
+      if (!department) {
+        return responses.errorResponse(res, 404, "Department not found");
+      }
+
+      const deletedDepartment =
+        departmentService.deleteDepartmentTransaction(departmentId);
+
+      responses.successResponse(res, 200, "Deleted successfully", {
+        deletedDepartment: deletedDepartment,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    // Check if the organization exists
-    const organization = await organizationService.findOrganizationById(
-      organizationId
-    );
+  getAllDepartments = async (req: Request, res: Response) => {
+    try {
+      const departments = await departmentService.getAllDepartments();
 
-    if (!organization) {
-      return res.status(404).json({ message: "Organization not found" });
+      if (!departments) {
+        return responses.errorResponse(res, 404, "Departments not found");
+      }
+
+      responses.successResponse(res, 200, "Departments found", {
+        departments: departments,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    // check if the organization has a department with the same name
-    const checkDepartment = await departmentService.findOrganizationDepartment(
-      name,
-      organizationId
-    );
+  getDepartmentById = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const departmentId = id;
 
-    if (checkDepartment) {
-      return res
-        .status(409)
-        .json({ message: "Department with the same name already exists" });
+      const department = await departmentService.findDepartmentById(
+        departmentId
+      );
+
+      if (!department) {
+        return responses.errorResponse(res, 404, "Department not found");
+      }
+
+      // get users in the department
+      const users = await departmentService.getUsersInDepartment(departmentId);
+
+      responses.successResponse(res, 200, "Department found", {
+        department: department,
+        users: users,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
 
-    const data = {
-      name,
-      description,
-      organizationId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  getDepartmentsByOrganization = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    try {
+      const { organizationId } = req.organization!;
 
-    // Create the department
-    const newDepartment = await departmentService.createDepartment(data);
+      // Check if the organization exists
+      const organization = await organizationService.findOrganizationById(
+        organizationId
+      );
 
-    const departmentId = newDepartment.id;
+      if (!organization) {
+        return responses.errorResponse(res, 404, "Organization not found");
+      }
 
-    // add the user to the department
-    const userDepartment = await userService.addUserToDepartment(
-      userId,
-      departmentId
-    );
+      const departments = await departmentService.getDepartmentsByOrganization(
+        organizationId
+      );
 
-    res.status(201).json({ message: "Department created", newDepartment });
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
+      if (!departments) {
+        return responses.errorResponse(
+          res,
+          404,
+          "No departments found for the organization"
+        );
+      }
 
-const updateDepartment = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { name, description } = req.body;
+      const data = departments.map((department: any) => department.name);
 
-    const departmentId = id;
-    // Check if the department exists
-    const department = await departmentService.findDepartmentById(departmentId);
+      systemLog.systemInfo(
+        `Departments found for organization: ${organization.name}`,
+        data
+      );
 
-    if (!department) {
-      return res.status(404).json({ message: "Department not found" });
+      responses.successResponse(res, 200, "Departments found", {
+        departments: departments,
+      });
+    } catch (error: any) {
+      responses.errorResponse(res, 500, error.message);
     }
+  };
+}
 
-    const newData = {
-      name,
-      description,
-      updatedAt: new Date().toISOString(),
-    };
-
-    const updatedDepartment = await departmentService.updateDepartment(
-      departmentId,
-      newData
-    );
-
-    res
-      .status(200)
-      .json({ message: "Department updated Successfully!", updatedDepartment });
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
-
-const deleteDepartment = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-
-    const departmentId = id;
-
-    // Check if the department exists
-    const department = await departmentService.findDepartmentById(departmentId);
-
-    if (!department) {
-      return res.status(404).json({ message: "Department not found" });
-    }
-
-    const deletedDepartment =
-      departmentService.deleteDepartmentTransaction(departmentId);
-
-    res
-      .status(200)
-      .json({ message: "Deleted successfully", deletedDepartment });
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
-
-const getAllDepartments = async (req: Request, res: Response) => {
-  try {
-    const departments = await departmentService.getAllDepartments();
-
-    res.status(200).json(departments);
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
-
-const getDepartmentById = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const departmentId = id;
-
-    const department = await departmentService.findDepartmentById(departmentId);
-
-    if (!department) {
-      return res.status(404).json({ error: "Department does not exist" });
-    }
-
-    // get users in the department
-    const users = await departmentService.getUsersInDepartment(departmentId);
-
-    res
-      .status(200)
-      .json({ success: true, department: department, users: users });
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
-
-const getDepartmentsByOrganization = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
-    const { organizationId } = req.organization!;
-
-    // Check if the organization exists
-    const organization = await organizationService.findOrganizationById(
-      organizationId
-    );
-
-    if (!organization) {
-      return res.status(404).json({ message: "Organization not found" });
-    }
-
-    const departments = await departmentService.getDepartmentsByOrganization(
-      organizationId
-    );
-
-    if (!departments) {
-      return res
-        .status(404)
-        .json({ error: "Departments do not exist in this organization" });
-    }
-
-    console.log(
-      "Departments' names:",
-      departments.map((department: any) => department.name)
-    );
-    res.status(200).json(departments);
-  } catch (error: any) {
-    res.json({ message: error.message });
-  }
-};
-
-export default {
-  createDepartment,
-  updateDepartment,
-  deleteDepartment,
-  getAllDepartments,
-  getDepartmentById,
-  getDepartmentsByOrganization,
-};
+export default new DepartmentController();

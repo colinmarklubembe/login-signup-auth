@@ -22,7 +22,7 @@ const router = Router();
 
 router.post(
   "/signup",
-  checkMissingFields(["name", "email", "password"]),
+  checkMissingFields(["firstName", "lastName", "email", "password"]),
   signupController.signup
 );
 
@@ -61,14 +61,14 @@ router.post(
 
 router.post(
   "/invite-user/:departmentId",
-  checkMissingFields(["name", "email", "userType"]),
+  checkMissingFields(["firstName", "lastName", "email", "userType"]),
   authenticate.checkOrganizationId,
   inviteUserController.inviteUser
 );
 
 router.put(
   "/update-profile/:id",
-  checkMissingFields(["name", "email"]),
+  checkMissingFields(["firstName", "lastName", "email"]),
   updateProfileController.updateProfile
 );
 

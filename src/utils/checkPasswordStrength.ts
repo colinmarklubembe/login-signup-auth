@@ -5,9 +5,7 @@ const validatePasswordStrength = (password: string) => {
   const result = zxcvbn(password);
   const passwordStrength = password.length >= minLength && result.score >= 3;
 
-  if (!passwordStrength) {
-    throw { status: 400, message: "Password is too weak" };
-  }
+  return passwordStrength;
 };
 
 export default { validatePasswordStrength };

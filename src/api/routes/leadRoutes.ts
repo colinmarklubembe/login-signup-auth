@@ -7,10 +7,8 @@ const router = Router();
 router.post(
   "/create-lead",
   checkMissingFields([
-    "fullName",
     "leadEmail",
     "phoneNumber",
-    "title",
     "leadStatus",
     "location",
     "businessType",
@@ -23,10 +21,8 @@ router.post(
 router.put(
   "/update-lead/:id",
   checkMissingFields([
-    "fullName",
     "leadEmail",
     "phoneNumber",
-    "title",
     "leadStatus",
     "location",
     "businessType",
@@ -46,5 +42,9 @@ router.get(
 );
 
 router.post("/change-status/:id", leadController.changeLeadStatus);
+router.get(
+  "/organizations/:organizationId/leads",
+  leadController.getOrganizationLeads
+);
 
 export default router;

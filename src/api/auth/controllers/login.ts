@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
+import { organizationService } from "../../services";
+import { comparePassword, generateToken, responses } from "../../../utils";
 import userService from "../services/userService";
-import comparePassword from "../../../utils/comparePassword";
-import organizationService from "../../services/organizationService";
-import generateToken from "../../../utils/generateToken";
 
 const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -12,7 +11,7 @@ const login = async (req: Request, res: Response) => {
     const user = await userService.findUserByEmail(email);
 
     if (!user) {
-      return res.status(400).json({ message: "User does not exist" });
+      return responses.errorResponse(res, 404, "User not found");
     }
 
     //check if user is active
@@ -27,7 +26,7 @@ const login = async (req: Request, res: Response) => {
 
     // Check if user is verified
     if (!user.isVerified) {
-      return res.status(400).json({ message: "User is not verified" });
+      return responses.errorResponse(res, 401, "User is not verified");
     }
 
     const hashedPassword = user.password;
@@ -36,7 +35,11 @@ const login = async (req: Request, res: Response) => {
     const isMatch = comparePassword.comparePassword(password, hashedPassword);
 
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return responses.errorResponse(
+        res,
+        401,
+        "Invalid email or password. Please try again!"
+      );
     }
 
     // Fetch organization IDs of the user
@@ -78,7 +81,9 @@ const login = async (req: Request, res: Response) => {
     const tokenData = {
       id: user.id,
       email: user.email,
-      name: user.name,
+      firstName: user.firstName,
+      middleName: user.middleName,
+      lastName: user.lastName,
       userType: user.userType,
       isVerified: user.isVerified,
       createdAt: new Date().toISOString(), // temporarily store the token creation date
@@ -88,19 +93,19 @@ const login = async (req: Request, res: Response) => {
     const updatedUser = await userService.findUserById(user.id);
 
     // Create token
-    const loginToken = generateToken.generateToken(tokenData);
+    const token = generateToken.generateToken(tokenData);
 
     res
       .status(200)
-      .setHeader("Authorization", `Bearer ${loginToken}`)
+      .setHeader("Authorization", `Bearer ${token}`)
       .json({
-        message: `Logged in successfully as ${tokenData.name}`,
+        message: `Logged in successfully as ${tokenData.firstName}`,
         success: true,
         user: updatedUser,
-        token: loginToken,
+        token: token,
       });
   } catch (error: any) {
-    res.json({ message: error.message });
+    responses.errorResponse(res, 500, error.message);
   }
 };
 
