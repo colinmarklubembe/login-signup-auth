@@ -127,6 +127,7 @@ model Sale {
   productId               String                        @db.ObjectId
   userId                  String                        @db.ObjectId
   organizationId          String                        @db.ObjectId
+  description             String?
   quantity                Int                           @default(1)
   totalPrice              Int
   createdAt               DateTime? 
@@ -235,4 +236,3 @@ enum BusinessType {
   ENTERPRISE
   HOME
 }
-
