@@ -22,7 +22,6 @@ const changePassword = async (req: Request, res: Response) => {
 
     const password = newPassword;
 
-    // validate password strength
     const passwordStrength =
       checkPasswordStrength.validatePasswordStrength(password);
 
@@ -34,7 +33,6 @@ const changePassword = async (req: Request, res: Response) => {
       );
     }
 
-    // hash new password
     const hashedPassword = await hashPassword(password);
 
     const userId = id;
