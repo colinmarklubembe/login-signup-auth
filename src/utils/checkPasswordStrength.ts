@@ -5,7 +5,6 @@ import * as zxcvbnEnPackage from "@zxcvbn-ts/language-en";
 const validatePasswordStrength = (password: string) => {
   const minLength = 8;
 
-  // Set up options
   const options = {
     translations: zxcvbnEnPackage.translations,
     dictionary: {

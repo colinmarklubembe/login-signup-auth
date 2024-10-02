@@ -13,16 +13,15 @@ const signup = async (req: Request, res: Response) => {
   try {
     const { firstName, middleName, lastName, email, password } = req.body;
 
-    const passwordStrength =
-      checkPasswordStrength.validatePasswordStrength(password);
+    const passwordStrength = checkPasswordStrength(password);
 
-    // if (!passwordStrength) {
-    //   return responses.errorResponse(
-    //     res,
-    //     400,
-    //     "Please include at least 8 alphanumeric characters, 1 uppercase letter and 1 special character"
-    //   );
-    // }
+    if (passwordStrength === false) {
+      return responses.errorResponse(
+        res,
+        400,
+        "Please include at least 8 alphanumeric characters, 1 uppercase letter and 1 special character"
+      );
+    }
 
     const checkUser = await userService.findUserByEmail(email);
 

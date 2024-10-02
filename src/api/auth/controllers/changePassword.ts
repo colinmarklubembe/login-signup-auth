@@ -25,8 +25,7 @@ const changePassword = async (req: AuthenticatedRequest, res: Response) => {
 
     const password = newPassword;
 
-    const passwordStrength =
-      checkPasswordStrength.validatePasswordStrength(password);
+    const passwordStrength = checkPasswordStrength(password);
 
     if (!passwordStrength) {
       return responses.errorResponse(
@@ -66,8 +65,7 @@ const resetPassword = async (req: Request, res: Response) => {
 
     const password = newPassword;
 
-    const passwordStrength =
-      checkPasswordStrength.validatePasswordStrength(password);
+    const passwordStrength = checkPasswordStrength(password);
 
     if (!passwordStrength) {
       return responses.errorResponse(
