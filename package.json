@@ -17,6 +17,9 @@
   "dependencies": {
     "@prisma/client": "^5.15.1",
     "@types/node": "^22.7.4",
+    "@zxcvbn-ts/core": "^3.0.4",
+    "@zxcvbn-ts/language-common": "^3.0.4",
+    "@zxcvbn-ts/language-en": "^3.0.2",
     "bcryptjs": "^2.4.3",
     "connect-redis": "^7.1.1",
     "cors": "^2.8.5",
@@ -41,7 +44,7 @@
     "@types/express-session": "^1.18.0",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/nodemailer": "^6.4.15",
-    "@types/zxcvbn": "^4.4.4",
+    "@types/zxcvbn": "^4.4.5",
     "gulp": "^5.0.0",
     "gulp-concat": "^2.6.1",
     "nodemon": "^3.1.2",
