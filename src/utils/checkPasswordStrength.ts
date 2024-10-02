@@ -36,3 +36,5 @@ const validatePasswordStrength = (password: string) => {
 
   return passwordStrength;
 };
+
+export default validatePasswordStrength;
