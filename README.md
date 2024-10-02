@@ -297,7 +297,7 @@ This endpoint sends an HTTP GET request to get a specific user identified by the
 
 ```json
 {
-  "success": boolean,
+  "success": "boolean",
   "user": {
     "type": "object"
   }
