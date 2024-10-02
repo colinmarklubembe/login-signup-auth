@@ -1,197 +1,136 @@
-import { Request, Response } from "express";
-import {
-  sendEmails,
-  generateRandomPassword,
-  mapStringToEnum,
-  hashPassword,
-  systemLog,
-  responses,
-} from "../../../utils";
-import { departmentService, organizationService } from "../../services";
-import userService from "../services/userService";
+// import { Request, Response } from "express";
+// import {
+//   generateRandomPassword,
+//   // mapStringToEnum,
+//   responses,
+//   sendEmails,
+//   hashPassword,
+// } from "../../../utils";
+// // import { companyService } from "../../services";
+// import userService from "../../auth/services/userService";
 
-interface AuthenticatedRequest extends Request {
-  organization?: { organizationId: string };
-}
+// interface AuthenticatedRequest extends Request {
+//   user?: { email: string };
+//   company?: { companyId: string };
+// }
 
-const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
-  const { departmentId } = req.params;
-  const { firstName, middleName, lastName, email, userType } = req.body;
+// class InviteUser {
+//   existingUser = async (
+//     companyId: string,
+//     email: string,
+//     role: string,
+//     res: Response
+//   ) => {
+//     const user = await userService.findUserByEmail(email);
 
-  const { organizationId } = req.organization!;
+//     if (!user) {
+//       throw { status: 404, message: "User not found" };
+//     }
 
-  try {
-    let mappedUserType: any;
+//     // const company = await companyService.getCompany(companyId);
 
-    mappedUserType = mapStringToEnum.mapStringToUserType(userType, res);
+//     const userId = user.id;
+//     // const mappedRole = mapStringToEnum.mapStringToRole(res, role);
 
-    // Check if user already exists
-    const existingUser = await userService.findUserByEmail(email);
+//     // // Check if user is already in the company
+//     // const userCompany = await companyService.getUserCompany(userId, companyId);
 
-    if (existingUser) {
-      const department = await departmentService.findDepartmentById(
-        departmentId
-      );
+//     if (userCompany) {
+//       throw { status: 400, message: "User already belongs to company" };
+//     }
 
-      if (!department) {
-        return responses.errorResponse(res, 404, "Department not found");
-      }
+//     await companyService.addUserToCompany(userId, companyId, mappedRole);
 
-      // check if the department belongs to the organization
-      if (department.organizationId !== organizationId) {
-        responses.errorResponse(
-          res,
-          400,
-          "Department doesn't belong to organization"
-        );
-      }
+//     const emailData = {
+//       name: `${user.firstName} ${user.lastName}`,
+//       email,
+//       companyName: company.name,
+//       role: role,
+//     };
 
-      // get the organization with the id of organizationId
-      const organization = await organizationService.findOrganizationById(
-        organizationId
-      );
+//     await sendEmails.sendInviteEmailToExistingUser(emailData);
 
-      const userId = existingUser.id;
+//     return { status: 200, message: "User added successfully", data: user };
+//   };
 
-      // add the user to the department
-      const userDepartment = await userService.addUserToDepartment(
-        userId,
-        departmentId
-      );
+//   newUser = async (
+//     companyId: string,
+//     firstName: string,
+//     lastName: string,
+//     email: string,
+//     role: string,
+//     res: Response
+//   ) => {
+//     const company = await companyService.getCompany(companyId);
 
-      // add the user to the organization if the user is not already in the organization
-      const userOrganization = await userService.findUserOrganization(
-        userId,
-        organizationId
-      );
+//     const password = generateRandomPassword();
 
-      if (!userOrganization) {
-        return await userService.addUserToOrganization(userId, organizationId);
-      }
+//     const hashedPassword = await hashPassword(password);
 
-      // new data to update the user
-      const newData = {
-        userDepartments: {
-          connect: { id: userDepartment.id },
-        },
-        userOrganizations: {
-          connect: { id: userOrganization.id },
-        },
-      };
+//     const data = {
+//       firstName,
+//       lastName,
+//       email,
+//       password: hashedPassword,
+//       createdAt: new Date().toISOString(),
+//       updatedAt: new Date().toISOString(),
+//     };
 
-      // get the updated user
-      const updatedUser = await userService.updateUser(userId, newData);
+//     const newUser = await userService.createUser(data);
 
-      // Send invitation email
-      const emailData = {
-        email: updatedUser.email,
-        name: updatedUser.firstName,
-        department: department.name,
-        organization: organization.name,
-      };
+//     const userId = newUser.id;
+//     const mappedRole = mapStringToEnum.mapStringToRole(res, role);
 
-      const response = await sendEmails.sendInviteEmailToExistingUser(
-        emailData
-      );
+//     await companyService.addUserToCompany(userId, companyId, mappedRole);
 
-      return responses.successResponse(
-        res,
-        200,
-        "Invitation email sent successfully!",
-        { user: updatedUser }
-      );
-    } else {
-      // generate random password
-      const password = generateRandomPassword();
+//     const emailData = {
+//       name: `${firstName} ${lastName}`,
+//       email,
+//       password,
+//       companyName: company.name,
+//       role: role,
+//     };
 
-      const defaultPassword = password;
-      const hashedPassword = await hashPassword(password);
+//     await sendEmails.sendInviteEmail(emailData);
 
-      // check if the department exists
-      const department = await departmentService.findDepartmentById(
-        departmentId
-      );
+//     return { status: 200, message: "User added successfully", data: newUser };
+//   };
 
-      if (!department) {
-        return responses.errorResponse(res, 404, "Department not found");
-      }
+//   inviteUser = async (req: AuthenticatedRequest, res: Response) => {
+//     const { email, role, firstName, lastName } = req.body;
+//     const { companyId } = req.company!;
 
-      // check if the department belongs to the organization
-      if (department.organizationId !== organizationId) {
-        responses.errorResponse(
-          res,
-          400,
-          "Department doesn't belong to organization"
-        );
-      }
+//     try {
+//       const user = await userService.findUserByEmail(email);
 
-      // get the name of the organization with the id of organizationId
-      const organization = await organizationService.findOrganizationById(
-        organizationId
-      );
+//       let response;
+//       if (user) {
+//         response = await this.existingUser(companyId, email, role, res);
+//       } else {
+//         response = await this.newUser(
+//           companyId,
+//           firstName,
+//           lastName,
+//           email,
+//           role,
+//           res
+//         );
+//       }
 
-      // create data for the user
-      const data = {
-        firstName,
-        middleName,
-        lastName,
-        email,
-        password: hashedPassword,
-        userType: mappedUserType,
-        isVerified: true,
-        createdAt: new Date().toISOString(),
-      };
+//       return responses.successResponse(
+//         res,
+//         response.status,
+//         response.message,
+//         response.data
+//       );
+//     } catch (error: any) {
+//       return responses.errorResponse(
+//         res,
+//         error.status || 500,
+//         error.message || "An error occurred while inviting the user."
+//       );
+//     }
+//   };
+// }
 
-      // Create the user along with user roles in a single transaction
-      const user = await userService.createUser(data);
-
-      // add user to Department
-      const userId = user.id;
-
-      const userDepartment = await userService.addUserToDepartment(
-        userId,
-        departmentId
-      );
-
-      // add the user to the organization
-      const newUserOrganization = await userService.addUserToOrganization(
-        userId,
-        organizationId
-      );
-
-      // get the updated user
-      const updatedUser = await userService.updateUser(userId, {
-        userDepartments: {
-          connect: { id: userDepartment.id },
-        },
-        userOrganizations: {
-          connect: { id: newUserOrganization.id },
-        },
-      });
-
-      const emailData = {
-        email: user.email,
-        name: user.firstName,
-        password: defaultPassword,
-        department: department.name,
-        organization: organization?.name,
-      };
-
-      // Send invitation email
-      const response = await sendEmails.sendInviteEmail(emailData);
-
-      systemLog.systemError(response.message);
-
-      return responses.successResponse(
-        res,
-        200,
-        "Invitation email sent successfully!",
-        { user: updatedUser }
-      );
-    }
-  } catch (error: any) {
-    responses.errorResponse(res, 500, error.message);
-  }
-};
-
-export default { inviteUser };
+// export default new InviteUser();

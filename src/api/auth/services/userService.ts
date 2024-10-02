@@ -1,199 +1,75 @@
 import prisma from "../../../prisma/client";
 
-const findUserByEmail = async (email: string) => {
-  return prisma.user.findUnique({
-    where: { email },
-    include: {
-      userOrganizations: {
-        include: {
-          organization: true,
-        },
+class UserService {
+  async findUserByEmail(email: string) {
+    return prisma.user.findUnique({
+      where: {
+        email,
       },
-      userDepartments: {
-        include: {
-          department: {
-            include: {
-              organization: true,
-            },
+      include: {
+        userCompanies: {
+          include: {
+            company: true,
           },
         },
       },
-    },
-  });
-};
+    });
+  }
 
-const findUserById = async (userId: string) => {
-  return prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      userOrganizations: { include: { organization: true } },
-    },
-  });
-};
-
-const createUser = async (data: any) => {
-  return prisma.user.create({
-    data,
-    include: { userOrganizations: { include: { organization: true } } },
-  });
-};
-
-const addUserToDepartmentWithRole = async (
-  userId: string,
-  departmentId: string
-) => {
-  return prisma.userDepartment.create({
-    data: {
-      user: {
-        connect: {
-          id: userId,
-        },
-      },
-      department: {
-        connect: {
-          id: departmentId,
-        },
-      },
-    },
-  });
-};
-
-const updateUser = async (userId: string, newData: any) => {
-  return prisma.user.update({
-    where: { id: userId },
-    data: {
-      ...newData,
-    },
-  });
-};
-
-const addUserToDepartment = async (userId: string, departmentId: string) => {
-  return prisma.userDepartment.create({
-    data: {
-      user: {
-        connect: {
-          id: userId,
-        },
-      },
-      department: {
-        connect: {
-          id: departmentId,
-        },
-      },
-    },
-  });
-};
-
-const assignRoleToUser = async (
-  userId: string,
-  roleId: string,
-  departmentId: string
-) => {
-  return prisma.userDepartment.update({
-    where: {
-      userId_departmentId: {
+  async findUserCompany(userId: string, companyId: string) {
+    return prisma.userCompany.findFirst({
+      where: {
         userId,
-        departmentId,
+        companyId,
       },
-    },
-    data: {
-      role: {
-        connect: {
-          id: roleId,
-        },
-      },
-    },
-  });
-};
+    });
+  }
 
-const addUserToOrganization = async (
-  userId: string,
-  organizationId: string
-) => {
-  return prisma.userOrganization.create({
-    data: {
-      user: {
-        connect: {
-          id: userId,
-        },
-      },
-      organization: {
-        connect: {
-          id: organizationId,
-        },
-      },
-    },
-  });
-};
+  async createUser(data: any) {
+    return prisma.user.create({
+      data,
+    });
+  }
 
-const findUserOrganization = async (userId: string, organizationId: string) => {
-  return prisma.userOrganization.findFirst({
-    where: {
-      userId,
-      organizationId,
-    },
-  });
-};
-
-const deleteUserTransaction = async (userId: string) => {
-  return prisma.$transaction([
-    prisma.userOrganization.deleteMany({
-      where: {
-        userId: userId,
-      },
-    }),
-    prisma.userDepartment.deleteMany({
-      where: {
-        userId: userId,
-      },
-    }),
-    prisma.user.delete({
+  async updateUser(userId: string, newData: any) {
+    return prisma.user.update({
       where: {
         id: userId,
       },
-    }),
-  ]);
-};
+      data: {
+        ...newData,
+      },
+    });
+  }
 
-const findUsersByOrganization = async (organizationId: string) => {
-  return prisma.user.findMany({
-    where: {
-      userOrganizations: {
-        some: {
-          organizationId,
-        },
+  async findUserById(userId: string) {
+    return prisma.user.findUnique({
+      where: {
+        id: userId,
       },
       include: {
-        userOrganizations: {
+        userCompanies: {
           include: {
-            organization: true,
-          },
-        },
-        userDepartments: {
-          include: {
-            department: true,
+            company: true,
           },
         },
       },
-    },
-  });
-};
+    });
+  }
 
-const getAllUsers = async () => {
-  return prisma.user.findMany();
-};
+  async getAllUsers() {
+    return prisma.user.findMany();
+  }
 
-export default {
-  getAllUsers,
-  findUserByEmail,
-  createUser,
-  addUserToDepartment,
-  assignRoleToUser,
-  addUserToDepartmentWithRole,
-  addUserToOrganization,
-  findUsersByOrganization,
-  updateUser,
-  findUserById,
-  findUserOrganization,
-  deleteUserTransaction,
-};
+  async deleteUser(userId: string) {
+    return prisma.user.$transaction([
+      prisma.user.delete({
+        where: {
+          id: userId,
+        },
+      }),
+    ]);
+  }
+}
+
+export default new UserService();

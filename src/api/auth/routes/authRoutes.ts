@@ -2,11 +2,11 @@ import { Router } from "express";
 
 import {
   signupController,
-  verifyUserController,
   loginController,
+  verifyUserController,
   changePasswordController,
   forgotPasswordController,
-  inviteUserController,
+  // inviteUserController,
   updateProfileController,
   getUserController,
   deleteUserController,
@@ -42,8 +42,9 @@ router.post(
 );
 
 router.put(
-  "/change-password/:id",
+  "/change-password",
   checkMissingFields(["oldPassword", "newPassword"]),
+  authenticate.authenticateToken,
   changePasswordController.changePassword
 );
 
@@ -59,20 +60,23 @@ router.post(
   forgotPasswordController.forgotPassword
 );
 
-router.post(
-  "/invite-user/:departmentId",
-  checkMissingFields(["firstName", "lastName", "email", "userType"]),
-  authenticate.checkOrganizationId,
-  inviteUserController.inviteUser
-);
+// router.post(
+//   "/invite-user",
+//   checkMissingFields(["firstName", "lastName", "email"]),
+//   authenticate.checkCompanyId,
+//   inviteUserController.inviteUser
+// );
 
 router.put(
-  "/update-profile/:id",
-  checkMissingFields(["firstName", "lastName", "email"]),
+  "/update-profile",
+  checkMissingFields(["firstName", "lastName"]),
+  authenticate.authenticateToken,
   updateProfileController.updateProfile
 );
 
 router.get("/get-user/:id", getUserController.getUserById);
+
+router.get("/user", authenticate.authenticateToken, getUserController.getUser);
 
 router.get("/get-users", getUserController.getAllUsers);
 

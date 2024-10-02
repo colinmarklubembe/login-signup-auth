@@ -4,7 +4,7 @@ class Responses {
   static successResponse(
     res: Response,
     statusCode: number,
-    message: string,
+    message: any,
     data: any = null
   ) {
     res.status(statusCode).json({
@@ -14,7 +14,7 @@ class Responses {
     });
   }
 
-  static errorResponse(res: Response, statusCode: number, error: string) {
+  static errorResponse(res: Response, statusCode: number, error: any) {
     res.status(statusCode).json({
       success: false,
       error,

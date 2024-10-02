@@ -6,7 +6,6 @@ const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    // check if user exists
     const user = await userService.findUserById(id);
 
     if (!user) {
@@ -15,7 +14,7 @@ const deleteUser = async (req: Request, res: Response) => {
 
     const userId = user.id;
 
-    const deletedUser = await userService.deleteUserTransaction(userId);
+    const deletedUser = await userService.deleteUser(userId);
 
     responses.successResponse(res, 200, "User deleted successfully");
   } catch (error: any) {

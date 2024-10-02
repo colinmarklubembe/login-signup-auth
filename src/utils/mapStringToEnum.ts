@@ -1,61 +1,52 @@
-import { UserType, LeadStatus, BusinessType } from "@prisma/client";
-import { Response } from "express";
+// import { Response } from "express";
+// import { responses } from ".";
+// import { RequisitionStatus, TransactionType, Role } from "@prisma/client";
 
-// Helper function to map string to UserType
-const mapStringToUserType = (
-  userType: string,
-  res: Response
-): UserType | Response<any> => {
-  switch (userType.toUpperCase()) {
-    case "OWNER":
-      return UserType.OWNER;
-    case "ADMIN":
-      return UserType.ADMIN;
-    case "USER":
-      return UserType.USER;
-    default:
-      return res
-        .status(400)
-        .json({ success: false, error: "Invalid user type" });
-  }
-};
+// class EnumMapper {
+//   mapStringToRequisitionStatus(
+//     res: Response,
+//     status: string
+//   ): RequisitionStatus | any {
+//     switch (status.toUpperCase()) {
+//       case "DRAFTS":
+//         return RequisitionStatus.DRAFTS;
+//       case "PENDING":
+//         return RequisitionStatus.PENDING;
+//       case "APPROVED":
+//         return RequisitionStatus.APPROVED;
+//       case "REJECTED":
+//         return RequisitionStatus.REJECTED;
+//       default:
+//         return responses.errorResponse(res, 400, "Invalid requisition status");
+//     }
+//   }
 
-const mapStringToLeadStatus = (
-  leadStatus: string,
-  res: Response
-): LeadStatus | Response<any> => {
-  switch (leadStatus.toUpperCase()) {
-    case "LEAD":
-      return LeadStatus.LEAD;
-    case "PROSPECT":
-      return LeadStatus.PROSPECT;
-    case "CLOSED":
-      return LeadStatus.CLOSED;
-    default:
-      return res
-        .status(400)
-        .json({ success: false, error: "Invalid lead status" });
-  }
-};
+//   mapStringToTransactionType(
+//     res: Response,
+//     type: string
+//   ): TransactionType | any {
+//     switch (type.toUpperCase()) {
+//       case "DEBIT":
+//         return TransactionType.DEBIT;
+//       case "CREDIT":
+//         return TransactionType.CREDIT;
+//       default:
+//         return responses.errorResponse(res, 400, "Invalid transaction type");
+//     }
+//   }
 
-const mapStringToBusinessType = (
-  businessType: string,
-  res: Response
-): BusinessType | Response<any> => {
-  switch (businessType.toUpperCase()) {
-    case "ENTERPRISE":
-      return BusinessType.ENTERPRISE;
-    case "HOME":
-      return BusinessType.HOME;
-    default:
-      return res
-        .status(400)
-        .json({ success: false, error: "Invalid business type" });
-  }
-};
+//   mapStringToRole(res: Response, role: string): Role | any {
+//     switch (role.toUpperCase()) {
+//       case "ADMIN":
+//         return Role.ADMIN;
+//       case "FINANCE":
+//         return Role.FINANCE;
+//       case "EMPLOYEE":
+//         return Role.EMPLOYEE;
+//       default:
+//         return responses.errorResponse(res, 400, "Invalid role");
+//     }
+//   }
+// }
 
-export default {
-  mapStringToUserType,
-  mapStringToLeadStatus,
-  mapStringToBusinessType,
-};
+// export default new EnumMapper();

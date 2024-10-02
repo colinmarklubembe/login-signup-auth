@@ -1,13 +1,17 @@
 import { Request, Response } from "express";
-import { sendEmails, responses } from "../../../utils";
+import { sendEmails, responses, systemLog } from "../../../utils";
 import userService from "../services/userService";
 
-const updateProfile = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { firstName, middleName, lastName, email } = req.body;
+interface AuthenticatedRequest extends Request {
+  user?: { email: string };
+}
+
+const updateProfile = async (req: AuthenticatedRequest, res: Response) => {
+  const { email } = req.user!;
+  const { firstName, middleName, lastName, phoneNumber } = req.body;
 
   try {
-    const user = await userService.findUserById(id);
+    const user = await userService.findUserByEmail(email);
 
     if (!user) {
       return responses.errorResponse(res, 404, "User not found");
@@ -19,26 +23,27 @@ const updateProfile = async (req: Request, res: Response) => {
       firstName,
       middleName,
       lastName,
-      email,
+      phoneNumber,
       updatedAt: new Date().toISOString(),
     };
 
     const updatedUser = await userService.updateUser(userId, newData);
 
-    // send update profile email to user
     const emailData = {
       email: user.email,
-      name: user.firstName,
+      name: `${user.firstName} ${user.lastName}`,
     };
 
     // Send invitation email
     const response = await sendEmails.sendUpdatedProfileEmail(emailData);
 
-    if (response.status === 200) {
-      responses.successResponse(res, 200, "Profile updated successfully", {
-        user: updatedUser,
-      });
+    if (response.status !== 200) {
+      systemLog.systemError("Email could not be sent");
     }
+
+    responses.successResponse(res, 200, "Profile updated successfully", {
+      user: updatedUser,
+    });
   } catch (error: any) {
     responses.errorResponse(res, 500, error.message);
   }

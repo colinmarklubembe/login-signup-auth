@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { UserType } from "@prisma/client";
 import {
   checkPasswordStrength,
   hashPassword,
@@ -14,7 +13,16 @@ const signup = async (req: Request, res: Response) => {
   try {
     const { firstName, middleName, lastName, email, password } = req.body;
 
-    checkPasswordStrength.validatePasswordStrength(password);
+    const passwordStrength =
+      checkPasswordStrength.validatePasswordStrength(password);
+
+    // if (!passwordStrength) {
+    //   return responses.errorResponse(
+    //     res,
+    //     400,
+    //     "Please include at least 8 alphanumeric characters, 1 uppercase letter and 1 special character"
+    //   );
+    // }
 
     const checkUser = await userService.findUserByEmail(email);
 
@@ -24,26 +32,24 @@ const signup = async (req: Request, res: Response) => {
 
     const hashedPassword = await hashPassword(password);
 
-    // Create the user data
     const data = {
       firstName,
       middleName,
       lastName,
       email,
+      isVerified: false,
       password: hashedPassword,
-      userType: UserType.USER,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     const user = await userService.createUser(data);
 
-    // create token data with timestamp
     const tokenData = {
       id: user.id,
       email: user.email,
       username: user.firstName,
-      createdAt: new Date().toISOString(), // temporarily store the timestamp of the token creation
-      userType: user.userType,
+      createdAt: new Date().toISOString(),
     };
 
     const token = generateToken.generateToken(tokenData);
@@ -56,22 +62,22 @@ const signup = async (req: Request, res: Response) => {
     const updatedUser = await userService.updateUser(userId, newData);
 
     const emailData = {
-      email: user.email,
-      name: user.firstName,
+      name: `${firstName} ${lastName}`,
+      email,
       token,
     };
 
-    const emailResponse: { status: number; message: any } =
-      await sendEmails.sendVerificationEmail(emailData);
+    const sendEmail = await sendEmails.sendVerificationEmail(emailData);
 
-    systemLog.systemError(emailResponse.message);
+    if (sendEmail.status !== 200) {
+      systemLog.systemError({
+        message: `Failed to send verification email to ${email}. Error: ${sendEmail.message}`,
+      });
+    }
 
-    responses.successResponse(
-      res,
-      201,
-      "User created successfully. Please verify your email",
-      updatedUser
-    );
+    responses.successResponse(res, 201, "User created successfully!", {
+      user: updatedUser,
+    });
   } catch (error: any) {
     responses.errorResponse(res, 500, error.message);
   }

@@ -1,11 +1,15 @@
-const systemError = (message: any) => {
-  console.log(message);
-};
+class SystemLogger {
+  systemError = (message: any) => {
+    console.log(message);
+  };
 
-const systemInfo = (message: any, data: any) => {
-  console.log(message, data);
-};
+  systemInfo = (message: any, data: any) => {
+    console.log(message, data);
+  };
 
-const systemWarning = (message: any) => {};
+  systemWarning = (message: any) => {
+    console.log(message);
+  };
+}
 
-export default { systemError, systemInfo, systemWarning };
+export default new SystemLogger();

@@ -8,24 +8,32 @@ const verifyUser = async (req: Request, res: Response) => {
     const token = req.query.token as string;
 
     if (!token) {
-      return res.status(400).json({ message: "Token not found" });
+      return responses.errorResponse(res, 400, "Token not found");
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
-      email: string;
-      username: string;
-      createdAt: string;
-      userType: any;
-    };
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+        id: string;
+        email: string;
+        username: string;
+        createdAt: string;
+      };
+    } catch (err) {
+      return responses.errorResponse(res, 400, "Invalid or expired token");
+    }
 
     const userId = decoded.id;
 
     // check if a token exists in the database
     const checkUser = await userService.findUserById(userId);
 
+    if (!checkUser) {
+      return responses.errorResponse(res, 404, "User not found");
+    }
+
     // check if both tokens match
-    if (checkUser?.verificationToken !== token) {
+    if (checkUser.verificationToken !== token) {
       return responses.errorResponse(res, 400, "Invalid token");
     }
 
@@ -45,9 +53,14 @@ const verifyUser = async (req: Request, res: Response) => {
 
     const user = await userService.updateUser(userId, newData);
 
-    res.status(200).redirect("http://localhost:3000/verifiedEmail");
+    if (!user) {
+      return responses.errorResponse(res, 500, "Failed to update user");
+    }
+
+    res.status(200).redirect("http://localhost:3000/login");
   } catch (error: any) {
-    responses.errorResponse(res, 500, error.message);
+    console.error("Error verifying user:", error);
+    responses.errorResponse(res, 500, "Internal server error");
   }
 };
 
@@ -71,7 +84,6 @@ const reverifyUser = async (req: Request, res: Response) => {
       email: user.email,
       username: user.firstName,
       createdAt: user.createdAt,
-      userType: user.userType,
     };
 
     // Create token
