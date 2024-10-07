@@ -8,216 +8,68 @@ datasource db {
 }
 
 model User {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  email                   String                        @unique
-  password                String        
-  firstName               String
-  middleName              String?
-  lastName                String        
-  isVerified              Boolean?                      @default(false)
-  verificationToken       String?   
-  forgotPasswordToken     String?     
-  userOrganizationRoles   UserOrganizationRole[]        @relation("UserOrganizationRoles")
-  userDepartmentRoles     UserDepartmentRole[]          @relation("UserDepartmentRoles")
-  userOrganizations       UserOrganization[]            @relation("UserOrganizations")
-  userType                UserType                      @default(USER)
-  userDepartments         UserDepartment[]              @relation("UserDepartments")
-  isActivated             Boolean                       @default(false)
-  organizationId          String?                    
-  createdAt               DateTime?        
-  updatedAt               DateTime?       
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  email               String    @unique
+  password            String
+  firstName           String
+  middleName          String?
+  lastName            String
+  isVerified          Boolean?  @default(false)
+  verificationToken   String?
+  forgotPasswordToken String?
+  userType            UserType  @default(USER)
+  isActivated         Boolean   @default(false)
+  organizationId      String?
+  createdAt           DateTime?
+  updatedAt           DateTime?
 }
 
-model Organization {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String    
-  description             String?   
-  address                 Address   
-  phoneNumber             String    
-  organizationEmail       String                        @unique      
-  userOrganizationRoles   UserOrganizationRole[]        @relation("UserOrganizationRoles")
-  userOrganizations       UserOrganization[]            @relation("UserOrganizations")
-  departments             Department[]                  @relation("OrganizationDepartments")
-  products                Product[]                     @relation("OrganizationProducts")
-  createdAt               DateTime? 
-  updatedAt               DateTime? 
-}
-
-model Department {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String    
-  description             String?       
-  organizationId          String                        @db.ObjectId
-  organization            Organization                  @relation("OrganizationDepartments", fields: [organizationId], references: [id])
-  userDepartments         UserDepartment[]              @relation("UserDepartments")
-  users                   UserDepartmentRole[]          @relation("UserDepartmentRoles")
-  createdAt               DateTime? 
-  updatedAt               DateTime? 
-}
-
-model Role {    
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String                        @unique
-  permissions             RolePermission[]              @relation("RolePermissions")
-  userOrganizationRoles   UserOrganizationRole[]        @relation("UserOrganizationRoles")
-  userDepartmentRoles     UserDepartmentRole[]          @relation("UserDepartmentRoles")
-  createdAt               DateTime? 
-  updatedAt               DateTime? 
+model Role {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  name        String           @unique
+  permissions RolePermission[] @relation("RolePermissions")
+  createdAt   DateTime?
+  updatedAt   DateTime?
 }
 
 model Permission {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String                        @unique
-  description             String?   
-  roles                   RolePermission[]              @relation("RolePermissions")
-}   
-
-model Product {   
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String
-  description             String?
-  organizationId          String                        @db.ObjectId
-  organization            Organization                  @relation("OrganizationProducts", fields: [organizationId], references: [id])
-  leadProducts            LeadProduct[]                 @relation("ProductLeads")
-  category                BusinessType
-  sales                   Sale[]                        @relation("ProductLeads")
-  unitPrice               Int
-  createdAt               DateTime? 
-  updatedAt               DateTime? 
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  name        String           @unique
+  description String?
+  roles       RolePermission[] @relation("RolePermissions")
 }
 
 model Tasks {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  name                    String    
-  description             String?   
-  dueDate                 DateTime    
-  status                  String    
-  priority                String    
-  assignedTo              String                        @db.ObjectId
-  assignedBy              String                        @db.ObjectId
-  createdAt               DateTime? 
-  updatedAt               DateTime? 
-}
-
-model Lead {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  title                   String?    
-  firstName               String?
-  middleName              String? 
-  lastName                String?
-  businessName            String?
-  contactPerson           String?   
-  leadEmail               String                        @unique
-  phoneNumber             String                        @unique
-  leadStatus              LeadStatus  @default(LEAD)
-  leadProducts            LeadProduct[]                 @relation("ProductLeads")    
-  businessType            BusinessType
-  sales                   Sale[]                        @relation("ProductLeads")    
-  location                String?   
-  description             String?   
-  addedByUserId           String    
-  organizationId          String                        @db.ObjectId 
-  createdAt               DateTime                      @default(now())
-  updatedAt               DateTime                      @updatedAt
-}
-
-model Sale {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  leadId                  String                        @db.ObjectId
-  productId               String                        @db.ObjectId
-  userId                  String                        @db.ObjectId
-  organizationId          String                        @db.ObjectId
-  description             String?
-  quantity                Int                           @default(1)
-  totalPrice              Int
-  createdAt               DateTime? 
-  updatedAt               DateTime? 
-
-  lead                    Lead                          @relation("ProductLeads", fields: [leadId], references: [id])
-  product                 Product                       @relation("ProductLeads", fields: [productId], references: [id])
-
-}
-
-model LeadProduct {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  leadId                  String                        @db.ObjectId
-  productId               String                        @db.ObjectId
-  createdAt               DateTime? 
-  updatedAt               DateTime?
-
-  lead                    Lead                          @relation("ProductLeads", fields: [leadId], references: [id])
-  product                 Product                       @relation("ProductLeads", fields: [productId], references: [id])
-
-  @@unique([leadId, productId]) 
-
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  dueDate     DateTime
+  status      String
+  priority    String
+  assignedTo  String    @db.ObjectId
+  assignedBy  String    @db.ObjectId
+  createdAt   DateTime?
+  updatedAt   DateTime?
 }
 
 model RolePermission {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  roleId                  String                        @db.ObjectId
-  permissionId            String                        @db.ObjectId
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  roleId       String @db.ObjectId
+  permissionId String @db.ObjectId
 
-  role                    Role                          @relation("RolePermissions", fields: [roleId], references: [id])
-  permission              Permission                    @relation("RolePermissions", fields: [permissionId], references: [id])
+  role       Role       @relation("RolePermissions", fields: [roleId], references: [id])
+  permission Permission @relation("RolePermissions", fields: [permissionId], references: [id])
 
   @@unique([roleId, permissionId])
 }
 
-model UserOrganizationRole {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  userId                  String                        @db.ObjectId
-  organizationId          String                        @db.ObjectId
-  roleId                  String                        @db.ObjectId
-
-  user                    User                          @relation("UserOrganizationRoles", fields: [userId], references: [id])
-  organization            Organization                  @relation("UserOrganizationRoles", fields: [organizationId], references: [id])
-  role                    Role                          @relation("UserOrganizationRoles", fields: [roleId], references: [id])
-
-  @@unique([userId, organizationId, roleId])    
-}   
-
-model UserDepartmentRole {    
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  userId                  String                        @db.ObjectId
-  departmentId            String                        @db.ObjectId
-  roleId                  String                        @db.ObjectId
-
-  user                    User                          @relation("UserDepartmentRoles", fields: [userId], references: [id])
-  department              Department                    @relation("UserDepartmentRoles", fields: [departmentId], references: [id])
-  role                    Role                          @relation("UserDepartmentRoles", fields: [roleId], references: [id])
-
-  @@unique([userId, departmentId, roleId])
-}
-
-model UserOrganization {
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  userId                  String                        @db.ObjectId
-  organizationId          String                        @db.ObjectId
-    
-  user                    User                          @relation("UserOrganizations", fields: [userId], references: [id])
-  organization            Organization                  @relation("UserOrganizations", fields: [organizationId], references: [id])
-    
-  @@unique([userId, organizationId])    
-}   
-    
-model UserDepartment {    
-  id                      String                        @id @default(auto()) @map("_id") @db.ObjectId
-  userId                  String                        @db.ObjectId
-  departmentId            String                        @db.ObjectId
-    
-  user                    User                          @relation("UserDepartments", fields: [userId], references: [id])
-  department              Department                    @relation("UserDepartments", fields: [departmentId], references: [id])
-
-  @@unique([userId, departmentId])
-}
-
 type Address {
-  addressLine1            String
-  addressLine2            String?
-  city                    String
-  region                  String
-  postalCode              String?
-  country                 String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  region       String
+  postalCode   String?
+  country      String
 }
 
 enum UserType {
