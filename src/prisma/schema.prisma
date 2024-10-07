@@ -225,14 +225,3 @@ enum UserType {
   ADMIN
   USER
 }
-
-enum LeadStatus {
-  LEAD
-  PROSPECT
-  CLOSED
-}
-
-enum BusinessType {
-  ENTERPRISE
-  HOME
-}
