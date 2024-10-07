@@ -6,7 +6,6 @@ const cors = require("cors");
 const app = express();
 
 app.use(cors());
-
 app.use(cors({ origin: "http://localhost:3000" }));
 
 const port = process.env.PORT || 4000;
@@ -17,7 +16,6 @@ mongoose
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
 app.use(express.json());
-
 app.use("/api/v1/auth", authRouter);
 
 app.listen(port, () => {
